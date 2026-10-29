@@ -43,6 +43,44 @@ const SimpleModeStrings = {
 	'objects/list/reference/title': 'Objeto selecionado: fica parado e os outros se alinham a ele',
 	'objects/unnamed': 'Objeto sem nome',
 
+	// biblioteca de componentes (EV-003)
+
+	'library/tabs': 'Tipos de objetos para adicionar',
+	'library/tab/basics': 'Básicos',
+	'library/tab/basics/title': 'Formas simples: cubo, esfera, cilindro e plano',
+	'library/tab/catalog': 'Biblioteca',
+	'library/tab/catalog/title': 'Componentes prontos: paredes, portas, móveis e mais',
+	'library/tab/mine': 'Meus',
+	'library/tab/mine/title': 'Meus componentes salvos neste navegador',
+	'library/search': 'Buscar componente',
+	'library/search/title': 'Buscar componentes por nome ou categoria',
+	'library/insert/title': 'Inserir %s (%s) — %s',
+	'library/noResults': 'Nenhum componente encontrado para "%s".',
+	'library/mine/notice': 'Seus componentes ficam salvos apenas neste navegador e não são sincronizados com outros dispositivos.',
+	'library/mine/loading': 'Carregando seus componentes…',
+	'library/mine/empty': 'Você ainda não salvou componentes. Selecione um objeto e use "Salvar em Meus componentes" no painel à direita.',
+	'library/mine/insert/title': 'Inserir %s — %s',
+	'library/mine/rename/title': 'Renomear %s',
+	'library/mine/delete/title': 'Excluir %s dos meus componentes',
+	'library/save': 'Salvar em Meus componentes',
+	'library/save/title': 'Guardar este objeto para usar em outros projetos neste navegador',
+	'library/save/name': 'Nome do componente',
+	'library/save/category': 'Categoria (opcional)',
+	'library/save/confirm': 'Salvar',
+	'library/save/cancel': 'Cancelar',
+
+	// componentes paramétricos (EV-003)
+
+	'component/range': '%s deve ficar entre %s e %s.',
+	'component/scale/notice': 'Este componente está com escala aplicada (%s). As medidas mostradas já incluem a escala; para editá-las, incorpore a escala às medidas.',
+	'component/scale/apply': 'Incorporar escala às medidas',
+	'component/scale/apply/title': 'As medidas atuais viram os parâmetros do componente e a escala volta a 1. Espessuras e suportes mantêm o tamanho original.',
+	'component/scale/blocked': 'Incorpore a escala às medidas antes de editar as dimensões.',
+	'component/scale/invalid': 'Não foi possível incorporar a escala:',
+	'component/readonly/unknown': 'Este componente não é reconhecido por esta versão do aplicativo. Ele é mantido como está, sem edição de parâmetros.',
+	'component/readonly/newer': 'Este componente foi criado por uma versão mais nova do aplicativo. Ele é mantido como está, sem edição de parâmetros.',
+	'component/readonly/invalid': 'Os parâmetros deste componente estão fora dos limites; a edição foi bloqueada para não danificá-lo.',
+
 	// ferramentas da área central
 
 	'tools/label': 'Ferramentas',
@@ -98,6 +136,8 @@ const SimpleModeStrings = {
 	'properties/section/info': 'Informações do objeto',
 	'properties/section/dimensions': 'Dimensões',
 	'properties/section/appearance': 'Aparência',
+	'properties/section/parameters': 'Parâmetros',
+	'properties/category': 'Categoria: %s',
 	'properties/section/alignment': 'Alinhar e distribuir',
 	'properties/position': 'Posição',
 	'properties/rotation': 'Rotação (graus)',
@@ -160,6 +200,9 @@ const SimpleModeStrings = {
 	'type/group': 'Grupo de objetos',
 	'type/model': 'Modelo 3D',
 	'type/other': 'Objeto',
+	'type/component/unknown': 'Componente desconhecido',
+	'type/component/newer': '(versão mais nova)',
+	'type/userComponent': 'Meu componente',
 
 	// mensagens
 
@@ -183,9 +226,16 @@ const SimpleModeStrings = {
 	'message/align/needThree': 'Para distribuir são necessários pelo menos 3 objetos (selecionado + marcados).',
 	'message/align/nothing': 'Os objetos já estão nessa posição.',
 	'message/align/done': '%s objeto(s) movido(s). Use Desfazer para voltar.',
+	'message/library/saved': '"%s" salvo em Meus componentes.',
+	'message/library/saveError': 'Não foi possível salvar o componente.',
+	'message/library/renamed': 'Componente renomeado.',
+	'message/library/deleted': '"%s" excluído de Meus componentes.',
+	'message/library/insertError': 'Não foi possível inserir este componente.',
+	'message/component/scaleApplied': 'Escala incorporada às medidas. Use Desfazer para voltar.',
 	'message/historyLocked': 'Desfazer/refazer está indisponível enquanto a cena estiver em reprodução.',
 
 	'confirm/new': 'Começar um projeto novo? Os objetos da cena atual serão removidos.\n\nDica: use "Salvar" antes para guardar uma cópia no computador.',
+	'confirm/library/delete': 'Excluir "%s" de Meus componentes?\n\nEssa ação não pode ser desfeita. Objetos já inseridos nos projetos não são afetados.',
 	'confirm/open': 'Abrir outro projeto? A cena atual será substituída.\n\nDica: use "Salvar" antes para guardar uma cópia no computador.',
 
 	// alternância de modo no Modo Avançado

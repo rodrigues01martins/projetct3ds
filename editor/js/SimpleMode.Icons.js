@@ -36,6 +36,20 @@ const ICON_PATHS = {
 	alignEnd: '<path d="M20 3v18"/><rect x="7" y="6" width="10" height="4" rx="1"/><rect x="11" y="14" width="6" height="4" rx="1"/>',
 	distribute: '<path d="M3 4v16M21 4v16"/><rect x="9" y="7" width="6" height="10" rx="1"/>',
 
+	// componentes (EV-003)
+	wall: '<rect x="3" y="5" width="18" height="14" rx="1"/><path d="M3 10h18M3 15h18M9 5v5M15 10v5M9 15v4"/>',
+	floor: '<path d="M2.5 15 7 9h14.5L17 15z"/><path d="M2.5 15v2.5h14.5V15M17 17.5l4.5-6V9"/>',
+	panel: '<rect x="6" y="3" width="12" height="16" rx="1"/><path d="M8 21v-2M16 21v-2"/>',
+	door: '<path d="M5 21V3h14v18"/><path d="M8 21V6h8v15"/><circle cx="14" cy="13.5" r=".9"/><path d="M3 21h18"/>',
+	window: '<rect x="4" y="4" width="16" height="16" rx="1"/><path d="M12 4v16M4 12h16"/>',
+	table: '<path d="M3 8h18v2.5H3z"/><path d="M5 10.5V20M19 10.5V20M8 10.5V16M16 10.5V16"/>',
+	chair: '<path d="M7 3v18M7 12h10v9M7 12V3h9v9"/><path d="M7 12h10"/>',
+	shelf: '<rect x="5" y="3" width="14" height="18" rx="1"/><path d="M5 8h14M5 13h14M5 18h14"/>',
+	platform: '<path d="M3 11 8 7h13l-5 4z"/><path d="M3 11v5h13v-5M16 16l5-4V7"/>',
+	search: '<circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/>',
+	bookmark: '<path d="M6 3h12v18l-6-4-6 4z"/>',
+	edit: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/>',
+
 	help: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6"/><path d="M12 17.5h.01"/>',
 	close: '<path d="M6 6l12 12M18 6 6 18"/>'
 

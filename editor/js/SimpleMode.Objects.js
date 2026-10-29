@@ -9,6 +9,9 @@ import { AddObjectCommand } from './commands/AddObjectCommand.js';
 
 import { getSimpleString as t } from './SimpleMode.Strings.js';
 import { createIcon, createSimpleButton, createText } from './SimpleMode.Icons.js';
+import { SimpleModeLibrary, getUniqueName } from './SimpleMode.Library.js';
+import { getComponentData, isUserComponent } from './SimpleMode.ComponentFactory.js';
+import { getDefinition } from './SimpleMode.Components.js';
 
 // Paleta suave usada para diferenciar os objetos recém-criados
 const PALETTE = [ 0x4f8cff, 0xff8a4f, 0x45c48b, 0xf2c94c, 0xb07cff, 0xff6b8b, 0x3cc7d6 ];
@@ -54,10 +57,15 @@ function SimpleModeObjects( editor, context ) {
 	container.add( addSection );
 
 	addSection.add( createText( t( 'objects/title' ), 'SimpleSectionTitle' ) );
-	addSection.add( createText( t( 'objects/hint' ), 'SimpleSectionHint' ) );
+
+	// EV-003: os básicos ficam na primeira aba da biblioteca
+	const basics = new UIDiv().setClass( 'SimpleBasics' );
+	basics.add( createText( t( 'objects/hint' ), 'SimpleSectionHint' ) );
 
 	const grid = new UIDiv().setClass( 'SimpleAddGrid' );
-	addSection.add( grid );
+	basics.add( grid );
+
+	addSection.add( new SimpleModeLibrary( editor, context, basics ) );
 
 	let colorIndex = 0;
 
@@ -85,7 +93,7 @@ function SimpleModeObjects( editor, context ) {
 		if ( primitive.doubleSide === true ) material.side = THREE.DoubleSide;
 
 		const mesh = new THREE.Mesh( primitive.create(), material );
-		mesh.name = getUniqueName( label );
+		mesh.name = getUniqueName( editor, label );
 
 		mesh.position.copy( getFreePosition( primitive.y ) );
 		if ( primitive.rotationX !== undefined ) mesh.rotation.x = primitive.rotationX;
@@ -94,20 +102,6 @@ function SimpleModeObjects( editor, context ) {
 		editor.execute( new AddObjectCommand( editor, mesh ) );
 
 		context.notify( t( 'message/added', mesh.name ), 'success' );
-
-	}
-
-	function getUniqueName( base ) {
-
-		const names = new Set();
-		editor.scene.traverse( ( object ) => names.add( object.name ) );
-
-		if ( names.has( base ) === false ) return base;
-
-		let index = 2;
-		while ( names.has( base + ' ' + index ) ) index ++;
-
-		return base + ' ' + index;
 
 	}
 
@@ -161,6 +155,17 @@ function SimpleModeObjects( editor, context ) {
 	const items = new Map(); // objeto -> { row, item, mark }
 
 	function getIconFor( object ) {
+
+		const component = getComponentData( object );
+
+		if ( component !== null ) {
+
+			const definition = getDefinition( component.id );
+			return definition !== null ? definition.icon : 'bookmark';
+
+		}
+
+		if ( isUserComponent( object ) ) return 'bookmark';
 
 		if ( object.isMesh && object.geometry ) {
 

@@ -1113,6 +1113,291 @@ body.mode-simple #viewport.measuring canvas {
 
 
 /* ------------------------------------------------------------------ */
+/* EV-003 — Biblioteca de componentes                                   */
+/* ------------------------------------------------------------------ */
+
+#simple-left .SimpleLibrary {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	margin-top: 10px;
+}
+
+#simple-left .SimpleTabs {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 2px;
+	padding: 3px;
+	background: var(--simple-surface-2);
+	border-radius: 10px;
+}
+
+	#simple-left .SimpleTab {
+		min-height: 28px;
+		padding: 0 4px;
+		font: inherit;
+		font-size: 12px;
+		font-weight: 600;
+		color: var(--simple-text-muted);
+		background: transparent;
+		border: 1px solid transparent;
+		border-radius: 8px;
+		cursor: pointer;
+	}
+
+		#simple-left .SimpleTab:hover {
+			color: var(--simple-text);
+		}
+
+		#simple-left .SimpleTab.active {
+			color: var(--simple-text);
+			background: var(--simple-surface);
+			border-color: var(--simple-border);
+			box-shadow: 0 1px 2px #0002;
+		}
+
+		#simple-left .SimpleTab:focus-visible {
+			outline: none;
+			box-shadow: var(--simple-focus);
+		}
+
+#simple-left .SimpleSearch {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	height: 32px;
+	padding: 0 8px;
+	background: var(--simple-surface-2);
+	border: 1px solid transparent;
+	border-radius: 8px;
+}
+
+	#simple-left .SimpleSearch:focus-within {
+		border-color: var(--simple-accent);
+		box-shadow: var(--simple-focus);
+		background: var(--simple-surface);
+	}
+
+	#simple-left .SimpleSearch .SimpleIcon {
+		width: 16px;
+		height: 16px;
+		color: var(--simple-text-muted);
+	}
+
+	#simple-left .SimpleSearchInput {
+		flex: 1;
+		min-width: 0;
+		height: 100%;
+		padding: 0;
+		font: inherit;
+		font-size: 13px;
+		color: var(--simple-text);
+		background: transparent;
+		border: 0;
+		outline: none;
+	}
+
+#simple-left .SimpleTabPanel {
+	max-height: 44vh;
+	overflow-y: auto;
+}
+
+	#simple-left .SimpleBasics .SimpleAddGrid {
+		margin-top: 8px;
+	}
+
+#simple-left .SimpleCardGroup + .SimpleCardGroup {
+	margin-top: 10px;
+}
+
+#simple-left .SimpleCardGroupTitle {
+	margin: 0 0 4px 2px;
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 0.03em;
+	text-transform: uppercase;
+	color: var(--simple-text-muted);
+}
+
+#simple-left .SimpleCard {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	width: 100%;
+	min-height: 44px;
+	margin-bottom: 4px;
+	padding: 4px 8px;
+	font: inherit;
+	text-align: left;
+	color: var(--simple-text);
+	background: var(--simple-surface-2);
+	border: 1px solid transparent;
+	border-radius: 9px;
+	cursor: pointer;
+}
+
+	#simple-left .SimpleCard .SimpleIcon {
+		width: 24px;
+		height: 24px;
+		color: var(--simple-accent);
+	}
+
+	#simple-left .SimpleCard:hover {
+		border-color: var(--simple-accent);
+		background: var(--simple-accent-soft);
+	}
+
+	#simple-left .SimpleCard:active {
+		transform: scale(0.98);
+	}
+
+	#simple-left .SimpleCard:focus-visible {
+		outline: none;
+		box-shadow: var(--simple-focus);
+	}
+
+	#simple-left .SimpleCard.current {
+		border-color: var(--simple-accent);
+		box-shadow: inset 3px 0 0 var(--simple-accent);
+	}
+
+#simple-left .SimpleCardText {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+}
+
+#simple-left .SimpleCardName {
+	overflow: hidden;
+	font-size: 13px;
+	font-weight: 600;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+#simple-left .SimpleCardDetail {
+	font-size: 11px;
+	font-variant-numeric: tabular-nums;
+	color: var(--simple-text-muted);
+	white-space: nowrap;
+}
+
+#simple-left .SimpleCardRow {
+	display: flex;
+	align-items: center;
+	gap: 2px;
+}
+
+	#simple-left .SimpleCardRow .SimpleCard {
+		flex: 1;
+		min-width: 0;
+	}
+
+	#simple-left .SimpleCardRow > .SimpleIcon {
+		width: 24px;
+		height: 24px;
+		margin: 0 4px;
+		color: var(--simple-accent);
+	}
+
+#simple-left .SimpleCardActions {
+	display: flex;
+	flex: none;
+}
+
+	#simple-left .SimpleCardActions .SimpleIconButton {
+		width: 26px;
+		min-height: 26px;
+	}
+
+		#simple-left .SimpleCardActions .SimpleIconButton .SimpleIcon {
+			width: 15px;
+			height: 15px;
+		}
+
+#simple-left .SimpleRenameInput {
+	flex: 1;
+	min-width: 0;
+	height: 34px;
+	padding: 0 8px;
+	font: inherit;
+	font-size: 13px;
+	color: var(--simple-text);
+	background: var(--simple-surface);
+	border: 1px solid var(--simple-accent);
+	border-radius: 8px;
+	outline: none;
+	box-shadow: var(--simple-focus);
+}
+
+#simple-mode .SimpleNotice {
+	display: block;
+	margin-bottom: 8px;
+	padding: 8px 10px;
+	font-size: 12px;
+	line-height: 1.45;
+	color: var(--simple-text-muted);
+	background: var(--simple-surface-2);
+	border-radius: 8px;
+}
+
+#simple-mode .SimpleError {
+	color: var(--simple-danger);
+}
+
+/* painel direito: componentes */
+
+#simple-right .SimpleComponentFields {
+	display: grid;
+	gap: 6px;
+}
+
+	#simple-right .SimpleComponentFields .SimpleDimensionRow {
+		grid-template-columns: 112px 1fr;
+	}
+
+	#simple-right .SimpleComponentFields .SimpleDimensionLabel {
+		font-size: 12px;
+		line-height: 1.25;
+	}
+
+	#simple-right .SimpleComponentFields .SimpleColorRow {
+		height: 32px;
+	}
+
+#simple-right .SimpleScaleNotice {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 8px;
+	margin: 10px 0 0;
+	border: 1px solid #f2c94c;
+}
+
+#simple-right .SimpleSaveComponent {
+	width: 100%;
+	margin-top: 8px;
+}
+
+#simple-right .SimpleSaveForm {
+	display: grid;
+	gap: 8px;
+	margin-top: 10px;
+	padding: 10px;
+	background: var(--simple-surface-2);
+	border-radius: 10px;
+}
+
+	#simple-right .SimpleSaveForm .SimpleTextInput {
+		margin-top: 4px;
+		background: var(--simple-surface);
+	}
+
+	#simple-right .SimpleSaveForm .SimpleSubLabel {
+		margin: 0;
+	}
+
+/* ------------------------------------------------------------------ */
 /* Mensagens                                                            */
 /* ------------------------------------------------------------------ */
 
@@ -1196,7 +1481,7 @@ body.mode-simple #viewport.measuring canvas {
 
 	:root {
 		--simple-topbar-height: 52px;
-		--simple-add-height: 64px;
+		--simple-add-height: 106px;
 		--simple-bottom-height: 40vh;
 	}
 
@@ -1243,8 +1528,61 @@ body.mode-simple #viewport.measuring canvas {
 
 		#simple-left .SimpleSectionTitle,
 		#simple-left .SimpleSectionHint,
-		#simple-left .SimpleListSection {
+		#simple-left .SimpleListSection,
+		#simple-left .SimpleSearch,
+		#simple-left .SimpleNotice,
+		#simple-left .SimpleCardGroupTitle,
+		#simple-left .SimpleCardDetail,
+		#simple-left .SimpleCardActions {
 			display: none;
+		}
+
+		/* biblioteca em faixa horizontal: abas + cartões lado a lado */
+		#simple-left .SimpleSection {
+			flex: 1;
+			min-width: 0;
+		}
+
+		#simple-left .SimpleLibrary {
+			gap: 6px;
+			margin: 0;
+		}
+
+		#simple-left .SimpleTabs {
+			max-width: 320px;
+		}
+
+		#simple-left .SimpleTabPanel {
+			max-height: none;
+			overflow-x: auto;
+			overflow-y: hidden;
+		}
+
+		#simple-left .SimpleTabPanel:not(#simple-panel-basics) {
+			display: flex;
+			gap: 6px;
+		}
+
+		#simple-left .SimpleCardGroup {
+			display: flex;
+			gap: 6px;
+		}
+
+		#simple-left .SimpleCardGroup + .SimpleCardGroup {
+			margin-top: 0;
+		}
+
+		#simple-left .SimpleCard,
+		#simple-left .SimpleCardRow {
+			width: auto;
+			flex: none;
+			margin: 0;
+			min-height: 40px;
+		}
+
+		#simple-left .SimpleTabPanel .SimpleEmpty {
+			padding: 4px;
+			white-space: nowrap;
 		}
 
 		#simple-left .SimpleAddGrid {
@@ -1289,6 +1627,11 @@ body.mode-simple #viewport.measuring canvas {
 
 	#simple-mode .SimpleToasts {
 		top: calc(var(--simple-topbar-height) + var(--simple-add-height) + 152px);
+	}
+
+	/* no celular, apenas a mensagem mais recente fica visível */
+	#simple-mode .SimpleToast:not(:last-child) {
+		display: none;
 	}
 
 	/* não cobre a barra de ferramentas nem as opções de precisão */

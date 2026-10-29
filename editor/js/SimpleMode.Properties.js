@@ -23,6 +23,9 @@ import { getSimpleString as t } from './SimpleMode.Strings.js';
 import { createIcon, createSimpleButton, createText } from './SimpleMode.Icons.js';
 import { SimpleNumberInput } from './SimpleMode.Inputs.js';
 import { getDimensionInfo, computeScaleForSize } from './SimpleMode.Dimensions.js';
+import { SimpleModeComponentProperties } from './SimpleMode.ComponentProperties.js';
+import { getComponentState, isUserComponent } from './SimpleMode.ComponentFactory.js';
+import { getCategory } from './SimpleMode.Components.js';
 
 const SECTIONS_KEY = 'interface/simple/sections';
 const AXES = [ 'x', 'y', 'z' ];
@@ -133,6 +136,9 @@ function SimpleModeProperties( editor, context ) {
 	const objectType = createText( '', 'SimpleObjectType' );
 	infoSection.body.add( objectType );
 
+	const objectCategory = createText( '', 'SimpleObjectType' );
+	infoSection.body.add( objectCategory );
+
 	// 2. Dimensões -----------------------------------------------------------
 
 	const dimSection = createSection( 'dimensions', t( 'properties/section/dimensions' ) );
@@ -186,6 +192,12 @@ function SimpleModeProperties( editor, context ) {
 	dimSection.body.add( dimHint );
 
 	let proportionObject = null; // objeto para o qual o padrão de "manter proporções" já foi definido
+
+	// EV-003: dimensões e parâmetros próprios dos componentes paramétricos (substituem a seção genérica)
+
+	const componentDimSection = createSection( 'componentDimensions', t( 'properties/section/dimensions' ) );
+	const componentParamSection = createSection( 'componentParameters', t( 'properties/section/parameters' ) );
+	const componentProperties = new SimpleModeComponentProperties( editor, context, componentDimSection, componentParamSection );
 
 	// 3. Posição, 4. Rotação, 5. Escala ------------------------------------
 
@@ -411,6 +423,147 @@ function SimpleModeProperties( editor, context ) {
 		onClick: deleteObject
 	} ) );
 
+	// EV-003: salvar em "Meus componentes" (formulário em linha, sem janela modal)
+
+	const userLibrary = context.userLibrary;
+
+	const saveButton = createSimpleButton( {
+		icon: 'bookmark', label: t( 'library/save' ), title: t( 'library/save/title' ),
+		className: 'SimpleSaveComponent',
+		onClick: openSaveForm
+	} );
+	actionsSection.body.add( saveButton );
+
+	const saveForm = document.createElement( 'form' );
+	saveForm.className = 'SimpleSaveForm';
+	saveForm.hidden = true;
+	saveForm.setAttribute( 'aria-label', t( 'library/save' ) );
+	saveForm.noValidate = true;
+
+	const saveName = document.createElement( 'input' );
+	saveName.className = 'SimpleTextInput';
+	saveName.maxLength = userLibrary.LIMITS.name;
+	saveName.placeholder = t( 'library/save/name' );
+	saveName.setAttribute( 'aria-label', t( 'library/save/name' ) );
+
+	const saveCategory = document.createElement( 'input' );
+	saveCategory.className = 'SimpleTextInput';
+	saveCategory.maxLength = userLibrary.LIMITS.category;
+	saveCategory.placeholder = t( 'library/save/category' );
+	saveCategory.setAttribute( 'aria-label', t( 'library/save/category' ) );
+	saveCategory.setAttribute( 'list', 'simple-category-list' );
+
+	const categoryList = document.createElement( 'datalist' );
+	categoryList.id = 'simple-category-list';
+
+	for ( const input of [ saveName, saveCategory ] ) {
+
+		input.addEventListener( 'keydown', function ( event ) {
+
+			event.stopPropagation();
+			if ( event.key === 'Escape' ) closeSaveForm();
+
+		} );
+
+	}
+
+	const saveLabels = [[ 'library/save/name', saveName ], [ 'library/save/category', saveCategory ]];
+
+	for ( const [ key, input ] of saveLabels ) {
+
+		const label = document.createElement( 'label' );
+		label.className = 'SimpleSubLabel';
+		label.textContent = t( key );
+		label.appendChild( input );
+		saveForm.appendChild( label );
+
+	}
+
+	saveForm.appendChild( categoryList );
+
+	const saveFormActions = document.createElement( 'div' );
+	saveFormActions.className = 'SimpleActions';
+
+	const saveConfirm = createSimpleButton( { icon: 'bookmark', label: t( 'library/save/confirm' ), className: 'active' } );
+	saveConfirm.dom.type = 'submit';
+	saveFormActions.appendChild( saveConfirm.dom );
+	saveFormActions.appendChild( createSimpleButton( { label: t( 'library/save/cancel' ), onClick: closeSaveForm } ).dom );
+	saveForm.appendChild( saveFormActions );
+
+	const saveHint = createText( t( 'library/mine/notice' ), 'SimpleSectionHint' );
+	saveForm.appendChild( saveHint.dom );
+
+	actionsSection.body.dom.appendChild( saveForm );
+
+	saveForm.addEventListener( 'submit', async function ( event ) {
+
+		event.preventDefault();
+
+		const object = getEditableObject();
+		if ( object === null ) return;
+
+		saveConfirm.dom.disabled = true;
+
+		try {
+
+			const record = await userLibrary.save( object, saveName.value, saveCategory.value );
+			closeSaveForm();
+			context.notify( t( 'message/library/saved', record.name ), 'success' );
+			if ( context.showMyComponents !== undefined ) context.showMyComponents();
+
+		} catch ( error ) {
+
+			console.error( error );
+			context.notify( error.message || t( 'message/library/saveError' ), 'error' );
+
+		} finally {
+
+			saveConfirm.dom.disabled = false;
+
+		}
+
+	} );
+
+	function openSaveForm() {
+
+		const object = getEditableObject();
+		const problem = userLibrary.canSave( object, editor.scene );
+
+		if ( problem !== null ) {
+
+			context.notify( problem, 'warning' );
+			return;
+
+		}
+
+		categoryList.textContent = '';
+
+		for ( const category of userLibrary.getCategories() ) {
+
+			const option = document.createElement( 'option' );
+			option.value = category;
+			categoryList.appendChild( option );
+
+		}
+
+		saveName.value = object.name;
+		saveCategory.value = '';
+		saveForm.hidden = false;
+		saveButton.dom.hidden = true;
+		saveName.focus();
+		saveName.select();
+
+	}
+
+	function closeSaveForm() {
+
+		saveForm.hidden = true;
+		saveButton.dom.hidden = false;
+
+	}
+
+	editor.signals.objectSelected.add( closeSaveForm );
+
 	// comandos -------------------------------------------------------------------
 
 	function getEditableObject() {
@@ -559,6 +712,9 @@ function SimpleModeProperties( editor, context ) {
 				child.material.map( ( material ) => material.clone() ) :
 				child.material.clone();
 
+			// geometria própria: regenerar um componente copiado não afeta o original (EV-003)
+			if ( child.geometry !== undefined ) child.geometry = child.geometry.clone();
+
 		} );
 
 		copy.name = object.name !== '' ? object.name + ' ' + t( 'properties/copySuffix' ) : '';
@@ -603,6 +759,16 @@ function SimpleModeProperties( editor, context ) {
 
 	function getTypeName( object, info ) {
 
+		const component = getComponentState( object );
+
+		if ( component !== null ) {
+
+			if ( component.definition === null ) return t( 'type/component/unknown' );
+			return component.definition.name + ( component.reason === 'newer' ? ' ' + t( 'type/component/newer' ) : '' );
+
+		}
+
+		if ( isUserComponent( object ) ) return t( 'type/userComponent' );
 		if ( info.primitive !== null ) return t( TYPE_NAMES[ info.primitive ] );
 		if ( object.isLight ) return t( 'type/light' );
 		if ( object.isCamera ) return t( 'type/camera' );
@@ -642,6 +808,43 @@ function SimpleModeProperties( editor, context ) {
 
 		updateDimensionUI( object );
 		updateColorUI( object );
+
+		// componente paramétrico: campos próprios no lugar das seções genéricas de dimensões e cor
+		const isParametric = componentProperties.update( object );
+
+		if ( isParametric ) {
+
+			dimSection.details.hidden = true;
+			colorSection.details.hidden = true;
+
+		} else {
+
+			colorSection.details.hidden = false;
+
+		}
+
+		updateCategory( object );
+
+	}
+
+	function updateCategory( object ) {
+
+		const component = getComponentState( object );
+		let text = '';
+
+		if ( component !== null && component.definition !== null ) {
+
+			const category = getCategory( component.definition.category );
+			text = t( 'properties/category', category !== null ? category.name : '' );
+
+		} else if ( isUserComponent( object ) ) {
+
+			text = t( 'properties/category', t( 'library/tab/mine' ) );
+
+		}
+
+		objectCategory.setTextContent( text );
+		objectCategory.dom.hidden = text === '';
 
 	}
 
@@ -705,6 +908,7 @@ function SimpleModeProperties( editor, context ) {
 		const unit = units.getUnit();
 		positionSection.setTitle( t( 'properties/position' ) + ' (' + unit.label + ')' );
 		dimSection.setTitle( t( 'properties/section/dimensions' ) + ' (' + unit.label + ')' );
+		componentDimSection.setTitle( t( 'properties/section/dimensions' ) + ' (' + unit.label + ')' );
 
 		if ( getEditableObject() !== null ) updateUI();
 

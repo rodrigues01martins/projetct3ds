@@ -15,6 +15,8 @@ import { Units } from './SimpleMode.Units.js';
 import { Precision } from './SimpleMode.Precision.js';
 import { Measure } from './SimpleMode.Measure.js';
 import { Alignment } from './SimpleMode.Alignment.js';
+import { UserLibrary } from './SimpleMode.UserLibrary.js';
+import { findComponentRoot } from './SimpleMode.ComponentFactory.js';
 
 import { getSimpleString as t } from './SimpleMode.Strings.js';
 
@@ -60,9 +62,26 @@ function SimpleMode( editor ) {
 	const measure = new Measure( editor, units, precision.getSnap );
 	const alignment = new Alignment( editor );
 
+	let currentMode = null; // 'simple' | 'advanced'
+
+	// EV-003: componentes salvos pelo usuário (IndexedDB próprio)
+	const userLibrary = new UserLibrary();
+	userLibrary.load(); // em segundo plano: a aba "Meus" já abre pronta
+
+	// EV-003: no Modo Simples, clicar em qualquer peça de um componente seleciona o componente inteiro.
+	// No Modo Avançado a seleção original (peça por peça) continua igual.
+	editor.selector.resolveSelection = function ( object ) {
+
+		if ( currentMode !== 'simple' ) return object;
+
+		const root = findComponentRoot( object, editor.scene );
+		return root !== null ? root : object;
+
+	};
+
 	// contexto compartilhado com os painéis
 
-	const context = { notify, setMode, units, precision, measure, alignment };
+	const context = { notify, setMode, units, precision, measure, alignment, userLibrary };
 
 	container.add(
 		new SimpleModeTopbar( editor, context ),
@@ -74,8 +93,6 @@ function SimpleMode( editor ) {
 
 	// alternância de modo
 
-	let currentMode = null;
-
 	function setMode( mode ) {
 
 		if ( mode !== 'simple' && mode !== 'advanced' ) mode = 'simple';
@@ -85,6 +102,14 @@ function SimpleMode( editor ) {
 
 		document.body.classList.toggle( 'mode-simple', mode === 'simple' );
 		document.body.classList.toggle( 'mode-advanced', mode === 'advanced' );
+
+		// ao entrar no Modo Simples, uma peça selecionada no Avançado passa a selecionar o componente inteiro
+		if ( mode === 'simple' && editor.selected !== null ) {
+
+			const root = findComponentRoot( editor.selected, editor.scene );
+			if ( root !== null && root !== editor.selected ) editor.select( root );
+
+		}
 
 		if ( mode === 'advanced' ) {
 

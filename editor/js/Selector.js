@@ -12,6 +12,9 @@ class Selector {
 		this.editor = editor;
 		this.signals = signals;
 
+		// EV-003: função opcional que troca o objeto a selecionar (ex.: peça -> componente no Modo Simples)
+		this.resolveSelection = null;
+
 		// signals
 
 		signals.intersectionsDetected.add( ( intersects ) => {
@@ -95,6 +98,8 @@ class Selector {
 	}
 
 	select( object ) {
+
+		if ( object !== null && object !== undefined && this.resolveSelection !== null ) object = this.resolveSelection( object );
 
 		if ( this.editor.selected === object ) return;
 
