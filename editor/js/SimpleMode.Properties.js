@@ -7,7 +7,7 @@
 
 import * as THREE from 'three';
 
-import { UIDiv, UIInput, UIColor } from './libs/ui.js';
+import { UIDiv, UIInput } from './libs/ui.js';
 
 import { AddObjectCommand } from './commands/AddObjectCommand.js';
 import { RemoveObjectCommand } from './commands/RemoveObjectCommand.js';
@@ -15,7 +15,6 @@ import { SetValueCommand } from './commands/SetValueCommand.js';
 import { SetPositionCommand } from './commands/SetPositionCommand.js';
 import { SetRotationCommand } from './commands/SetRotationCommand.js';
 import { SetScaleCommand } from './commands/SetScaleCommand.js';
-import { SetMaterialColorCommand } from './commands/SetMaterialColorCommand.js';
 
 import { clone } from '../../examples/jsm/utils/SkeletonUtils.js';
 
@@ -26,6 +25,7 @@ import { getDimensionInfo, computeScaleForSize } from './SimpleMode.Dimensions.j
 import { SimpleModeComponentProperties } from './SimpleMode.ComponentProperties.js';
 import { getComponentState, isUserComponent } from './SimpleMode.ComponentFactory.js';
 import { getCategory } from './SimpleMode.Components.js';
+import { SimpleModeAppearancePanel } from './SimpleMode.AppearancePanel.js';
 
 const SECTIONS_KEY = 'interface/simple/sections';
 const AXES = [ 'x', 'y', 'z' ];
@@ -246,27 +246,9 @@ function SimpleModeProperties( editor, context ) {
 
 	// 6. Aparência -------------------------------------------------------------
 
+	// EV-004: acabamentos (materiais, texturas procedurais e partes lógicas dos componentes)
 	const colorSection = createSection( 'appearance', t( 'properties/section/appearance' ) );
-
-	colorSection.body.add( createText( t( 'properties/color' ), 'SimpleSubLabel' ) );
-
-	const colorRow = new UIDiv().setClass( 'SimpleColorRow' );
-	colorSection.body.add( colorRow );
-
-	const objectColor = new UIColor().setClass( 'SimpleColorInput' );
-	objectColor.dom.setAttribute( 'aria-label', t( 'properties/color' ) );
-	objectColor.dom.style.width = '';
-	objectColor.dom.style.height = '';
-
-	const colorValue = createText( '', 'SimpleColorValue' );
-
-	// 'input' atualiza ao vivo; o comando é "atualizável", então o arraste gera um único passo no histórico
-	objectColor.dom.addEventListener( 'input', updateColor );
-
-	colorRow.add( objectColor, colorValue );
-
-	const colorUnavailable = createText( t( 'properties/color/unavailable' ), 'SimpleSectionHint' );
-	colorSection.body.add( colorUnavailable );
+	const appearancePanel = new SimpleModeAppearancePanel( editor, context, colorSection );
 
 	// 7. Alinhamento e distribuição -------------------------------------------
 
@@ -659,37 +641,6 @@ function SimpleModeProperties( editor, context ) {
 
 	}
 
-	function getColorMaterial( object ) {
-
-		const material = object.material;
-
-		if ( material === undefined || Array.isArray( material ) ) return null;
-		if ( material.color === undefined || material.color.isColor !== true ) return null;
-
-		return material;
-
-	}
-
-	function updateColor() {
-
-		const object = getEditableObject();
-		if ( object === null ) return;
-
-		const material = getColorMaterial( object );
-		if ( material === null ) return;
-
-		const hex = objectColor.getHexValue();
-
-		if ( material.color.getHex() !== hex ) {
-
-			editor.execute( new SetMaterialColorCommand( editor, object, 'color', hex ) );
-
-		}
-
-		colorValue.setTextContent( objectColor.getValue().toUpperCase() );
-
-	}
-
 	function duplicateObject() {
 
 		const object = getEditableObject();
@@ -714,6 +665,13 @@ function SimpleModeProperties( editor, context ) {
 
 			// geometria própria: regenerar um componente copiado não afeta o original (EV-003)
 			if ( child.geometry !== undefined ) child.geometry = child.geometry.clone();
+
+			// EV-004: texturas com repetição própria (a imagem continua compartilhada na GPU)
+			for ( const material of Array.isArray( child.material ) ? child.material : [ child.material ] ) {
+
+				if ( material.map ) material.map = material.map.clone();
+
+			}
 
 		} );
 
@@ -807,21 +765,13 @@ function SimpleModeProperties( editor, context ) {
 		scale.section.details.hidden = object.isLight === true;
 
 		updateDimensionUI( object );
-		updateColorUI( object );
 
-		// componente paramétrico: campos próprios no lugar das seções genéricas de dimensões e cor
+		// componente paramétrico: campos próprios no lugar da seção genérica de dimensões
 		const isParametric = componentProperties.update( object );
+		if ( isParametric ) dimSection.details.hidden = true;
 
-		if ( isParametric ) {
-
-			dimSection.details.hidden = true;
-			colorSection.details.hidden = true;
-
-		} else {
-
-			colorSection.details.hidden = false;
-
-		}
+		// EV-004: aparência para básicos, componentes e grupos/malhas com material
+		colorSection.details.hidden = appearancePanel.update( object ) === false;
 
 		updateCategory( object );
 
@@ -914,23 +864,6 @@ function SimpleModeProperties( editor, context ) {
 
 	}
 
-	function updateColorUI( object ) {
-
-		const material = getColorMaterial( object );
-		const available = material !== null;
-
-		if ( available ) {
-
-			objectColor.setHexValue( material.color.getHex() );
-			colorValue.setTextContent( objectColor.getValue().toUpperCase() );
-
-		}
-
-		colorRow.setDisplay( available ? '' : 'none' );
-		colorUnavailable.setDisplay( available ? 'none' : '' );
-
-	}
-
 	signals.objectSelected.add( updateUI );
 
 	signals.objectChanged.add( function ( object ) {
@@ -948,12 +881,6 @@ function SimpleModeProperties( editor, context ) {
 	signals.geometryChanged.add( function ( object ) {
 
 		if ( object === editor.selected ) updateUI();
-
-	} );
-
-	signals.materialChanged.add( function ( object ) {
-
-		if ( object !== undefined && object === editor.selected ) updateColorUI( object );
 
 	} );
 

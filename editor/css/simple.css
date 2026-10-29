@@ -1398,6 +1398,318 @@ body.mode-simple #viewport.measuring canvas {
 	}
 
 /* ------------------------------------------------------------------ */
+/* EV-004 — Aparência e iluminação                                      */
+/* ------------------------------------------------------------------ */
+
+#simple-right .SimplePartChips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+	margin-bottom: 10px;
+}
+
+	#simple-right .SimplePartChip {
+		min-height: 28px;
+		padding: 0 10px;
+		font: inherit;
+		font-size: 12px;
+		font-weight: 600;
+		color: var(--simple-text);
+		background: var(--simple-surface-2);
+		border: 1px solid transparent;
+		border-radius: 999px;
+		cursor: pointer;
+	}
+
+		#simple-right .SimplePartChip:hover {
+			border-color: var(--simple-border);
+		}
+
+		#simple-right .SimplePartChip.active {
+			color: #fff;
+			background: var(--simple-accent);
+			border-color: var(--simple-accent);
+		}
+
+		#simple-right .SimplePartChip:focus-visible {
+			outline: none;
+			box-shadow: var(--simple-focus);
+		}
+
+#simple-right .SimpleAppearanceCurrent {
+	display: block;
+	margin-bottom: 8px;
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--simple-text);
+}
+
+#simple-right .SimpleSwatches {
+	display: block;
+	margin-bottom: 12px;
+}
+
+#simple-right .SimpleSwatchTitle {
+	margin: 8px 0 4px;
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 0.03em;
+	text-transform: uppercase;
+	color: var(--simple-text-muted);
+}
+
+#simple-right .SimpleSwatchRow {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 4px;
+}
+
+#simple-right .SimpleSwatch {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 4px;
+	min-width: 0;
+	padding: 6px 2px 4px;
+	font: inherit;
+	color: var(--simple-text);
+	background: transparent;
+	border: 1px solid transparent;
+	border-radius: 8px;
+	cursor: pointer;
+}
+
+	#simple-right .SimpleSwatch:hover {
+		background: var(--simple-surface-2);
+	}
+
+	#simple-right .SimpleSwatch.active {
+		border-color: var(--simple-accent);
+		background: var(--simple-accent-soft);
+	}
+
+	#simple-right .SimpleSwatch:focus-visible {
+		outline: none;
+		box-shadow: var(--simple-focus);
+	}
+
+#simple-right .SimpleSwatchChip {
+	width: 34px;
+	height: 34px;
+	border-radius: 50%;
+	background-size: cover;
+	box-shadow: inset 0 0 0 1px #0002, 0 1px 2px #0003;
+}
+
+	/* vidro e transparências: xadrez visível através da cor */
+	#simple-right .SimpleSwatchChip.transparent {
+		background-image: linear-gradient(45deg, #0002 25%, transparent 25%, transparent 75%, #0002 75%), linear-gradient(45deg, #0002 25%, transparent 25%, transparent 75%, #0002 75%) !important;
+		background-size: 12px 12px !important;
+		background-position: 0 0, 6px 6px !important;
+		opacity: 0.75;
+	}
+
+#simple-right .SimpleSwatchName {
+	max-width: 100%;
+	overflow: hidden;
+	font-size: 11px;
+	line-height: 1.2;
+	text-align: center;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+#simple-mode .SimpleAppearanceControls {
+	display: grid;
+	gap: 10px;
+}
+
+	#simple-mode .SimpleAppearanceControls.disabled {
+		opacity: 0.55;
+	}
+
+#simple-mode .SimpleControlRow {
+	display: grid;
+	grid-template-columns: 96px minmax(0, 1fr);
+	align-items: center;
+	gap: 8px;
+}
+
+	#simple-mode .SimpleControlRow .SimpleControlLabel {
+		font-size: 12px;
+		color: var(--simple-text);
+	}
+
+#simple-mode .SimpleRange {
+	width: 100%;
+	min-width: 0;
+	margin: 0;
+	accent-color: var(--simple-accent);
+	cursor: pointer;
+}
+
+	#simple-mode .SimpleRange:focus-visible {
+		outline: none;
+		box-shadow: var(--simple-focus);
+		border-radius: 4px;
+	}
+
+#simple-mode .SimpleRangeWithValue {
+	display: grid;
+	grid-template-columns: 1fr 52px;
+	align-items: center;
+	gap: 6px;
+}
+
+#simple-mode .SimpleRangeValue {
+	font-size: 12px;
+	font-variant-numeric: tabular-nums;
+	text-align: right;
+	color: var(--simple-text-muted);
+}
+
+/* painel direito: rótulo acima do controle, usando toda a largura do painel */
+#simple-right .SimpleControlRow {
+	grid-template-columns: minmax(0, 1fr);
+	gap: 4px;
+}
+
+	#simple-right .SimpleControlRow[data-control="color"] {
+		grid-template-columns: minmax(0, 1fr) auto;
+	}
+
+#simple-right .SimpleControlRow[data-control="scale"] {
+	grid-template-columns: minmax(0, 1fr) 44px;
+}
+
+	#simple-right .SimpleControlRow[data-control="scale"] .SimpleControlLabel {
+		grid-column: 1 / -1;
+	}
+
+#simple-right .SimpleGloss {
+	display: grid;
+	gap: 4px;
+}
+
+#simple-right .SimpleGlossLevels {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 2px;
+}
+
+	#simple-right .SimpleGlossLevel {
+		min-width: 0;
+		min-height: 24px;
+		padding: 0 2px;
+		overflow: hidden;
+		font-size: 11px;
+		text-overflow: ellipsis;
+		background: var(--simple-surface-2);
+	}
+
+	#simple-right .SimpleGlossLevel.active {
+		color: #fff;
+		background: var(--simple-accent);
+	}
+
+#simple-mode .SimpleTemperature {
+	accent-color: #f59e0b;
+}
+
+#simple-mode .SimpleToggle {
+	width: 18px;
+	height: 18px;
+	margin: 0;
+	accent-color: var(--simple-accent);
+	cursor: pointer;
+}
+
+/* botão e painel de iluminação */
+
+#simple-center .SimpleLightingButton {
+	min-height: 28px;
+	padding: 0 8px 0 10px;
+	font: inherit;
+	font-size: 12px;
+	color: var(--simple-text);
+	background: transparent;
+	border: 0;
+	border-left: 1px solid var(--simple-border);
+	cursor: pointer;
+}
+
+	#simple-center .SimpleLightingButton:hover,
+	#simple-center .SimpleLightingButton.active {
+		color: var(--simple-accent);
+	}
+
+	#simple-center .SimpleLightingButton:focus-visible {
+		outline: none;
+		box-shadow: var(--simple-focus);
+		border-radius: 6px;
+	}
+
+#simple-center .SimpleLighting {
+	position: absolute;
+	z-index: 4;
+	box-sizing: border-box;
+	padding: 10px 14px 14px;
+	overflow-y: auto;
+	background: var(--simple-surface);
+	border: 1px solid var(--simple-border);
+	border-radius: var(--simple-radius);
+	box-shadow: var(--simple-shadow);
+}
+
+#simple-center .SimpleScenarios {
+	display: grid;
+	gap: 4px;
+	margin: 8px 0 12px;
+}
+
+#simple-center .SimpleScenario {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 2px;
+	padding: 7px 10px;
+	font: inherit;
+	text-align: left;
+	color: var(--simple-text);
+	background: var(--simple-surface-2);
+	border: 1px solid transparent;
+	border-radius: 8px;
+	cursor: pointer;
+}
+
+	#simple-center .SimpleScenario strong {
+		font-size: 13px;
+	}
+
+	#simple-center .SimpleScenario span {
+		font-size: 11px;
+		color: var(--simple-text-muted);
+	}
+
+	#simple-center .SimpleScenario:hover {
+		border-color: var(--simple-border);
+	}
+
+	#simple-center .SimpleScenario.active {
+		border-color: var(--simple-accent);
+		background: var(--simple-accent-soft);
+	}
+
+	#simple-center .SimpleScenario:focus-visible {
+		outline: none;
+		box-shadow: var(--simple-focus);
+	}
+
+#simple-center .SimpleLighting .SimpleNotice {
+	margin: 10px 0 0;
+}
+
+/* ------------------------------------------------------------------ */
 /* Mensagens                                                            */
 /* ------------------------------------------------------------------ */
 

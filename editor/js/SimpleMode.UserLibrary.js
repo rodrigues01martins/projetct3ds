@@ -16,6 +16,9 @@ import * as THREE from 'three';
 
 import { getDefinition, migrateParameters, validateParameters } from './SimpleMode.Components.js';
 import { getComponentData, setMeta, createComponent, findComponentRoot } from './SimpleMode.ComponentFactory.js';
+import { getAppearance, getProcedural, applyPart, rebuildProceduralMaps, stripProceduralMaps } from './SimpleMode.Appearance.js';
+import { sanitizeSpec } from './SimpleMode.MaterialCatalog.js';
+import { isKnownTexture } from './SimpleMode.Textures.js';
 
 const DB_NAME = 'project3ds-library';
 const DB_VERSION = 1;
@@ -145,7 +148,10 @@ function checkGroupObject( object ) {
 		for ( const material of materials ) {
 
 			if ( MATERIAL_TYPES.has( material.type ) === false ) problem = 'Material não suportado: ' + material.type + '.';
-			if ( TEXTURE_KEYS.some( ( key ) => material[ key ] ) ) problem = 'Materiais com texturas/imagens ainda não podem ser salvos como componente.';
+			// EV-004: texturas procedurais são aceitas (guardadas só pela definição e regeneradas ao inserir);
+			// imagens externas continuam bloqueadas
+			const procedural = getProcedural( material ) !== null;
+			if ( TEXTURE_KEYS.some( ( key ) => material[ key ] && ! ( key === 'map' && procedural ) ) ) problem = 'Este objeto usa texturas de imagem externas, que ainda não podem ser salvas como componente. Os acabamentos do Project3DS são aceitos.';
 
 		}
 
@@ -203,13 +209,33 @@ function checkRecord( record ) {
 
 	if ( record.kind === 'parametric' ) {
 
-		return typeof record.componentId === 'string' && record.parameters !== null && typeof record.parameters === 'object';
+		// 'appearance' (EV-004) é opcional: registros antigos continuam válidos
+		const appearanceOk = record.appearance === undefined || ( record.appearance !== null && typeof record.appearance === 'object' );
+		return typeof record.componentId === 'string' && record.parameters !== null && typeof record.parameters === 'object' && appearanceOk;
 
 	}
 
 	if ( record.kind === 'group' ) return checkGroupJSON( record.object );
 
 	return false;
+
+}
+
+// acabamentos (EV-004): mantém apenas partes com especificação válida
+function cleanAppearance( appearance ) {
+
+	if ( appearance === null || appearance === undefined || typeof appearance !== 'object' || appearance.parts === null || typeof appearance.parts !== 'object' ) return null;
+
+	const parts = {};
+
+	for ( const key of Object.keys( appearance.parts ).slice( 0, 32 ) ) {
+
+		const spec = sanitizeSpec( appearance.parts[ key ], isKnownTexture );
+		if ( spec !== null && typeof key === 'string' && key.length <= 60 ) parts[ key ] = spec;
+
+	}
+
+	return Object.keys( parts ).length > 0 ? { version: 1, parts } : null;
 
 }
 
@@ -261,6 +287,10 @@ function createRecord( object, name, category ) {
 			record.componentVersion = definition.version;
 			record.parameters = parameters;
 
+			// EV-004: acabamentos guardados como definição (preset, cor, brilho, textura procedural)
+			const appearance = cleanAppearance( getAppearance( object ) );
+			if ( appearance !== null ) record.appearance = appearance;
+
 			return record;
 
 		}
@@ -274,6 +304,14 @@ function createRecord( object, name, category ) {
 	const clone = object.clone( true );
 	clone.position.set( 0, 0, 0 );
 	clone.rotation.set( 0, 0, 0 );
+
+	// materiais próprios na cópia, sem as imagens procedurais (regeneradas a partir do registro do material)
+	clone.traverse( ( child ) => {
+
+		if ( child.isMesh === true && Array.isArray( child.material ) === false ) child.material = child.material.clone();
+
+	} );
+	stripProceduralMaps( clone );
 
 	const json = clone.toJSON();
 	delete json.metadata;
@@ -304,6 +342,15 @@ function instantiate( record ) {
 
 		object = createComponent( definition.id, parameters );
 
+		// EV-004: reconstrói os acabamentos salvos (especificações inválidas são ignoradas com segurança)
+		const appearance = cleanAppearance( record.appearance );
+
+		if ( appearance !== null ) {
+
+			for ( const key of Object.keys( appearance.parts ) ) applyPart( object, key, appearance.parts[ key ] );
+
+		}
+
 	} else {
 
 		const loader = new THREE.ObjectLoader();
@@ -317,6 +364,8 @@ function instantiate( record ) {
 			if ( child.material !== undefined ) child.material = Array.isArray( child.material ) ? child.material.map( ( m ) => m.clone() ) : child.material.clone();
 
 		} );
+
+		rebuildProceduralMaps( object ); // EV-004: texturas procedurais regeneradas pela definição
 
 	}
 

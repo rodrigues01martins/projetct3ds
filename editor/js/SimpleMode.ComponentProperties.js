@@ -13,6 +13,7 @@ import { MultiCmdsCommand } from './commands/MultiCmdsCommand.js';
 
 import { validateParameters } from './SimpleMode.Components.js';
 import { getComponentState } from './SimpleMode.ComponentFactory.js';
+import { getPartMeta } from './SimpleMode.Appearance.js';
 
 import { getSimpleString as t } from './SimpleMode.Strings.js';
 import { createSimpleButton, createText } from './SimpleMode.Icons.js';
@@ -212,8 +213,13 @@ function SimpleModeComponentProperties( editor, context, dimensionSection, param
 
 			if ( parameter.type === 'color' ) {
 
+				// EV-004: um acabamento aplicado à parte tem prioridade sobre a cor do parâmetro
+				const override = parameter.material !== undefined && getPartMeta( object, parameter.material ) !== null;
+
 				input.value = value;
-				input.disabled = state.editable !== true;
+				input.disabled = state.editable !== true || override;
+				row.dom.classList.toggle( 'disabled', override );
+				row.dom.title = override ? t( 'component/color/override' ) : ( parameter.hint || '' );
 				continue;
 
 			}
@@ -274,6 +280,12 @@ function SimpleModeComponentProperties( editor, context, dimensionSection, param
 	}
 
 	units.changed.add( refresh );
+
+	editor.signals.materialChanged.add( ( object ) => {
+
+		if ( current !== null && object === current.object ) refresh();
+
+	} );
 
 	return { update, getState: () => ( current !== null ? current.state : null ) };
 

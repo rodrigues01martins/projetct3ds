@@ -5,6 +5,7 @@ import { UIDiv } from './libs/ui.js';
 
 import { getSimpleString as t } from './SimpleMode.Strings.js';
 import { createIcon, createSimpleButton, createText } from './SimpleMode.Icons.js';
+import { SimpleModeLightingPanel } from './SimpleMode.LightingPanel.js';
 
 const TOOLS = [ 'select', 'translate', 'rotate', 'scale' ];
 
@@ -201,6 +202,9 @@ function SimpleModeTools( editor, context ) {
 		return select;
 
 	}
+
+	// EV-004: iluminação (acesso discreto ao lado de Encaixe e Grade)
+	context.lightingPanel = new SimpleModeLightingPanel( editor, context, options, container );
 
 	function updatePrecision() {
 

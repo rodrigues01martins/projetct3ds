@@ -10,6 +10,7 @@ import * as THREE from 'three';
 
 import { MultiCmdsCommand } from './commands/MultiCmdsCommand.js';
 import { SetPositionCommand } from './commands/SetPositionCommand.js';
+import { isLightingGroup } from './SimpleMode.Lighting.js';
 
 const AXES = [ 'x', 'y', 'z' ];
 const TOLERANCE = 1e-7;
@@ -25,7 +26,7 @@ function Alignment( editor ) {
 
 	function isSupported( object ) {
 
-		return object !== null && object !== undefined && object.parent === editor.scene && object.isCamera !== true;
+		return object !== null && object !== undefined && object.parent === editor.scene && object.isCamera !== true && isLightingGroup( object ) === false;
 
 	}
 

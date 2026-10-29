@@ -17,6 +17,8 @@ import { Measure } from './SimpleMode.Measure.js';
 import { Alignment } from './SimpleMode.Alignment.js';
 import { UserLibrary } from './SimpleMode.UserLibrary.js';
 import { findComponentRoot } from './SimpleMode.ComponentFactory.js';
+import { isOwnedLighting } from './SimpleMode.Lighting.js';
+import { LightingService } from './SimpleMode.LightingPanel.js';
 
 import { getSimpleString as t } from './SimpleMode.Strings.js';
 
@@ -74,10 +76,17 @@ function SimpleMode( editor ) {
 
 		if ( currentMode !== 'simple' ) return object;
 
+		// EV-004: as luzes do Project3DS são controladas pelo painel Iluminação (não são selecionadas no Modo Simples)
+		if ( isOwnedLighting( object, editor.scene ) ) return null;
+
 		const root = findComponentRoot( object, editor.scene );
 		return root !== null ? root : object;
 
 	};
+
+	// EV-004: reaplica a iluminação salva no projeto e mantém sombras/auxiliares coerentes
+	const lighting = new LightingService( editor, () => currentMode );
+	let shadingBeforeSimple = null;
 
 	// contexto compartilhado com os painéis
 
@@ -123,6 +132,23 @@ function SimpleMode( editor ) {
 
 		// encaixe e grade do Modo Simples; no Modo Avançado voltam ao comportamento original
 		precision.setEnabled( mode === 'simple' );
+
+		// EV-004: o Modo Simples mostra os materiais reais (sombreamento padrão); o modo anterior volta no Avançado
+		if ( mode === 'simple' && editor.viewportShading !== 'default' ) {
+
+			shadingBeforeSimple = editor.viewportShading;
+			editor.setViewportShading( 'default' );
+
+		} else if ( mode === 'advanced' && shadingBeforeSimple !== null ) {
+
+			editor.setViewportShading( shadingBeforeSimple );
+			shadingBeforeSimple = null;
+
+		}
+
+		if ( mode === 'advanced' && context.lightingPanel !== undefined ) context.lightingPanel.close();
+
+		lighting.updateHelpers();
 
 		if ( config.getKey( MODE_KEY ) !== mode ) config.setKey( MODE_KEY, mode );
 

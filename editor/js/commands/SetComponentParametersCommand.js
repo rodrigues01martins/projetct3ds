@@ -52,6 +52,8 @@ class SetComponentParametersCommand extends Command {
 
 		regenerateComponent( this.object, definition, parameters, {
 
+			editor,
+
 			addPart( mesh, group, index ) {
 
 				editor.addObject( mesh, group, index );

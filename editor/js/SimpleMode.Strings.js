@@ -71,6 +71,7 @@ const SimpleModeStrings = {
 
 	// componentes paramétricos (EV-003)
 
+	'component/color/override': 'Esta cor é definida pelo acabamento aplicado em Aparência. Use "Restaurar acabamento original" para voltar a usá-la.',
 	'component/range': '%s deve ficar entre %s e %s.',
 	'component/scale/notice': 'Este componente está com escala aplicada (%s). As medidas mostradas já incluem a escala; para editá-las, incorpore a escala às medidas.',
 	'component/scale/apply': 'Incorporar escala às medidas',
@@ -80,6 +81,51 @@ const SimpleModeStrings = {
 	'component/readonly/unknown': 'Este componente não é reconhecido por esta versão do aplicativo. Ele é mantido como está, sem edição de parâmetros.',
 	'component/readonly/newer': 'Este componente foi criado por uma versão mais nova do aplicativo. Ele é mantido como está, sem edição de parâmetros.',
 	'component/readonly/invalid': 'Os parâmetros deste componente estão fora dos limites; a edição foi bloqueada para não danificá-lo.',
+
+	// aparência (EV-004)
+
+	'appearance/part': 'Parte',
+	'appearance/catalog': 'Acabamentos',
+	'appearance/current': 'Acabamento: %s',
+	'appearance/original': 'Original',
+	'appearance/custom': 'Personalizado',
+	'appearance/apply': 'Aplicar %s',
+	'appearance/color': 'Cor',
+	'appearance/gloss': 'Brilho',
+	'appearance/gloss/title': 'Brilho da superfície: de fosco (esquerda) a brilhante (direita)',
+	'appearance/gloss/level': 'Deixar a superfície com acabamento %s',
+	'appearance/metal': 'Aspecto metálico',
+	'appearance/metal/title': 'Aspecto metálico: de não metálico (esquerda) a metálico (direita)',
+	'appearance/transparency': 'Transparência',
+	'appearance/transparency/title': 'Transparência: de opaco (esquerda) a quase transparente (direita)',
+	'appearance/texture': 'Padrão',
+	'appearance/texture/none': 'Liso (sem padrão)',
+	'appearance/textureScale': 'Tamanho do padrão',
+	'appearance/textureScale/title': 'Tamanho do padrão: menor (esquerda) ou maior (direita) que o tamanho real',
+	'appearance/glass/note': 'Transparência simples: a luz atravessa sem refração real (como um vidro fino).',
+	'appearance/restore': 'Restaurar acabamento original',
+	'appearance/restore/title': 'Voltar ao acabamento que esta parte tinha antes',
+	'appearance/issue/multi': 'Este objeto usa vários materiais na mesma forma; edite-o no Modo Avançado.',
+	'appearance/issue/unsupported': 'O tipo de material deste objeto não permite ajustes de acabamento seguros; use o Modo Avançado.',
+	'appearance/issue/external': 'Este objeto usa texturas de imagem próprias; para não perdê-las, edite o acabamento no Modo Avançado.',
+
+	// iluminação (EV-004)
+
+	'lighting/title': 'Iluminação',
+	'lighting/button': 'Luz: %s',
+	'lighting/open/title': 'Iluminação da cena: cenários, intensidade, temperatura e sombras',
+	'lighting/close': 'Fechar iluminação (Esc)',
+	'lighting/scenario': 'Cenário de iluminação',
+	'lighting/intensity': 'Intensidade',
+	'lighting/temperature': 'Temperatura',
+	'lighting/temperature/title': 'Temperatura da luz: quente/amarelada (esquerda) a fria/azulada (direita)',
+	'lighting/shadows': 'Sombras',
+	'lighting/quality': 'Qualidade das sombras',
+	'lighting/quality/low': 'Econômica',
+	'lighting/quality/high': 'Alta',
+	'lighting/notice/none': 'Escolha um cenário para ajustar intensidade, temperatura e sombras.',
+	'lighting/notice/userLights': 'Esta cena tem %s luz(es) criada(s) por você. Elas são mantidas como estão; os cenários apenas somam as luzes do Project3DS.',
+	'lighting/notice/rendererShadows': 'As sombras estão desligadas nas configurações do projeto (Modo Avançado › Projeto › Sombras).',
 
 	// ferramentas da área central
 
@@ -232,6 +278,12 @@ const SimpleModeStrings = {
 	'message/library/deleted': '"%s" excluído de Meus componentes.',
 	'message/library/insertError': 'Não foi possível inserir este componente.',
 	'message/component/scaleApplied': 'Escala incorporada às medidas. Use Desfazer para voltar.',
+	'message/appearance/applied': '%s aplicado.',
+	'message/appearance/appliedPart': '%s aplicado em %s.',
+	'message/appearance/invalid': 'Valor de acabamento inválido.',
+	'message/appearance/alreadyOriginal': 'Esta parte já está com o acabamento original.',
+	'message/appearance/noUV': 'O padrão não é compatível com esta forma; o acabamento foi aplicado sem o padrão.',
+	'message/lighting/changed': 'Iluminação: %s.',
 	'message/historyLocked': 'Desfazer/refazer está indisponível enquanto a cena estiver em reprodução.',
 
 	'confirm/new': 'Começar um projeto novo? Os objetos da cena atual serão removidos.\n\nDica: use "Salvar" antes para guardar uma cópia no computador.',

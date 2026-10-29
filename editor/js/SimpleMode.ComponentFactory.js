@@ -12,6 +12,7 @@
 import * as THREE from 'three';
 
 import { getDefinition, getDefaultParameters, migrateParameters, validateParameters } from './SimpleMode.Components.js';
+import { reapplyComponentAppearance } from './SimpleMode.Appearance.js';
 
 const META_KEY = 'project3ds';
 
@@ -188,7 +189,7 @@ function createComponent( id, overrides = {} ) {
 // Peças que deixam de existir são removidas e novas peças são criadas (ex.: quantidade de prateleiras).
 //
 // hooks (fornecidos pelo comando, para manter os registros do Editor consistentes):
-//   addPart( mesh, group, index ), removePart( mesh ), replaceGeometry( mesh, newGeometry )
+//   addPart( mesh, group, index ), removePart( mesh ), replaceGeometry( mesh, newGeometry ), editor (opcional)
 
 function regenerateComponent( group, definition, parameters, hooks ) {
 
@@ -259,6 +260,10 @@ function regenerateComponent( group, definition, parameters, hooks ) {
 	}
 
 	setMeta( group, { component: { id: definition.id, version: definition.version, parameters: Object.assign( {}, parameters ) } } );
+
+	// EV-004: os acabamentos registrados (userData.project3ds.appearance) têm prioridade sobre as cores da
+	// definição e são reaplicados às peças regeneradas, com a repetição da textura recalculada pela nova medida
+	reapplyComponentAppearance( group, hooks.editor );
 
 }
 

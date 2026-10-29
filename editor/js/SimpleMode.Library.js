@@ -9,6 +9,7 @@ import { AddObjectCommand } from './commands/AddObjectCommand.js';
 
 import { CATEGORIES, COMPONENTS, getDefaultParameters, getParameterSize } from './SimpleMode.Components.js';
 import { createComponent, getComponentData, findComponentRoot } from './SimpleMode.ComponentFactory.js';
+import { isLightingGroup } from './SimpleMode.Lighting.js';
 
 import { getSimpleString as t } from './SimpleMode.Strings.js';
 import { createIcon, createSimpleButton, createText } from './SimpleMode.Icons.js';
@@ -39,6 +40,7 @@ function findFreeSpot( editor, size, snap ) {
 
 	const margin = 0.2;
 	const boxes = editor.scene.children
+		.filter( ( object ) => isLightingGroup( object ) === false && object.isLight !== true )
 		.map( ( object ) => new THREE.Box3().setFromObject( object, true ) )
 		.filter( ( box ) => box.isEmpty() === false );
 

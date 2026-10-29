@@ -50,6 +50,8 @@ const ICON_PATHS = {
 	bookmark: '<path d="M6 3h12v18l-6-4-6 4z"/>',
 	edit: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/>',
 
+	light: '<circle cx="12" cy="11" r="4.5"/><path d="M9.5 18h5M10.5 21h3M12 2v1.5M4.2 4.2l1.1 1.1M19.8 4.2l-1.1 1.1M2 11h1.5M20.5 11H22"/>',
+
 	help: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6"/><path d="M12 17.5h.01"/>',
 	close: '<path d="M6 6l12 12M18 6 6 18"/>'
 

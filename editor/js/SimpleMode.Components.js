@@ -17,6 +17,7 @@ const CATEGORIES = [
 
 // tipos de parâmetro: 'length' (metros), 'integer', 'color' ('#rrggbb')
 // dimension: eixo físico ('x' | 'y' | 'z') -> aparece na seção Dimensões
+// material: (cores) chave do material que a cor define; um acabamento da EV-004 nessa parte tem prioridade
 
 const COMPONENTS = [
 
@@ -31,7 +32,7 @@ const COMPONENTS = [
 			{ key: 'width', label: 'Largura', type: 'length', dimension: 'x', default: 3, min: 0.1, max: 30 },
 			{ key: 'height', label: 'Altura', type: 'length', dimension: 'y', default: 2.7, min: 0.1, max: 10 },
 			{ key: 'thickness', label: 'Espessura', type: 'length', dimension: 'z', default: 0.15, min: 0.01, max: 2 },
-			{ key: 'color', label: 'Cor', type: 'color', default: '#e8e4dc' }
+			{ key: 'color', label: 'Cor', type: 'color', material: 'main', default: '#e8e4dc' }
 		],
 		materials: ( p ) => ( { main: { label: 'Parede', color: p.color, roughness: 0.9 } } ),
 		parts: ( p ) => [
@@ -50,7 +51,7 @@ const COMPONENTS = [
 			{ key: 'width', label: 'Largura', type: 'length', dimension: 'x', default: 4, min: 0.1, max: 50 },
 			{ key: 'thickness', label: 'Espessura', type: 'length', dimension: 'y', default: 0.15, min: 0.01, max: 2 },
 			{ key: 'depth', label: 'Profundidade', type: 'length', dimension: 'z', default: 4, min: 0.1, max: 50 },
-			{ key: 'color', label: 'Cor', type: 'color', default: '#b9a58a' }
+			{ key: 'color', label: 'Cor', type: 'color', material: 'main', default: '#b9a58a' }
 		],
 		materials: ( p ) => ( { main: { label: 'Piso', color: p.color, roughness: 0.85 } } ),
 		parts: ( p ) => [
@@ -69,7 +70,7 @@ const COMPONENTS = [
 			{ key: 'width', label: 'Largura', type: 'length', dimension: 'x', default: 2, min: 0.1, max: 20 },
 			{ key: 'height', label: 'Altura', type: 'length', dimension: 'y', default: 2, min: 0.1, max: 10 },
 			{ key: 'thickness', label: 'Espessura', type: 'length', dimension: 'z', default: 0.05, min: 0.005, max: 0.5 },
-			{ key: 'color', label: 'Cor', type: 'color', default: '#9fb7c9' }
+			{ key: 'color', label: 'Cor', type: 'color', material: 'main', default: '#9fb7c9' }
 		],
 		materials: ( p ) => ( { main: { label: 'Painel', color: p.color, roughness: 0.6 } } ),
 		parts: ( p ) => [
@@ -90,8 +91,8 @@ const COMPONENTS = [
 			{ key: 'leafThickness', label: 'Espessura da folha', type: 'length', default: 0.04, min: 0.01, max: 0.15 },
 			{ key: 'frameWidth', label: 'Largura do batente', type: 'length', default: 0.05, min: 0.01, max: 0.3 },
 			{ key: 'frameDepth', label: 'Profundidade do batente', type: 'length', dimension: 'z', default: 0.12, min: 0.02, max: 0.5 },
-			{ key: 'leafColor', label: 'Cor da folha', type: 'color', default: '#a47148' },
-			{ key: 'frameColor', label: 'Cor do batente', type: 'color', default: '#f2f2f2' }
+			{ key: 'leafColor', label: 'Cor da folha', type: 'color', material: 'leaf', default: '#a47148' },
+			{ key: 'frameColor', label: 'Cor do batente', type: 'color', material: 'frame', default: '#f2f2f2' }
 		],
 		validate: ( p ) => {
 
@@ -138,8 +139,8 @@ const COMPONENTS = [
 			{ key: 'depth', label: 'Profundidade', type: 'length', dimension: 'z', default: 0.08, min: 0.02, max: 0.5 },
 			{ key: 'sill', label: 'Altura do peitoril (do chão)', type: 'length', default: 1, min: 0, max: 5 },
 			{ key: 'frameWidth', label: 'Largura da moldura', type: 'length', default: 0.05, min: 0.01, max: 0.3 },
-			{ key: 'frameColor', label: 'Cor da moldura', type: 'color', default: '#ffffff' },
-			{ key: 'glassColor', label: 'Cor do vidro', type: 'color', default: '#a8d8ff' }
+			{ key: 'frameColor', label: 'Cor da moldura', type: 'color', material: 'frame', default: '#ffffff' },
+			{ key: 'glassColor', label: 'Cor do vidro', type: 'color', material: 'glass', default: '#a8d8ff' }
 		],
 		validate: ( p ) => {
 
@@ -182,8 +183,8 @@ const COMPONENTS = [
 			{ key: 'topThickness', label: 'Espessura do tampo', type: 'length', default: 0.03, min: 0.01, max: 0.15 },
 			{ key: 'legThickness', label: 'Espessura das pernas', type: 'length', default: 0.05, min: 0.02, max: 0.2 },
 			{ key: 'legInset', label: 'Recuo das pernas', type: 'length', default: 0.05, min: 0, max: 0.5 },
-			{ key: 'topColor', label: 'Cor do tampo', type: 'color', default: '#c8a27a' },
-			{ key: 'legColor', label: 'Cor das pernas', type: 'color', default: '#5b4636' }
+			{ key: 'topColor', label: 'Cor do tampo', type: 'color', material: 'top', default: '#c8a27a' },
+			{ key: 'legColor', label: 'Cor das pernas', type: 'color', material: 'legs', default: '#5b4636' }
 		],
 		validate: ( p ) => {
 
@@ -228,8 +229,8 @@ const COMPONENTS = [
 			{ key: 'seatHeight', label: 'Altura do assento', type: 'length', default: 0.45, min: 0.15, max: 1 },
 			{ key: 'seatThickness', label: 'Espessura do assento', type: 'length', default: 0.04, min: 0.01, max: 0.15 },
 			{ key: 'legThickness', label: 'Espessura dos suportes', type: 'length', default: 0.035, min: 0.01, max: 0.1 },
-			{ key: 'seatColor', label: 'Cor do assento e encosto', type: 'color', default: '#d9d2c5' },
-			{ key: 'frameColor', label: 'Cor dos suportes', type: 'color', default: '#4a4a4a' }
+			{ key: 'seatColor', label: 'Cor do assento e encosto', type: 'color', material: 'seat', default: '#d9d2c5' },
+			{ key: 'frameColor', label: 'Cor dos suportes', type: 'color', material: 'frame', default: '#4a4a4a' }
 		],
 		validate: ( p ) => {
 
@@ -277,7 +278,7 @@ const COMPONENTS = [
 			{ key: 'depth', label: 'Profundidade', type: 'length', dimension: 'z', default: 0.35, min: 0.1, max: 1.2 },
 			{ key: 'shelves', label: 'Quantidade de prateleiras', type: 'integer', default: 5, min: 2, max: 12, hint: 'Inclui a base e o topo.' },
 			{ key: 'boardThickness', label: 'Espessura das placas', type: 'length', default: 0.018, min: 0.005, max: 0.08 },
-			{ key: 'color', label: 'Cor', type: 'color', default: '#e0d2b8' }
+			{ key: 'color', label: 'Cor', type: 'color', material: 'main', default: '#e0d2b8' }
 		],
 		validate: ( p ) => {
 
@@ -320,8 +321,8 @@ const COMPONENTS = [
 			{ key: 'width', label: 'Largura', type: 'length', dimension: 'x', default: 2, min: 0.2, max: 30 },
 			{ key: 'height', label: 'Altura', type: 'length', dimension: 'y', default: 0.4, min: 0.02, max: 3 },
 			{ key: 'depth', label: 'Profundidade', type: 'length', dimension: 'z', default: 1, min: 0.2, max: 30 },
-			{ key: 'topColor', label: 'Cor do tampo', type: 'color', default: '#6f7680' },
-			{ key: 'baseColor', label: 'Cor da base', type: 'color', default: '#3f444b' }
+			{ key: 'topColor', label: 'Cor do tampo', type: 'color', material: 'top', default: '#6f7680' },
+			{ key: 'baseColor', label: 'Cor da base', type: 'color', material: 'base', default: '#3f444b' }
 		],
 		materials: ( p ) => ( {
 			top: { label: 'Tampo', color: p.topColor, roughness: 0.8 },

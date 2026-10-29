@@ -12,6 +12,7 @@ import { createIcon, createSimpleButton, createText } from './SimpleMode.Icons.j
 import { SimpleModeLibrary, getUniqueName } from './SimpleMode.Library.js';
 import { getComponentData, isUserComponent } from './SimpleMode.ComponentFactory.js';
 import { getDefinition } from './SimpleMode.Components.js';
+import { isLightingGroup } from './SimpleMode.Lighting.js';
 
 // Paleta suave usada para diferenciar os objetos recém-criados
 const PALETTE = [ 0x4f8cff, 0xff8a4f, 0x45c48b, 0xf2c94c, 0xb07cff, 0xff6b8b, 0x3cc7d6 ];
@@ -96,6 +97,8 @@ function SimpleModeObjects( editor, context ) {
 		mesh.name = getUniqueName( editor, label );
 
 		mesh.position.copy( getFreePosition( primitive.y ) );
+		mesh.castShadow = true; // EV-004: participa das sombras dos cenários de iluminação
+		mesh.receiveShadow = true;
 		if ( primitive.rotationX !== undefined ) mesh.rotation.x = primitive.rotationX;
 
 		// AddObjectCommand já seleciona o objeto e registra no histórico (desfazer/refazer)
@@ -109,7 +112,7 @@ function SimpleModeObjects( editor, context ) {
 
 	function getFreePosition( y ) {
 
-		const occupied = editor.scene.children.map( ( object ) => object.position );
+		const occupied = editor.scene.children.filter( ( object ) => isLightingGroup( object ) === false ).map( ( object ) => object.position );
 		const candidate = new THREE.Vector3();
 
 		for ( let ring = 0; ring < 10; ring ++ ) {
@@ -189,7 +192,8 @@ function SimpleModeObjects( editor, context ) {
 		list.dom.textContent = '';
 		items.clear();
 
-		const objects = editor.scene.children;
+		// EV-004: o grupo de luzes do Project3DS é controlado pelo painel Iluminação, não pela lista
+		const objects = editor.scene.children.filter( ( object ) => isLightingGroup( object ) === false );
 
 		if ( objects.length === 0 ) {
 
