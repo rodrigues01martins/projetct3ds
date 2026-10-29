@@ -148,13 +148,17 @@ function SimpleModeObjects( editor, context ) {
 	container.add( listSection );
 
 	listSection.add( createText( t( 'objects/list/title' ), 'SimpleSectionTitle' ) );
+	listSection.add( createText( t( 'objects/list/hint' ), 'SimpleSectionHint' ) );
 
 	const list = new UIDiv().setClass( 'SimpleObjectList' );
-	list.dom.setAttribute( 'role', 'listbox' );
+	list.dom.setAttribute( 'role', 'list' );
 	list.dom.setAttribute( 'aria-label', t( 'objects/list/title' ) );
 	listSection.add( list );
 
-	const items = new Map();
+	// EV-002: marcação complementar para alinhar/distribuir (não altera editor.selected)
+	const alignment = context.alignment;
+
+	const items = new Map(); // objeto -> { row, item, mark }
 
 	function getIconFor( object ) {
 
@@ -193,10 +197,27 @@ function SimpleModeObjects( editor, context ) {
 
 			const name = object.name || t( 'objects/unnamed' );
 
+			const row = document.createElement( 'div' );
+			row.className = 'SimpleObjectRow';
+			row.setAttribute( 'role', 'listitem' );
+
+			const mark = document.createElement( 'input' );
+			mark.type = 'checkbox';
+			mark.className = 'SimpleMark';
+			mark.title = t( 'objects/list/mark/title', name );
+			mark.setAttribute( 'aria-label', t( 'objects/list/mark/title', name ) );
+			mark.disabled = alignment.isSupported( object ) === false;
+			mark.addEventListener( 'keydown', ( event ) => event.stopPropagation() );
+			mark.addEventListener( 'change', function () {
+
+				alignment.toggle( object );
+
+			} );
+			row.appendChild( mark );
+
 			const item = document.createElement( 'button' );
 			item.type = 'button';
 			item.className = 'SimpleObjectItem';
-			item.setAttribute( 'role', 'option' );
 			item.title = t( 'objects/list/item/title', name );
 			item.appendChild( createIcon( getIconFor( object ) ) );
 
@@ -217,8 +238,16 @@ function SimpleModeObjects( editor, context ) {
 
 			} );
 
-			list.dom.appendChild( item );
-			items.set( object, item );
+			const badge = document.createElement( 'span' );
+			badge.className = 'SimpleReferenceBadge';
+			badge.textContent = t( 'objects/list/reference' );
+			badge.title = t( 'objects/list/reference/title' );
+
+			row.appendChild( item );
+			row.appendChild( badge );
+
+			list.dom.appendChild( row );
+			items.set( object, { row, item, mark, badge } );
 
 		}
 
@@ -228,11 +257,21 @@ function SimpleModeObjects( editor, context ) {
 
 	function updateSelection() {
 
-		for ( const [ object, item ] of items ) {
+		const hasMarks = alignment.getParticipants().others.length > 0;
+
+		for ( const [ object, { row, item, mark, badge } ] of items ) {
 
 			const selected = object === editor.selected;
+			const marked = alignment.isMarked( object );
+
 			item.classList.toggle( 'active', selected );
-			item.setAttribute( 'aria-selected', selected );
+			item.setAttribute( 'aria-pressed', selected );
+
+			mark.checked = marked;
+			row.classList.toggle( 'marked', marked );
+
+			// o objeto selecionado é a referência das operações de alinhamento
+			badge.hidden = ! ( selected && hasMarks );
 
 		}
 
@@ -240,17 +279,20 @@ function SimpleModeObjects( editor, context ) {
 
 	signals.sceneGraphChanged.add( refreshList );
 	signals.objectSelected.add( updateSelection );
+	alignment.changed.add( updateSelection );
 
 	signals.objectChanged.add( function ( object ) {
 
 		// o nome pode ter mudado (SetValueCommand não dispara sceneGraphChanged)
-		const item = items.get( object );
+		const entry = items.get( object );
 
-		if ( item !== undefined ) {
+		if ( entry !== undefined ) {
 
 			const name = object.name || t( 'objects/unnamed' );
-			item.querySelector( '.SimpleObjectItemLabel' ).textContent = name;
-			item.title = t( 'objects/list/item/title', name );
+			entry.item.querySelector( '.SimpleObjectItemLabel' ).textContent = name;
+			entry.item.title = t( 'objects/list/item/title', name );
+			entry.mark.title = t( 'objects/list/mark/title', name );
+			entry.mark.setAttribute( 'aria-label', t( 'objects/list/mark/title', name ) );
 
 		}
 

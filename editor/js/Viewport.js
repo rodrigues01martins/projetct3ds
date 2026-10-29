@@ -339,6 +339,28 @@ function Viewport( editor ) {
 
 	} );
 
+	// EV-002: grade configurável (mantém cores e padrão visual; null restaura a grade original 30 x 30)
+
+	signals.gridChanged.add( function ( options ) {
+
+		const { size, divisions, majorDivisions } = options || { size: 30, divisions: 30, majorDivisions: 6 };
+
+		grid1.geometry.dispose();
+		grid1.geometry = new THREE.GridHelper( size, divisions ).geometry;
+
+		grid2.geometry.dispose();
+		grid2.geometry = new THREE.GridHelper( size, majorDivisions ).geometry;
+
+		if ( renderer !== null ) render();
+
+	} );
+
+	signals.sceneHelpersChanged.add( function () {
+
+		if ( renderer !== null ) render();
+
+	} );
+
 	signals.spaceChanged.add( function ( space ) {
 
 		transformControls.setSpace( space );

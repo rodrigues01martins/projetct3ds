@@ -744,13 +744,383 @@ body.mode-simple #viewport #viewport-controls {
 	}
 
 /* ------------------------------------------------------------------ */
+/* EV-002 — Medidas e precisão                                          */
+/* ------------------------------------------------------------------ */
+
+#simple-mode .SimpleSelect {
+	height: 30px;
+	padding: 0 6px;
+	font: inherit;
+	font-size: 13px;
+	color: var(--simple-text);
+	background: var(--simple-surface-2);
+	border: 1px solid transparent;
+	border-radius: 7px;
+	cursor: pointer;
+	outline: none;
+}
+
+	#simple-mode .SimpleSelect:hover {
+		border-color: var(--simple-border);
+	}
+
+	#simple-mode .SimpleSelect:focus-visible {
+		box-shadow: var(--simple-focus);
+	}
+
+/* barra superior: unidade */
+
+#simple-topbar .SimpleUnitField {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding-left: 10px;
+	border-left: 1px solid var(--simple-border);
+	font-size: 12px;
+	color: var(--simple-text-muted);
+	white-space: nowrap;
+}
+
+/* área central: opções de precisão/grade e status da medição */
+
+#simple-center .SimpleViewOptions {
+	position: absolute;
+	top: calc(var(--simple-gap) + 52px);
+	left: 50%;
+	transform: translateX(-50%);
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 4px 8px;
+	max-width: calc(100% - 24px);
+	box-sizing: border-box;
+	background: var(--simple-surface);
+	border: 1px solid var(--simple-border);
+	border-radius: 10px;
+	box-shadow: var(--simple-shadow);
+	white-space: nowrap;
+}
+
+	#simple-center .SimpleOption {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		font-size: 12px;
+		color: var(--simple-text-muted);
+	}
+
+		#simple-center .SimpleOption .SimpleIcon {
+			width: 16px;
+			height: 16px;
+		}
+
+		#simple-center .SimpleOption .SimpleSelect {
+			height: 28px;
+		}
+
+	#simple-center .SimpleOption + .SimpleOption {
+		padding-left: 10px;
+		border-left: 1px solid var(--simple-border);
+	}
+
+#simple-center .SimpleMeasureStatus {
+	position: absolute;
+	top: calc(var(--simple-gap) + 98px);
+	left: 50%;
+	transform: translateX(-50%);
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 4px 4px 4px 12px;
+	max-width: calc(100% - 24px);
+	box-sizing: border-box;
+	font-size: 13px;
+	color: var(--simple-text);
+	background: var(--simple-surface);
+	border: 1px solid #ff9f0a;
+	border-radius: 10px;
+	box-shadow: var(--simple-shadow);
+}
+
+	#simple-center .SimpleMeasureStatus strong {
+		color: #d97706;
+		font-size: 15px;
+		font-variant-numeric: tabular-nums;
+	}
+
+	#simple-center .SimpleMeasureAction {
+		min-height: 28px;
+	}
+
+#simple-center .SimpleMeasureLabel {
+	position: absolute;
+	transform: translate(-50%, calc(-100% - 8px));
+	padding: 3px 8px;
+	font-size: 13px;
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+	color: #fff;
+	background: #d97706;
+	border-radius: 6px;
+	box-shadow: 0 2px 6px #0004;
+	white-space: nowrap;
+	pointer-events: none;
+}
+
+body.mode-simple #viewport.measuring canvas {
+	cursor: crosshair;
+}
+
+/* painel esquerdo: marcação para alinhamento */
+
+#simple-left .SimpleObjectRow {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	border-radius: 8px;
+}
+
+	#simple-left .SimpleObjectRow .SimpleObjectItem {
+		flex: 1;
+		min-width: 0;
+	}
+
+	#simple-left .SimpleObjectRow.marked {
+		background: var(--simple-accent-soft);
+	}
+
+#simple-left .SimpleMark {
+	flex: none;
+	width: 16px;
+	height: 16px;
+	margin: 0 0 0 6px;
+	accent-color: var(--simple-accent);
+	cursor: pointer;
+}
+
+	#simple-left .SimpleMark:disabled {
+		cursor: not-allowed;
+		opacity: 0.4;
+	}
+
+#simple-left .SimpleReferenceBadge {
+	flex: none;
+	padding: 2px 6px;
+	margin-right: 4px;
+	font-size: 10px;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+	color: #fff;
+	background: var(--simple-accent);
+	border-radius: 999px;
+}
+
+/* painel direito: seções recolhíveis */
+
+#simple-right .SimpleCollapsible {
+	padding: 0;
+}
+
+	#simple-right .SimpleCollapsible > summary {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		margin: 0;
+		padding: 12px 16px;
+		cursor: pointer;
+		list-style: none;
+		user-select: none;
+	}
+
+	#simple-right .SimpleCollapsible > summary::-webkit-details-marker {
+		display: none;
+	}
+
+	#simple-right .SimpleCollapsible > summary::before {
+		content: '';
+		width: 6px;
+		height: 6px;
+		border-right: 2px solid currentColor;
+		border-bottom: 2px solid currentColor;
+		transform: rotate(-45deg);
+		transition: transform 0.15s;
+		opacity: 0.7;
+	}
+
+	#simple-right .SimpleCollapsible[open] > summary::before {
+		transform: rotate(45deg);
+	}
+
+	#simple-right .SimpleCollapsible > summary:hover {
+		color: var(--simple-text);
+	}
+
+	#simple-right .SimpleCollapsible > summary:focus-visible {
+		outline: none;
+		box-shadow: inset var(--simple-focus);
+	}
+
+	#simple-right .SimpleSectionBody {
+		padding: 0 16px 14px;
+	}
+
+#simple-right .SimpleSubLabel {
+	display: block;
+	margin: 0 0 6px;
+	font-size: 12px;
+	color: var(--simple-text-muted);
+}
+
+#simple-right .SimpleObjectType {
+	display: block;
+	margin-top: 8px;
+	font-size: 12px;
+	color: var(--simple-text-muted);
+}
+
+/* dimensões */
+
+#simple-right .SimpleDimensionGrid {
+	display: grid;
+	gap: 6px;
+}
+
+#simple-right .SimpleDimensionRow {
+	display: grid;
+	grid-template-columns: 96px 1fr;
+	align-items: center;
+	gap: 8px;
+}
+
+	#simple-right .SimpleDimensionRow.disabled .SimpleDimensionLabel {
+		opacity: 0.6;
+	}
+
+#simple-right .SimpleDimensionLabel {
+	font-size: 13px;
+	color: var(--simple-text);
+}
+
+#simple-right .SimpleUnitSuffix {
+	flex: none;
+	padding: 0 8px 0 2px;
+	font-size: 12px;
+	color: var(--simple-text-muted);
+}
+
+#simple-right .SimpleNumber:disabled {
+	color: var(--simple-text-muted);
+	cursor: not-allowed;
+}
+
+#simple-right .SimpleAxisField:has(.SimpleNumber.invalid) {
+	border-color: var(--simple-danger);
+	box-shadow: 0 0 0 3px var(--simple-danger-soft);
+}
+
+#simple-right .SimpleCheckboxRow {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin-top: 10px;
+	font-size: 13px;
+	color: var(--simple-text);
+	cursor: pointer;
+}
+
+	#simple-right .SimpleCheckboxRow input {
+		margin: 0;
+		accent-color: var(--simple-accent);
+	}
+
+	#simple-right .SimpleCheckboxRow .SimpleIcon {
+		width: 14px;
+		height: 14px;
+		color: var(--simple-text-muted);
+	}
+
+	#simple-right .SimpleCheckboxRow:has(input:disabled) {
+		opacity: 0.6;
+		cursor: not-allowed;
+	}
+
+#simple-right .SimpleDimensionHint {
+	margin-top: 8px;
+	line-height: 1.45;
+}
+
+/* alinhamento */
+
+#simple-right .SimpleAlignSummary {
+	display: block;
+	margin-bottom: 10px;
+	font-size: 12px;
+	line-height: 1.5;
+	color: var(--simple-text-muted);
+}
+
+	#simple-right .SimpleAlignSummary strong {
+		color: var(--simple-text);
+	}
+
+#simple-right .SimpleAlignTable {
+	display: grid;
+	gap: 6px;
+}
+
+#simple-right .SimpleAlignRow {
+	display: grid;
+	grid-template-columns: 20px repeat(4, 1fr);
+	align-items: stretch;
+	gap: 4px;
+}
+
+	#simple-right .SimpleAlignRow .SimpleAxisLabel {
+		border-radius: 6px;
+	}
+
+#simple-right .SimpleAlignButton {
+	flex-direction: column;
+	gap: 2px;
+	min-height: 44px;
+	padding: 4px 2px;
+	font-size: 11px;
+}
+
+	#simple-right .SimpleAlignButton .SimpleIcon {
+		width: 16px;
+		height: 16px;
+	}
+
+#simple-right .SimpleLinkButton {
+	min-height: 28px;
+	margin-top: 8px;
+	padding: 0;
+	color: var(--simple-accent);
+	background: transparent;
+}
+
+	#simple-right .SimpleLinkButton:hover {
+		background: transparent;
+		border-color: transparent;
+		text-decoration: underline;
+	}
+
+#simple-right .SimpleAlignRow .SimpleAlignButton.disabled .SimpleIcon {
+	opacity: 0.6;
+}
+
+
+/* ------------------------------------------------------------------ */
 /* Mensagens                                                            */
 /* ------------------------------------------------------------------ */
 
 #simple-mode .SimpleToasts {
 	position: fixed;
 	left: 50%;
-	top: calc(var(--simple-topbar-height) + 64px);
+	/* abaixo da barra de ferramentas, das opções de precisão e do status da medição */
+	top: calc(var(--simple-topbar-height) + 152px);
 	transform: translateX(-50%);
 	display: flex;
 	flex-direction: column;
@@ -812,6 +1182,11 @@ body.mode-simple #viewport #viewport-controls {
 	}
 
 	#simple-topbar .SimpleSaving {
+		display: none;
+	}
+
+	#simple-center .SimpleOptionLabel,
+	#simple-topbar .SimpleUnitLabel {
 		display: none;
 	}
 
@@ -913,7 +1288,12 @@ body.mode-simple #viewport #viewport-controls {
 	}
 
 	#simple-mode .SimpleToasts {
-		top: calc(var(--simple-topbar-height) + var(--simple-add-height) + 64px);
+		top: calc(var(--simple-topbar-height) + var(--simple-add-height) + 152px);
+	}
+
+	/* não cobre a barra de ferramentas nem as opções de precisão */
+	#simple-center .SimpleHelp {
+		max-height: calc(100% - 172px);
 	}
 
 }
@@ -941,6 +1321,23 @@ body.mode-simple #viewport #viewport-controls {
 	#simple-topbar .SimpleModeSwitch .SimpleButton.active {
 		display: none;
 	}
+
+	#simple-topbar .SimpleModeSwitch .SimpleButton {
+		padding: 0 8px;
+	}
+
+	#simple-topbar .SimpleProjectName {
+		min-width: 44px;
+		padding: 0 6px !important;
+	}
+
+	#simple-topbar .SimpleUnitField {
+		padding-left: 4px;
+	}
+
+		#simple-topbar .SimpleUnitField .SimpleSelect {
+			padding: 0 2px;
+		}
 
 	#simple-left .SimpleAddButton .SimpleButtonLabel,
 	#simple-topbar .SimpleModeSwitch .SimpleButtonLabel {

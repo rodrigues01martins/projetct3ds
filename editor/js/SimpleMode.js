@@ -11,6 +11,11 @@ import { SimpleModeObjects } from './SimpleMode.Objects.js';
 import { SimpleModeTools } from './SimpleMode.Tools.js';
 import { SimpleModeProperties } from './SimpleMode.Properties.js';
 
+import { Units } from './SimpleMode.Units.js';
+import { Precision } from './SimpleMode.Precision.js';
+import { Measure } from './SimpleMode.Measure.js';
+import { Alignment } from './SimpleMode.Alignment.js';
+
 import { getSimpleString as t } from './SimpleMode.Strings.js';
 
 const MODE_KEY = 'interface/mode';
@@ -48,9 +53,16 @@ function SimpleMode( editor ) {
 
 	}
 
+	// serviços da EV-002 (unidades, precisão, medição e alinhamento), compartilhados com os painéis
+
+	const units = new Units( editor );
+	const precision = new Precision( editor );
+	const measure = new Measure( editor, units, precision.getSnap );
+	const alignment = new Alignment( editor );
+
 	// contexto compartilhado com os painéis
 
-	const context = { notify, setMode };
+	const context = { notify, setMode, units, precision, measure, alignment };
 
 	container.add(
 		new SimpleModeTopbar( editor, context ),
@@ -74,8 +86,18 @@ function SimpleMode( editor ) {
 		document.body.classList.toggle( 'mode-simple', mode === 'simple' );
 		document.body.classList.toggle( 'mode-advanced', mode === 'advanced' );
 
-		// a ferramenta "Selecionar" não existe no Modo Avançado: volta para "Mover"
-		if ( mode === 'advanced' ) signals.transformModeChanged.dispatch( 'translate' );
+		if ( mode === 'advanced' ) {
+
+			// encerra a régua e remove seus elementos temporários
+			measure.deactivate();
+
+			// a ferramenta "Selecionar" não existe no Modo Avançado: volta para "Mover"
+			signals.transformModeChanged.dispatch( 'translate' );
+
+		}
+
+		// encaixe e grade do Modo Simples; no Modo Avançado voltam ao comportamento original
+		precision.setEnabled( mode === 'simple' );
 
 		if ( config.getKey( MODE_KEY ) !== mode ) config.setKey( MODE_KEY, mode );
 
@@ -120,6 +142,7 @@ function SimpleMode( editor ) {
 		getMode,
 		createAdvancedToggle,
 		notify,
+		context,
 		initialMode: config.getKey( MODE_KEY ) === 'advanced' ? 'advanced' : 'simple'
 	};
 

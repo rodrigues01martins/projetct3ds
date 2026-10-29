@@ -42,6 +42,8 @@ function Editor() {
 
 		transformModeChanged: new Signal(),
 		snapChanged: new Signal(),
+		gridChanged: new Signal(), // EV-002: espaçamento da grade ({ size, divisions, majorDivisions } ou null = padrão)
+		sceneHelpersChanged: new Signal(), // EV-002: auxiliares temporários (ex.: régua) alterados, pede novo render
 		spaceChanged: new Signal(),
 		rendererCreated: new Signal(),
 		rendererUpdated: new Signal(),

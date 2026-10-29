@@ -120,6 +120,51 @@ function SimpleModeTopbar( editor, context ) {
 
 	container.add( new UIDiv().setClass( 'SimpleSpacer' ) );
 
+	// unidade de medida do projeto (EV-002): muda só a representação dos números
+
+	const units = context.units;
+
+	const unitField = document.createElement( 'label' );
+	unitField.className = 'SimpleUnitField';
+	unitField.title = t( 'topbar/unit/title' );
+
+	const unitLabel = document.createElement( 'span' );
+	unitLabel.className = 'SimpleUnitLabel';
+	unitLabel.textContent = t( 'topbar/unit' );
+	unitField.appendChild( unitLabel );
+
+	const unitSelect = document.createElement( 'select' );
+	unitSelect.className = 'SimpleSelect';
+	unitSelect.setAttribute( 'aria-label', t( 'topbar/unit/title' ) );
+
+	for ( const unit of Object.values( units.UNITS ) ) {
+
+		const option = document.createElement( 'option' );
+		option.value = unit.id;
+		option.textContent = unit.label;
+		option.title = unit.name;
+		unitSelect.appendChild( option );
+
+	}
+
+	unitSelect.value = units.getUnit().id;
+	unitSelect.addEventListener( 'keydown', ( event ) => event.stopPropagation() ); // não aciona atalhos
+	unitSelect.addEventListener( 'change', function () {
+
+		units.setUnit( unitSelect.value );
+		context.notify( t( 'message/unitChanged', units.getUnit().name.toLowerCase() ) );
+
+	} );
+	unitField.appendChild( unitSelect );
+
+	units.changed.add( function () {
+
+		unitSelect.value = units.getUnit().id;
+
+	} );
+
+	container.dom.appendChild( unitField );
+
 	// indicador de salvamento automático
 
 	const savingStatus = createText( t( 'topbar/saving' ), 'SimpleSaving' );
