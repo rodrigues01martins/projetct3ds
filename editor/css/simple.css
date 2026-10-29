@@ -1,0 +1,962 @@
+/*
+ * EV-001 — Modo Simples de Criação 3D
+ *
+ * O <body> recebe a classe `mode-simple` ou `mode-advanced`.
+ * No Modo Simples os painéis originais ficam apenas ocultos (nada é removido) e o
+ * mesmo #viewport é reposicionado entre os novos painéis.
+ */
+
+:root {
+	--simple-topbar-height: 56px;
+	--simple-left-width: 232px;
+	--simple-right-width: 300px;
+	--simple-gap: 12px;
+	--simple-radius: 10px;
+
+	--simple-bg: #f4f5f7;
+	--simple-surface: #ffffff;
+	--simple-surface-2: #eef0f3;
+	--simple-border: #dcdfe5;
+	--simple-text: #1f2430;
+	--simple-text-muted: #687083;
+	--simple-accent: #0a84ff;
+	--simple-accent-soft: #0a84ff1f;
+	--simple-danger: #e5484d;
+	--simple-danger-soft: #e5484d1a;
+	--simple-success: #2f9e66;
+	--simple-shadow: 0 6px 20px -8px #0003;
+	--simple-focus: 0 0 0 3px #0a84ff55;
+}
+
+@media ( prefers-color-scheme: dark ) {
+
+	:root {
+		--simple-bg: #15171c;
+		--simple-surface: #1d2027;
+		--simple-surface-2: #262a33;
+		--simple-border: #323744;
+		--simple-text: #e7e9ee;
+		--simple-text-muted: #9aa1b2;
+		--simple-accent: #3b9bff;
+		--simple-accent-soft: #3b9bff26;
+		--simple-danger: #ff6369;
+		--simple-danger-soft: #ff636922;
+		--simple-success: #4cc38a;
+		--simple-shadow: 0 6px 20px -8px #000a;
+	}
+
+}
+
+/* ------------------------------------------------------------------ */
+/* Alternância de modo                                                  */
+/* ------------------------------------------------------------------ */
+
+#simple-mode {
+	display: none;
+}
+
+body.mode-simple #simple-mode {
+	display: block;
+}
+
+body.mode-simple #menubar,
+body.mode-simple #sidebar,
+body.mode-simple #toolbar,
+body.mode-simple #resizer {
+	display: none !important;
+}
+
+/* !important: o Resizer do Modo Avançado aplica `right` inline nesses elementos */
+body.mode-simple #viewport,
+body.mode-simple #player,
+body.mode-simple #script {
+	top: var(--simple-topbar-height) !important;
+	left: var(--simple-left-width) !important;
+	right: var(--simple-right-width) !important;
+	bottom: 0 !important;
+	height: auto !important;
+}
+
+body.mode-simple {
+	background: var(--simple-bg);
+}
+
+/* Botão "Modo Simples" na barra de menus original */
+
+#menubar .menu.SimpleModeToggle {
+	padding-right: 4px;
+}
+
+	#menubar .menu.SimpleModeToggle button {
+		font: inherit;
+		color: #fff;
+		background: var(--simple-accent);
+		border: 0;
+		border-radius: 6px;
+		margin: 4px 4px 0 0;
+		padding: 4px 10px;
+		line-height: 16px;
+		cursor: pointer;
+	}
+
+	#menubar .menu.SimpleModeToggle button:hover {
+		filter: brightness(1.1);
+	}
+
+	#menubar .menu.SimpleModeToggle button:focus-visible {
+		outline: none;
+		box-shadow: var(--simple-focus);
+	}
+
+@media all and ( max-width: 600px ) {
+
+	/* main.css oculta `.menu.right` em telas pequenas; o botão de modo precisa continuar visível */
+	#menubar .menu.right.SimpleModeToggle {
+		display: block;
+	}
+
+}
+
+/* ------------------------------------------------------------------ */
+/* Elementos comuns                                                     */
+/* ------------------------------------------------------------------ */
+
+#simple-mode {
+	font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+	font-size: 14px;
+	color: var(--simple-text);
+}
+
+#simple-mode .SimpleIcon {
+	display: inline-flex;
+	width: 18px;
+	height: 18px;
+	flex: none;
+}
+
+	#simple-mode .SimpleIcon svg {
+		width: 100%;
+		height: 100%;
+	}
+
+#simple-mode .SimpleButton {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	min-height: 34px;
+	padding: 0 12px;
+	font: inherit;
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--simple-text);
+	background: var(--simple-surface-2);
+	border: 1px solid transparent;
+	border-radius: 8px;
+	cursor: pointer;
+	white-space: nowrap;
+	transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+
+	#simple-mode .SimpleButton:hover {
+		border-color: var(--simple-border);
+		background: var(--simple-surface);
+	}
+
+	#simple-mode .SimpleButton:focus-visible {
+		outline: none;
+		box-shadow: var(--simple-focus);
+	}
+
+	#simple-mode .SimpleButton.active {
+		color: #fff;
+		background: var(--simple-accent);
+		border-color: var(--simple-accent);
+	}
+
+	#simple-mode .SimpleButton.disabled {
+		opacity: 0.45;
+		cursor: not-allowed;
+	}
+
+	#simple-mode .SimpleButton.danger {
+		color: var(--simple-danger);
+	}
+
+		#simple-mode .SimpleButton.danger:hover {
+			background: var(--simple-danger-soft);
+			border-color: var(--simple-danger);
+		}
+
+#simple-mode .SimpleIconButton {
+	min-height: 28px;
+	width: 28px;
+	padding: 0;
+	background: transparent;
+}
+
+/* especificidade baixa de propósito: #simple-left/#simple-right sobrescrevem no layout responsivo */
+.SimplePanel {
+	position: absolute;
+	top: var(--simple-topbar-height);
+	bottom: 0;
+	box-sizing: border-box;
+	overflow-y: auto;
+	background: var(--simple-surface);
+	user-select: none;
+}
+
+#simple-mode .SimpleSection {
+	display: block;
+	padding: 14px 16px;
+	border-bottom: 1px solid var(--simple-border);
+}
+
+#simple-mode .SimpleSectionTitle {
+	display: block;
+	font-size: 12px;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: var(--simple-text-muted);
+}
+
+#simple-mode .SimpleSectionHint {
+	display: block;
+	margin-top: 4px;
+	font-size: 12px;
+	color: var(--simple-text-muted);
+}
+
+#simple-mode [hidden] {
+	display: none !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* A. Barra superior                                                    */
+/* ------------------------------------------------------------------ */
+
+#simple-topbar {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: var(--simple-topbar-height);
+	box-sizing: border-box;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 0 14px;
+	background: var(--simple-surface);
+	border-bottom: 1px solid var(--simple-border);
+	z-index: 3;
+}
+
+	#simple-topbar .SimpleBrand {
+		font-weight: 800;
+		font-size: 15px;
+		letter-spacing: -0.01em;
+		color: var(--simple-accent);
+		white-space: nowrap;
+	}
+
+	#simple-topbar .SimpleProjectName {
+		width: 220px;
+		min-width: 90px;
+		flex: 0 1 220px;
+		height: 34px;
+		box-sizing: border-box;
+		padding: 0 10px !important;
+		font: inherit;
+		font-weight: 600;
+		color: var(--simple-text);
+		background: transparent;
+		border: 1px solid transparent !important;
+		border-radius: 8px;
+		outline: none;
+	}
+
+		#simple-topbar .SimpleProjectName:hover {
+			border-color: var(--simple-border) !important;
+		}
+
+		#simple-topbar .SimpleProjectName:focus {
+			border-color: var(--simple-accent) !important;
+			box-shadow: var(--simple-focus);
+			background: var(--simple-surface);
+		}
+
+	#simple-topbar .SimpleGroup {
+		display: flex;
+		gap: 4px;
+		padding-left: 10px;
+		border-left: 1px solid var(--simple-border);
+	}
+
+	#simple-topbar .SimpleSpacer {
+		flex: 1;
+	}
+
+	#simple-topbar .SimpleSaving {
+		font-size: 12px;
+		color: var(--simple-success);
+		opacity: 0;
+		transition: opacity 0.3s;
+		white-space: nowrap;
+	}
+
+		#simple-topbar .SimpleSaving.active {
+			opacity: 1;
+		}
+
+	#simple-topbar .SimpleModeSwitch {
+		display: flex;
+		padding: 3px;
+		gap: 2px;
+		background: var(--simple-surface-2);
+		border-radius: 10px;
+	}
+
+		#simple-topbar .SimpleModeSwitch .SimpleButton {
+			min-height: 28px;
+			padding: 0 12px;
+			background: transparent;
+		}
+
+		#simple-topbar .SimpleModeSwitch .SimpleButton.active {
+			color: var(--simple-text);
+			background: var(--simple-surface);
+			border-color: var(--simple-border);
+			box-shadow: 0 1px 2px #0002;
+			cursor: default;
+		}
+
+/* ------------------------------------------------------------------ */
+/* B. Painel esquerdo                                                   */
+/* ------------------------------------------------------------------ */
+
+#simple-left {
+	left: 0;
+	width: var(--simple-left-width);
+	border-right: 1px solid var(--simple-border);
+	display: flex;
+	flex-direction: column;
+}
+
+	#simple-left .SimpleAddGrid {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 8px;
+		margin-top: 12px;
+	}
+
+	#simple-left .SimpleAddButton {
+		flex-direction: column;
+		gap: 6px;
+		min-height: 78px;
+		padding: 10px 6px;
+		border-radius: var(--simple-radius);
+	}
+
+		#simple-left .SimpleAddButton .SimpleIcon {
+			width: 30px;
+			height: 30px;
+			color: var(--simple-accent);
+		}
+
+		#simple-left .SimpleAddButton:hover {
+			border-color: var(--simple-accent);
+			background: var(--simple-accent-soft);
+		}
+
+		#simple-left .SimpleAddButton:active {
+			transform: scale(0.97);
+		}
+
+	#simple-left .SimpleListSection {
+		flex: 1;
+		min-height: 120px;
+		border-bottom: 0;
+		display: flex;
+		flex-direction: column;
+	}
+
+	#simple-left .SimpleObjectList {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		margin-top: 10px;
+		overflow-y: auto;
+	}
+
+	#simple-left .SimpleObjectItem {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		width: 100%;
+		min-height: 32px;
+		padding: 0 8px;
+		font: inherit;
+		font-size: 13px;
+		text-align: left;
+		color: var(--simple-text);
+		background: transparent;
+		border: 1px solid transparent;
+		border-radius: 8px;
+		cursor: pointer;
+	}
+
+		#simple-left .SimpleObjectItem .SimpleIcon {
+			width: 16px;
+			height: 16px;
+			color: var(--simple-text-muted);
+		}
+
+		#simple-left .SimpleObjectItemLabel {
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+
+		#simple-left .SimpleObjectItem:hover {
+			background: var(--simple-surface-2);
+		}
+
+		#simple-left .SimpleObjectItem:focus-visible {
+			outline: none;
+			box-shadow: var(--simple-focus);
+		}
+
+		#simple-left .SimpleObjectItem.active {
+			color: var(--simple-accent);
+			font-weight: 600;
+			background: var(--simple-accent-soft);
+			border-color: var(--simple-accent);
+		}
+
+			#simple-left .SimpleObjectItem.active .SimpleIcon {
+				color: var(--simple-accent);
+			}
+
+	#simple-mode .SimpleEmpty {
+		display: block;
+		padding: 8px 2px;
+		font-size: 12px;
+		line-height: 1.5;
+		color: var(--simple-text-muted);
+	}
+
+/* ------------------------------------------------------------------ */
+/* C. Área central (sobre o viewport)                                   */
+/* ------------------------------------------------------------------ */
+
+#simple-center {
+	position: absolute;
+	top: var(--simple-topbar-height);
+	left: var(--simple-left-width);
+	right: var(--simple-right-width);
+	bottom: 0;
+	pointer-events: none; /* cliques passam para o viewport */
+	z-index: 2;
+}
+
+	#simple-center > * {
+		pointer-events: auto;
+	}
+
+	#simple-center .SimpleTools {
+		position: absolute;
+		top: var(--simple-gap);
+		left: 50%;
+		transform: translateX(-50%);
+		display: flex;
+		align-items: center;
+		gap: 4px;
+		padding: 5px;
+		max-width: calc(100% - 24px);
+		box-sizing: border-box;
+		overflow-x: auto;
+		background: var(--simple-surface);
+		border: 1px solid var(--simple-border);
+		border-radius: 12px;
+		box-shadow: var(--simple-shadow);
+	}
+
+		#simple-center .SimpleTool {
+			background: transparent;
+			padding: 0 10px;
+		}
+
+		#simple-center .SimpleTool.active {
+			background: var(--simple-accent);
+		}
+
+		#simple-center .SimpleToolSeparator {
+			width: 1px;
+			align-self: stretch;
+			margin: 4px 2px;
+			background: var(--simple-border);
+		}
+
+	#simple-center .SimpleSceneHint {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		max-width: 80%;
+		padding: 12px 18px;
+		text-align: center;
+		font-size: 14px;
+		color: var(--simple-text);
+		background: var(--simple-surface);
+		border: 1px dashed var(--simple-border);
+		border-radius: var(--simple-radius);
+		box-shadow: var(--simple-shadow);
+		pointer-events: none;
+	}
+
+	#simple-center .SimpleHelpButton {
+		position: absolute;
+		left: var(--simple-gap);
+		bottom: var(--simple-gap);
+		background: var(--simple-surface);
+		border-color: var(--simple-border);
+		box-shadow: var(--simple-shadow);
+	}
+
+	#simple-center .SimpleHelp {
+		position: absolute;
+		left: var(--simple-gap);
+		bottom: calc(var(--simple-gap) + 44px);
+		width: 300px;
+		max-width: calc(100% - 24px);
+		max-height: calc(100% - 140px);
+		overflow-y: auto;
+		box-sizing: border-box;
+		padding: 10px 14px 12px;
+		font-size: 13px;
+		line-height: 1.45;
+		background: var(--simple-surface);
+		border: 1px solid var(--simple-border);
+		border-radius: var(--simple-radius);
+		box-shadow: var(--simple-shadow);
+	}
+
+		#simple-center .SimpleHelpHeader {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+		}
+
+		#simple-center .SimpleHelpTitle {
+			font-weight: 700;
+		}
+
+		#simple-center .SimpleHelp ul {
+			margin: 6px 0 0;
+			padding-left: 18px;
+			color: var(--simple-text-muted);
+		}
+
+		#simple-center .SimpleHelp li + li {
+			margin-top: 4px;
+		}
+
+		#simple-center .SimpleHelp b {
+			color: var(--simple-text);
+			font-weight: 600;
+		}
+
+/* Informações técnicas do viewport (contagem de vértices, câmera, sombreamento) só no Modo Avançado */
+body.mode-simple #viewport #info,
+body.mode-simple #viewport #viewport-controls {
+	display: none;
+}
+
+/* ------------------------------------------------------------------ */
+/* D. Painel direito                                                    */
+/* ------------------------------------------------------------------ */
+
+#simple-right {
+	right: 0;
+	width: var(--simple-right-width);
+	border-left: 1px solid var(--simple-border);
+}
+
+	#simple-right .SimplePanelTitle {
+		padding: 16px 16px 12px;
+		border-bottom: 1px solid var(--simple-border);
+	}
+
+	#simple-right .SimpleEmptyState {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		text-align: center;
+		gap: 8px;
+		padding: 36px 24px;
+		color: var(--simple-text-muted);
+	}
+
+		#simple-right .SimpleEmptyState .SimpleIcon {
+			width: 36px;
+			height: 36px;
+			opacity: 0.6;
+		}
+
+		#simple-right .SimpleEmptyTitle {
+			font-weight: 600;
+			color: var(--simple-text);
+		}
+
+		#simple-right .SimpleEmptyText {
+			font-size: 13px;
+			line-height: 1.5;
+		}
+
+	#simple-right .SimpleFieldLabel {
+		display: block;
+		margin-bottom: 8px;
+		font-size: 12px;
+		font-weight: 600;
+		color: var(--simple-text-muted);
+	}
+
+	#simple-right .SimpleTextInput {
+		width: 100%;
+		height: 34px;
+		box-sizing: border-box;
+		padding: 0 10px !important;
+		font: inherit;
+		color: var(--simple-text);
+		background: var(--simple-surface-2);
+		border: 1px solid transparent !important;
+		border-radius: 8px;
+		outline: none;
+		user-select: text;
+	}
+
+		#simple-right .SimpleTextInput:focus {
+			border-color: var(--simple-accent) !important;
+			box-shadow: var(--simple-focus);
+			background: var(--simple-surface);
+		}
+
+	#simple-right .SimpleVectorRow {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 6px;
+	}
+
+	#simple-right .SimpleAxisField {
+		display: flex;
+		align-items: center;
+		height: 32px;
+		overflow: hidden;
+		background: var(--simple-surface-2);
+		border: 1px solid transparent;
+		border-radius: 8px;
+	}
+
+		#simple-right .SimpleAxisField:focus-within {
+			border-color: var(--simple-accent);
+			box-shadow: var(--simple-focus);
+			background: var(--simple-surface);
+		}
+
+	#simple-right .SimpleAxisLabel {
+		flex: none;
+		width: 20px;
+		align-self: stretch;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 11px;
+		font-weight: 700;
+		color: #fff;
+	}
+
+		#simple-right .axis-x .SimpleAxisLabel { background: #e5484d; }
+		#simple-right .axis-y .SimpleAxisLabel { background: #2f9e66; }
+		#simple-right .axis-z .SimpleAxisLabel { background: #0a84ff; }
+
+	#simple-right .SimpleNumber {
+		flex: 1;
+		min-width: 0;
+		width: 100%;
+		height: 100%;
+		box-sizing: border-box;
+		padding: 0 6px;
+		font: inherit;
+		font-size: 13px;
+		font-variant-numeric: tabular-nums;
+		color: var(--simple-text);
+		background: transparent;
+		border: 0;
+		outline: none;
+	}
+
+	#simple-right .SimpleColorRow {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+	}
+
+	#simple-right .SimpleColorInput {
+		width: 44px;
+		height: 32px;
+		padding: 0 !important;
+		border: 1px solid var(--simple-border) !important;
+		border-radius: 8px;
+		background: transparent;
+		cursor: pointer;
+	}
+
+		#simple-right .SimpleColorInput::-webkit-color-swatch-wrapper {
+			padding: 3px;
+		}
+
+		#simple-right .SimpleColorInput::-webkit-color-swatch {
+			border: none;
+			border-radius: 5px;
+		}
+
+		#simple-right .SimpleColorInput::-moz-color-swatch {
+			border: none;
+			border-radius: 5px;
+		}
+
+		#simple-right .SimpleColorInput:focus-visible {
+			outline: none;
+			box-shadow: var(--simple-focus);
+		}
+
+	#simple-right .SimpleColorValue {
+		font-size: 13px;
+		font-variant-numeric: tabular-nums;
+		color: var(--simple-text-muted);
+	}
+
+	#simple-right .SimpleActions {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 8px;
+	}
+
+/* ------------------------------------------------------------------ */
+/* Mensagens                                                            */
+/* ------------------------------------------------------------------ */
+
+#simple-mode .SimpleToasts {
+	position: fixed;
+	left: 50%;
+	top: calc(var(--simple-topbar-height) + 64px);
+	transform: translateX(-50%);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 6px;
+	z-index: 10;
+	pointer-events: none;
+	width: max-content;
+	max-width: calc(100vw - 32px);
+}
+
+#simple-mode .SimpleToast {
+	padding: 9px 14px;
+	font-size: 13px;
+	line-height: 1.4;
+	color: #fff;
+	background: #2b303b;
+	border-radius: 8px;
+	box-shadow: var(--simple-shadow);
+	animation: simple-toast-in 0.2s ease-out;
+	transition: opacity 0.3s, transform 0.3s;
+}
+
+	#simple-mode .SimpleToast.success { background: var(--simple-success); }
+	#simple-mode .SimpleToast.warning { background: #b7791f; }
+	#simple-mode .SimpleToast.error { background: var(--simple-danger); }
+
+	#simple-mode .SimpleToast.leaving {
+		opacity: 0;
+		transform: translateY(6px);
+	}
+
+@keyframes simple-toast-in {
+	from { opacity: 0; transform: translateY(6px); }
+	to { opacity: 1; transform: none; }
+}
+
+/* ------------------------------------------------------------------ */
+/* Responsivo                                                           */
+/* ------------------------------------------------------------------ */
+
+@media all and ( max-width: 1180px ) {
+
+	:root {
+		--simple-left-width: 196px;
+		--simple-right-width: 268px;
+	}
+
+	/* barra superior e ferramentas apenas com ícones */
+	#simple-topbar .SimpleGroup .SimpleButtonLabel,
+	#simple-center .SimpleTool .SimpleButtonLabel {
+		display: none;
+	}
+
+	#simple-topbar .SimpleGroup .SimpleButton,
+	#simple-center .SimpleTool {
+		width: 36px;
+		padding: 0;
+	}
+
+	#simple-topbar .SimpleSaving {
+		display: none;
+	}
+
+}
+
+@media all and ( max-width: 760px ) {
+
+	:root {
+		--simple-topbar-height: 52px;
+		--simple-add-height: 64px;
+		--simple-bottom-height: 40vh;
+	}
+
+	#simple-topbar {
+		gap: 6px;
+		padding: 0 8px;
+		overflow-x: auto;
+	}
+
+	#simple-topbar .SimpleBrand {
+		display: none;
+	}
+
+	#simple-topbar .SimpleProjectName {
+		flex: 1 1 90px;
+		width: 90px;
+	}
+
+	#simple-topbar .SimpleGroup {
+		padding-left: 6px;
+	}
+
+	#simple-topbar .SimpleSpacer {
+		display: none;
+	}
+
+	/* painel de adicionar vira uma faixa horizontal abaixo da barra superior */
+	#simple-left {
+		top: var(--simple-topbar-height);
+		bottom: auto;
+		width: auto;
+		right: 0;
+		height: var(--simple-add-height);
+		flex-direction: row;
+		overflow: hidden;
+		border-right: 0;
+		border-bottom: 1px solid var(--simple-border);
+	}
+
+		#simple-left .SimpleSection {
+			padding: 8px;
+			border-bottom: 0;
+		}
+
+		#simple-left .SimpleSectionTitle,
+		#simple-left .SimpleSectionHint,
+		#simple-left .SimpleListSection {
+			display: none;
+		}
+
+		#simple-left .SimpleAddGrid {
+			grid-template-columns: repeat(4, 1fr);
+			margin: 0;
+		}
+
+		#simple-left .SimpleAddButton {
+			min-height: 46px;
+			flex-direction: row;
+			padding: 0 12px;
+		}
+
+			#simple-left .SimpleAddButton .SimpleIcon {
+				width: 22px;
+				height: 22px;
+			}
+
+	/* propriedades viram um painel inferior */
+	#simple-right {
+		top: auto;
+		left: 0;
+		width: auto;
+		height: var(--simple-bottom-height);
+		border-left: 0;
+		border-top: 1px solid var(--simple-border);
+	}
+
+		#simple-right .SimpleEmptyState {
+			padding: 16px;
+		}
+
+	body.mode-simple #viewport,
+	body.mode-simple #player,
+	body.mode-simple #script,
+	#simple-center {
+		top: calc(var(--simple-topbar-height) + var(--simple-add-height)) !important;
+		left: 0 !important;
+		right: 0 !important;
+		bottom: var(--simple-bottom-height) !important;
+	}
+
+	#simple-mode .SimpleToasts {
+		top: calc(var(--simple-topbar-height) + var(--simple-add-height) + 64px);
+	}
+
+}
+
+@media all and ( max-width: 480px ) {
+
+	/* barra superior compacta: só o botão do outro modo fica visível */
+	#simple-topbar {
+		gap: 4px;
+	}
+
+	#simple-topbar .SimpleProjectName {
+		min-width: 56px;
+	}
+
+	#simple-topbar .SimpleGroup {
+		gap: 2px;
+		padding-left: 4px;
+	}
+
+	#simple-topbar .SimpleGroup .SimpleButton {
+		width: 32px;
+	}
+
+	#simple-topbar .SimpleModeSwitch .SimpleButton.active {
+		display: none;
+	}
+
+	#simple-left .SimpleAddButton .SimpleButtonLabel,
+	#simple-topbar .SimpleModeSwitch .SimpleButtonLabel {
+		font-size: 12px;
+	}
+
+	#simple-left .SimpleAddButton {
+		padding: 0 6px;
+	}
+
+	#simple-left .SimpleAddButton .SimpleButtonLabel {
+		display: none;
+	}
+
+	#simple-center .SimpleHelpButton .SimpleButtonLabel {
+		display: none;
+	}
+
+}

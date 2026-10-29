@@ -11,6 +11,8 @@ function Config() {
 
 		'autosave': true,
 
+		'interface/mode': 'simple', // EV-001: 'simple' (padrão) ou 'advanced'
+
 		'project/title': '',
 		'project/editable': false,
 		'project/vr': false,

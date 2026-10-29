@@ -299,9 +299,35 @@ function Viewport( editor ) {
 
 	} );
 
+	// 'select' hides the transform gizmo so objects can only be picked (used by the Simple Mode)
+
+	let transformMode = 'translate';
+
+	function canTransform( object ) {
+
+		return object !== null && object !== scene && object !== camera;
+
+	}
+
 	signals.transformModeChanged.add( function ( mode ) {
 
-		transformControls.setMode( mode );
+		transformMode = mode;
+
+		if ( mode === 'select' ) {
+
+			transformControls.detach();
+
+		} else {
+
+			transformControls.setMode( mode );
+
+			if ( transformControls.object === undefined && canTransform( editor.selected ) ) {
+
+				transformControls.attach( editor.selected );
+
+			}
+
+		}
 
 		render();
 
@@ -414,7 +440,7 @@ function Viewport( editor ) {
 		selectionBox.visible = false;
 		transformControls.detach();
 
-		if ( object !== null && object !== scene && object !== camera ) {
+		if ( canTransform( object ) ) {
 
 			box.setFromObject( object, true );
 
@@ -424,7 +450,7 @@ function Viewport( editor ) {
 
 			}
 
-			transformControls.attach( object );
+			if ( transformMode !== 'select' ) transformControls.attach( object );
 
 		}
 

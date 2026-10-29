@@ -129,6 +129,7 @@ const assets = [
 	//
 
 	'./css/main.css',
+	'./css/simple.css',
 
 	'./js/EditorControls.js',
 	'./js/Storage.js',
@@ -148,6 +149,13 @@ const assets = [
 	'./js/Menubar.Status.js',
 	'./js/Resizer.js',
 	'./js/Selector.js',
+	'./js/SimpleMode.js',
+	'./js/SimpleMode.Icons.js',
+	'./js/SimpleMode.Objects.js',
+	'./js/SimpleMode.Properties.js',
+	'./js/SimpleMode.Strings.js',
+	'./js/SimpleMode.Tools.js',
+	'./js/SimpleMode.Topbar.js',
 	'./js/Sidebar.js',
 	'./js/Sidebar.Scene.js',
 	'./js/Sidebar.Project.js',
