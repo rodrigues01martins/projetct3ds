@@ -8,7 +8,11 @@ const SimpleModeStrings = {
 	'topbar/projectName': 'Nome do projeto',
 	'topbar/projectName/placeholder': 'Projeto sem título',
 	'topbar/new': 'Novo',
-	'topbar/new/title': 'Começar um projeto novo, com a cena vazia',
+	'topbar/new/title': 'Começar um projeto novo: em branco ou a partir de um modelo pronto',
+	'topbar/new/blank': 'Projeto em branco',
+	'topbar/new/blank/hint': 'Cena vazia, para criar do zero',
+	'topbar/new/template': 'Começar com modelo pronto',
+	'topbar/new/template/hint': 'Ambientes, escritórios e espaços para eventos',
 	'topbar/open': 'Abrir',
 	'topbar/open/title': 'Abrir um projeto salvo no computador (.json)',
 	'topbar/save': 'Salvar',
@@ -127,6 +131,22 @@ const SimpleModeStrings = {
 	'lighting/notice/userLights': 'Esta cena tem %s luz(es) criada(s) por você. Elas são mantidas como estão; os cenários apenas somam as luzes do Project3DS.',
 	'lighting/notice/rendererShadows': 'As sombras estão desligadas nas configurações do projeto (Modo Avançado › Projeto › Sombras).',
 
+	// galeria de projetos prontos (EV-005)
+
+	'gallery/title': 'Projetos prontos',
+	'gallery/subtitle': 'Escolha um ponto de partida. Tudo continua editável: medidas, acabamentos, iluminação e objetos.',
+	'gallery/close': 'Fechar galeria (Esc)',
+	'gallery/category': 'Categoria',
+	'gallery/category/all': 'Todos',
+	'gallery/search': 'Buscar modelo pelo nome',
+	'gallery/preview': 'Planta do modelo %s',
+	'gallery/facts': 'Área de aprox. %s × %s · %s componentes',
+	'gallery/use': 'Usar este modelo',
+	'gallery/use/title': 'Começar um novo projeto a partir de "%s"',
+	'gallery/noResults': 'Nenhum modelo encontrado para "%s".',
+	'gallery/replace/notice': 'Usar um modelo substitui o projeto aberto (Meus componentes e arquivos salvos não são afetados).',
+	'gallery/replace/backup': 'Baixar uma cópia do projeto atual (.json) antes de substituir',
+
 	// ferramentas da área central
 
 	'tools/label': 'Ferramentas',
@@ -142,6 +162,8 @@ const SimpleModeStrings = {
 	'tools/focus/title': 'Aproximar a câmera do objeto selecionado (F)',
 	'tools/measure': 'Medir distância',
 	'tools/measure/title': 'Medir distância: clique em dois pontos da cena (Esc para sair)',
+	'tools/emptyHint/templates': 'ou comece com um projeto pronto',
+	'tools/emptyHint/templates/title': 'Abrir a galeria de projetos prontos',
 	'tools/emptyHint': 'Comece adicionando um objeto pelo painel à esquerda.',
 
 	// régua de medição (EV-002)
@@ -284,10 +306,13 @@ const SimpleModeStrings = {
 	'message/appearance/alreadyOriginal': 'Esta parte já está com o acabamento original.',
 	'message/appearance/noUV': 'O padrão não é compatível com esta forma; o acabamento foi aplicado sem o padrão.',
 	'message/lighting/changed': 'Iluminação: %s.',
+	'message/template/opened': 'Modelo "%s" pronto para editar. Salve com outro nome quando quiser.',
+	'message/template/error': 'Não foi possível abrir o modelo. O projeto anterior foi mantido.',
 	'message/historyLocked': 'Desfazer/refazer está indisponível enquanto a cena estiver em reprodução.',
 
 	'confirm/new': 'Começar um projeto novo? Os objetos da cena atual serão removidos.\n\nDica: use "Salvar" antes para guardar uma cópia no computador.',
 	'confirm/library/delete': 'Excluir "%s" de Meus componentes?\n\nEssa ação não pode ser desfeita. Objetos já inseridos nos projetos não são afetados.',
+	'confirm/template': 'Começar um novo projeto com o modelo "%s"?\n\nO projeto aberto será substituído. Se quiser guardá-lo, use "Salvar" antes (ou marque a opção de baixar uma cópia).',
 	'confirm/open': 'Abrir outro projeto? A cena atual será substituída.\n\nDica: use "Salvar" antes para guardar uma cópia no computador.',
 
 	// alternância de modo no Modo Avançado

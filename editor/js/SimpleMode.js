@@ -19,6 +19,7 @@ import { UserLibrary } from './SimpleMode.UserLibrary.js';
 import { findComponentRoot } from './SimpleMode.ComponentFactory.js';
 import { isOwnedLighting } from './SimpleMode.Lighting.js';
 import { LightingService } from './SimpleMode.LightingPanel.js';
+import { SimpleModeTemplateGallery } from './SimpleMode.TemplateGallery.js';
 
 import { getSimpleString as t } from './SimpleMode.Strings.js';
 
@@ -100,6 +101,10 @@ function SimpleMode( editor ) {
 		toasts
 	);
 
+	// EV-005: galeria de projetos prontos (aberta por "Novo" ou pelo convite da cena vazia)
+	const gallery = new SimpleModeTemplateGallery( editor, context );
+	container.dom.appendChild( gallery.dom );
+
 	// alternância de modo
 
 	function setMode( mode ) {
@@ -147,6 +152,7 @@ function SimpleMode( editor ) {
 		}
 
 		if ( mode === 'advanced' && context.lightingPanel !== undefined ) context.lightingPanel.close();
+		if ( mode === 'advanced' ) gallery.close( false );
 
 		lighting.updateHelpers();
 

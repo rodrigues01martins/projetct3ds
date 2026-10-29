@@ -6,6 +6,7 @@ import { UIDiv } from './libs/ui.js';
 import { getSimpleString as t } from './SimpleMode.Strings.js';
 import { createIcon, createSimpleButton, createText } from './SimpleMode.Icons.js';
 import { SimpleModeLightingPanel } from './SimpleMode.LightingPanel.js';
+import { isLightingGroup } from './SimpleMode.Lighting.js';
 
 const TOOLS = [ 'select', 'translate', 'rotate', 'scale' ];
 
@@ -299,16 +300,26 @@ function SimpleModeTools( editor, context ) {
 
 	const emptyHint = new UIDiv().setClass( 'SimpleSceneHint' );
 	emptyHint.add( createText( t( 'tools/emptyHint' ), '' ) );
+
+	// EV-005: convite discreto para começar por um projeto pronto (só aparece com a cena vazia; nunca abre sozinho)
+	emptyHint.add( createSimpleButton( {
+		icon: 'templates', label: t( 'tools/emptyHint/templates' ), title: t( 'tools/emptyHint/templates/title' ),
+		className: 'SimpleLinkButton SimpleTemplatesInvite',
+		onClick: () => context.openTemplates()
+	} ) );
 	container.add( emptyHint );
 
 	function updateEmptyHint() {
 
-		emptyHint.dom.hidden = editor.scene.children.length > 0;
+		// as luzes do Project3DS não contam como conteúdo; durante a medição o convite não deve receber os cliques
+		const hasContent = editor.scene.children.some( ( object ) => isLightingGroup( object ) === false );
+		emptyHint.dom.hidden = hasContent || measure.isActive();
 
 	}
 
 	signals.sceneGraphChanged.add( updateEmptyHint );
 	signals.editorCleared.add( updateEmptyHint );
+	measure.changed.add( updateEmptyHint );
 	updateEmptyHint();
 
 	// ajuda contextual (recolhível, aberta por padrão apenas no primeiro uso)

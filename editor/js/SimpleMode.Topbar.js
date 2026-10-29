@@ -4,7 +4,7 @@
 import { UIDiv, UIInput } from './libs/ui.js';
 
 import { getSimpleString as t } from './SimpleMode.Strings.js';
-import { createSimpleButton, createText } from './SimpleMode.Icons.js';
+import { createIcon, createSimpleButton, createText } from './SimpleMode.Icons.js';
 
 function SimpleModeTopbar( editor, context ) {
 
@@ -47,15 +47,108 @@ function SimpleModeTopbar( editor, context ) {
 
 	} );
 
+	// EV-005: projetos abertos por outros fluxos (modelos prontos, recuperação) atualizam o nome exibido
+	signals.sceneGraphChanged.add( function () {
+
+		if ( document.activeElement !== projectName.dom ) projectName.setValue( config.getKey( 'project/title' ) || '' );
+
+	} );
+
 	// arquivo
 
 	const fileGroup = new UIDiv().setClass( 'SimpleGroup' );
 	container.add( fileGroup );
 
-	fileGroup.add( createSimpleButton( {
+	// EV-005: "Novo" oferece projeto em branco (comportamento original) ou um projeto pronto
+	const newButton = createSimpleButton( {
 		icon: 'new', label: t( 'topbar/new' ), title: t( 'topbar/new/title' ),
-		onClick: newProject
-	} ) );
+		onClick: () => ( newMenu.hidden ? openNewMenu() : closeNewMenu() )
+	} );
+	newButton.dom.setAttribute( 'aria-haspopup', 'menu' );
+	newButton.dom.setAttribute( 'aria-expanded', 'false' );
+	fileGroup.add( newButton );
+
+	const newMenu = document.createElement( 'div' );
+	newMenu.className = 'SimpleMenu';
+	newMenu.setAttribute( 'role', 'menu' );
+	newMenu.setAttribute( 'aria-label', t( 'topbar/new' ) );
+	newMenu.hidden = true;
+
+	for ( const [ key, icon, action ] of [[ 'blank', 'new', newProject ], [ 'template', 'templates', () => context.openTemplates() ]] ) {
+
+		const item = document.createElement( 'button' );
+		item.type = 'button';
+		item.className = 'SimpleMenuItem';
+		item.setAttribute( 'role', 'menuitem' );
+		item.tabIndex = - 1;
+		item.appendChild( createIcon( icon ) );
+
+		const text = document.createElement( 'span' );
+		const strong = document.createElement( 'strong' );
+		strong.textContent = t( 'topbar/new/' + key );
+		const hint = document.createElement( 'small' );
+		hint.textContent = t( 'topbar/new/' + key + '/hint' );
+		text.append( strong, hint );
+		item.appendChild( text );
+
+		item.addEventListener( 'click', () => {
+
+			closeNewMenu( false );
+			action();
+
+		} );
+		newMenu.appendChild( item );
+
+	}
+
+	newMenu.addEventListener( 'keydown', function ( event ) {
+
+		event.stopPropagation();
+		const items = [ ...newMenu.querySelectorAll( '.SimpleMenuItem' ) ];
+		const index = items.indexOf( document.activeElement );
+
+		if ( event.key === 'ArrowDown' || event.key === 'ArrowUp' ) {
+
+			event.preventDefault();
+			items[ ( index + ( event.key === 'ArrowDown' ? 1 : items.length - 1 ) ) % items.length ].focus();
+
+		} else if ( event.key === 'Escape' || event.key === 'Tab' ) {
+
+			event.preventDefault();
+			closeNewMenu();
+
+		}
+
+	} );
+
+	document.body.appendChild( newMenu );
+
+	function openNewMenu() {
+
+		const rect = newButton.dom.getBoundingClientRect();
+		newMenu.style.left = Math.max( 8, Math.min( rect.left, window.innerWidth - 288 ) ) + 'px';
+		newMenu.style.top = ( rect.bottom + 6 ) + 'px';
+		newMenu.hidden = false;
+		newButton.dom.setAttribute( 'aria-expanded', 'true' );
+		newMenu.querySelector( '.SimpleMenuItem' ).focus();
+
+	}
+
+	function closeNewMenu( restoreFocus = true ) {
+
+		if ( newMenu.hidden ) return;
+
+		newMenu.hidden = true;
+		newButton.dom.setAttribute( 'aria-expanded', 'false' );
+		if ( restoreFocus ) newButton.dom.focus();
+
+	}
+
+	document.addEventListener( 'mousedown', ( event ) => {
+
+		if ( newMenu.hidden === false && newMenu.contains( event.target ) === false && newButton.dom.contains( event.target ) === false ) closeNewMenu( false );
+
+	} );
 
 	fileGroup.add( createSimpleButton( {
 		icon: 'open', label: t( 'topbar/open' ), title: t( 'topbar/open/title' ),
@@ -224,7 +317,8 @@ function SimpleModeTopbar( editor, context ) {
 	function getFileName() {
 
 		const title = config.getKey( 'project/title' ) || '';
-		const safe = title.trim().replace( /[\\/:*?"<>|]+/g, '' ).replace( /\s+/g, '-' );
+		// sem acentos e caracteres proibidos: nomes de arquivo aceitos por todos os navegadores e sistemas
+		const safe = title.trim().normalize( 'NFD' ).replace( /[\u0300-\u036f]/g, '' ).replace( /[\\/:*?"<>|]+/g, '' ).replace( /\s+/g, '-' );
 
 		return ( safe !== '' ? safe : 'projeto' ) + '.json';
 
@@ -253,6 +347,10 @@ function SimpleModeTopbar( editor, context ) {
 		}
 
 	}
+
+	// EV-005: usados pela galeria de projetos prontos (cópia de segurança e nome do projeto)
+	context.saveProject = saveProject;
+	context.setProjectTitle = ( title ) => projectName.setValue( title || '' );
 
 	const openForm = document.createElement( 'form' );
 	openForm.style.display = 'none';

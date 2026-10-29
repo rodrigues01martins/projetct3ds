@@ -1710,6 +1710,344 @@ body.mode-simple #viewport.measuring canvas {
 }
 
 /* ------------------------------------------------------------------ */
+/* EV-005 — Projetos prontos                                            */
+/* ------------------------------------------------------------------ */
+
+/* menu "Novo" (fica no <body> para não ser cortado pela barra superior) */
+.SimpleMenu {
+	position: fixed;
+	z-index: 20;
+	display: grid;
+	gap: 2px;
+	width: 280px;
+	padding: 6px;
+	box-sizing: border-box;
+	font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+	background: var(--simple-surface);
+	border: 1px solid var(--simple-border);
+	border-radius: var(--simple-radius);
+	box-shadow: var(--simple-shadow);
+}
+
+body.mode-advanced .SimpleMenu {
+	display: none;
+}
+
+	.SimpleMenu .SimpleMenuItem {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		padding: 8px 10px;
+		font: inherit;
+		text-align: left;
+		color: var(--simple-text);
+		background: transparent;
+		border: 0;
+		border-radius: 8px;
+		cursor: pointer;
+	}
+
+		.SimpleMenu .SimpleMenuItem:hover,
+		.SimpleMenu .SimpleMenuItem:focus-visible {
+			outline: none;
+			background: var(--simple-accent-soft);
+		}
+
+		.SimpleMenu .SimpleMenuItem > span {
+			display: flex;
+			flex-direction: column;
+			gap: 2px;
+		}
+
+		.SimpleMenu .SimpleMenuItem strong {
+			font-size: 13px;
+		}
+
+		.SimpleMenu .SimpleMenuItem small {
+			font-size: 12px;
+			color: var(--simple-text-muted);
+		}
+
+	.SimpleMenu .SimpleIcon {
+		display: inline-flex;
+		flex: none;
+		width: 22px;
+		height: 22px;
+		color: var(--simple-accent);
+	}
+
+		.SimpleMenu .SimpleIcon svg {
+			width: 100%;
+			height: 100%;
+		}
+
+/* convite na cena vazia */
+#simple-center .SimpleSceneHint .SimpleTemplatesInvite {
+	display: flex;
+	margin: 6px auto 0;
+	pointer-events: auto;
+}
+
+/* diálogo */
+#simple-mode .SimpleOverlay {
+	position: fixed;
+	inset: 0;
+	z-index: 15;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 16px;
+	box-sizing: border-box;
+	background: #0007;
+}
+
+	#simple-mode .SimpleOverlay[hidden] {
+		display: none !important;
+	}
+
+#simple-mode .SimpleDialog {
+	display: flex;
+	flex-direction: column;
+	width: min(1000px, 100%);
+	max-height: min(88vh, 860px);
+	box-sizing: border-box;
+	overflow: hidden;
+	background: var(--simple-surface);
+	border-radius: 14px;
+	box-shadow: 0 20px 60px -10px #0008;
+}
+
+#simple-mode .SimpleDialogHeader {
+	position: relative;
+	flex: none;
+	padding: 18px 56px 8px 20px;
+}
+
+	#simple-mode .SimpleDialogTitle {
+		display: block;
+		font-size: 18px;
+		font-weight: 700;
+	}
+
+	#simple-mode .SimpleDialogClose {
+		position: absolute;
+		top: 14px;
+		right: 14px;
+	}
+
+#simple-mode .SimpleGalleryToolbar {
+	display: flex;
+	flex: none;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	padding: 8px 20px 12px;
+	border-bottom: 1px solid var(--simple-border);
+}
+
+	#simple-mode .SimpleGalleryFilters {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 4px;
+	}
+
+	#simple-mode .SimpleGalleryToolbar .SimpleSearch {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		width: 240px;
+		height: 32px;
+		padding: 0 8px;
+		background: var(--simple-surface-2);
+		border: 1px solid transparent;
+		border-radius: 8px;
+	}
+
+		#simple-mode .SimpleGalleryToolbar .SimpleSearch:focus-within {
+			border-color: var(--simple-accent);
+			box-shadow: var(--simple-focus);
+		}
+
+		#simple-mode .SimpleGalleryToolbar .SimpleSearchInput {
+			flex: 1;
+			min-width: 0;
+			font: inherit;
+			font-size: 13px;
+			color: var(--simple-text);
+			background: transparent;
+			border: 0;
+			outline: none;
+		}
+
+#simple-mode .SimpleGalleryFilters .SimplePartChip {
+	min-height: 28px;
+	padding: 0 12px;
+	font: inherit;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--simple-text);
+	background: var(--simple-surface-2);
+	border: 1px solid transparent;
+	border-radius: 999px;
+	cursor: pointer;
+}
+
+	#simple-mode .SimpleGalleryFilters .SimplePartChip.active {
+		color: #fff;
+		background: var(--simple-accent);
+	}
+
+	#simple-mode .SimpleGalleryFilters .SimplePartChip:focus-visible {
+		outline: none;
+		box-shadow: var(--simple-focus);
+	}
+
+#simple-mode .SimpleGalleryGrid {
+	display: grid;
+	flex: 1 1 auto;
+	min-height: 0;
+	grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+	grid-auto-rows: max-content; /* cartões com altura do conteúdo; a grade rola */
+	gap: 14px;
+	padding: 16px 20px;
+	overflow-y: auto;
+}
+
+#simple-mode .SimpleTemplateCard {
+	display: flex;
+	flex: none;
+	flex-direction: column;
+	overflow: hidden;
+	background: var(--simple-surface);
+	border: 1px solid var(--simple-border);
+	border-radius: 12px;
+	cursor: pointer;
+	transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+	#simple-mode .SimpleTemplateCard[hidden] {
+		display: none;
+	}
+
+	#simple-mode .SimpleTemplateCard:hover {
+		border-color: var(--simple-accent);
+	}
+
+	#simple-mode .SimpleTemplateCard.selected {
+		border-color: var(--simple-accent);
+		box-shadow: 0 0 0 2px var(--simple-accent);
+	}
+
+	#simple-mode .SimpleTemplateCard:focus-visible {
+		outline: none;
+		box-shadow: 0 0 0 2px var(--simple-accent), var(--simple-focus);
+	}
+
+#simple-mode .SimpleTemplatePreview {
+	height: 150px;
+	padding: 10px;
+	box-sizing: border-box;
+	background: repeating-linear-gradient(0deg, transparent 0 19px, #0000000d 19px 20px), repeating-linear-gradient(90deg, transparent 0 19px, #0000000d 19px 20px), var(--simple-surface-2);
+}
+
+	#simple-mode .SimpleTemplatePreview svg {
+		width: 100%;
+		height: 100%;
+	}
+
+#simple-mode .SimpleTemplateBody {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	gap: 4px;
+	padding: 12px 14px 14px;
+}
+
+	#simple-mode .SimpleTemplateCategory {
+		font-size: 11px;
+		font-weight: 700;
+		letter-spacing: 0.03em;
+		text-transform: uppercase;
+		color: var(--simple-accent);
+	}
+
+	#simple-mode .SimpleTemplateName {
+		margin: 0;
+		font-size: 15px;
+	}
+
+	#simple-mode .SimpleTemplateDescription {
+		flex: 1;
+		margin: 0;
+		font-size: 13px;
+		line-height: 1.45;
+		color: var(--simple-text-muted);
+	}
+
+	#simple-mode .SimpleTemplateFacts {
+		margin: 4px 0 8px;
+		font-size: 12px;
+		font-variant-numeric: tabular-nums;
+		color: var(--simple-text);
+	}
+
+	#simple-mode .SimpleTemplateUse {
+		align-self: flex-start;
+	}
+
+#simple-mode .SimpleGallery > .SimpleEmpty {
+	padding: 0 20px 16px;
+}
+
+#simple-mode .SimpleGalleryFooter {
+	display: grid;
+	flex: none;
+	gap: 6px;
+	padding: 12px 20px 16px;
+	border-top: 1px solid var(--simple-border);
+}
+
+	#simple-mode .SimpleGalleryFooter .SimpleCheckboxRow {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		font-size: 13px;
+		cursor: pointer;
+	}
+
+		#simple-mode .SimpleGalleryFooter .SimpleCheckboxRow[hidden] {
+			display: none;
+		}
+
+		#simple-mode .SimpleGalleryFooter .SimpleCheckboxRow input {
+			margin: 0;
+			accent-color: var(--simple-accent);
+		}
+
+@media all and ( max-width: 600px ) {
+
+	#simple-mode .SimpleOverlay {
+		padding: 0;
+		align-items: stretch;
+	}
+
+	#simple-mode .SimpleDialog {
+		max-height: none;
+		border-radius: 0;
+	}
+
+	#simple-mode .SimpleGalleryToolbar .SimpleSearch {
+		width: 100%;
+	}
+
+	#simple-mode .SimpleGalleryGrid {
+		grid-template-columns: 1fr;
+	}
+
+}
+
+/* ------------------------------------------------------------------ */
 /* Mensagens                                                            */
 /* ------------------------------------------------------------------ */
 
