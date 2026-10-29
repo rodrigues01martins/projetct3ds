@@ -1,0 +1,15 @@
+
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "echo 'No dependencies to install'",
+  "buildCommand": "node scripts/build-vercel.mjs",
+  "outputDirectory": "public",
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "/editor/",
+      "permanent": false
+    }
+  ]
+}
