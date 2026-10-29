@@ -50,6 +50,10 @@ const ICON_PATHS = {
 	bookmark: '<path d="M6 3h12v18l-6-4-6 4z"/>',
 	edit: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/>',
 
+	wallTool: '<path d="M3 20h18"/><rect x="5" y="6" width="14" height="10" rx="1"/><path d="M5 11h14M10 6v5M14 11v5"/><circle cx="5" cy="20" r="1.4"/><circle cx="19" cy="20" r="1.4"/>',
+	floorTool: '<path d="M3 15 8 8h13l-5 7z"/><circle cx="3" cy="15" r="1.4"/><circle cx="21" cy="8" r="1.4"/>',
+	place: '<path d="M12 3v9"/><path d="m8.5 8.5 3.5 3.5 3.5-3.5"/><path d="M4 16l8 4 8-4-8-4z"/>',
+	rest: '<path d="M3 20h18"/><rect x="8" y="6" width="8" height="8" rx="1"/><path d="M12 2v2M12 15v4"/>',
 	templates: '<rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><path d="M17 14v6M14 17h6"/>',
 	light: '<circle cx="12" cy="11" r="4.5"/><path d="M9.5 18h5M10.5 21h3M12 2v1.5M4.2 4.2l1.1 1.1M19.8 4.2l-1.1 1.1M2 11h1.5M20.5 11H22"/>',
 

@@ -20,6 +20,8 @@ import { findComponentRoot } from './SimpleMode.ComponentFactory.js';
 import { isOwnedLighting } from './SimpleMode.Lighting.js';
 import { LightingService } from './SimpleMode.LightingPanel.js';
 import { SimpleModeTemplateGallery } from './SimpleMode.TemplateGallery.js';
+import { Interaction } from './SimpleMode.Interaction.js';
+import { ConstructionTools } from './SimpleMode.ConstructionTools.js';
 
 import { getSimpleString as t } from './SimpleMode.Strings.js';
 
@@ -62,7 +64,9 @@ function SimpleMode( editor ) {
 
 	const units = new Units( editor );
 	const precision = new Precision( editor );
-	const measure = new Measure( editor, units, precision.getSnap );
+	// EV-006: controlador único de interação com o viewport (régua e ferramentas de construção)
+	const interaction = new Interaction( editor );
+	const measure = new Measure( editor, units, precision.getSnap, interaction );
 	const alignment = new Alignment( editor );
 
 	let currentMode = null; // 'simple' | 'advanced'
@@ -91,7 +95,10 @@ function SimpleMode( editor ) {
 
 	// contexto compartilhado com os painéis
 
-	const context = { notify, setMode, units, precision, measure, alignment, userLibrary };
+	const context = { notify, setMode, units, precision, measure, alignment, userLibrary, interaction };
+
+	// EV-006: desenhar parede, criar piso, posicionar componente e apoiar objeto
+	context.construction = new ConstructionTools( editor, context, interaction );
 
 	container.add(
 		new SimpleModeTopbar( editor, context ),
@@ -127,7 +134,8 @@ function SimpleMode( editor ) {
 
 		if ( mode === 'advanced' ) {
 
-			// encerra a régua e remove seus elementos temporários
+			// encerra a régua e as ferramentas de construção, removendo prévias e marcadores temporários
+			interaction.deactivate();
 			measure.deactivate();
 
 			// a ferramenta "Selecionar" não existe no Modo Avançado: volta para "Mover"

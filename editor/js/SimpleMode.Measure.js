@@ -2,13 +2,12 @@
 //
 // Régua de medição 3D. Os elementos visuais ficam em `editor.sceneHelpers` (desenhados pelo viewport,
 // mas nunca serializados no projeto) e o rótulo é um elemento HTML reposicionado a cada render.
-// Enquanto a régua está ativa, os cliques no viewport não selecionam nem transformam objetos.
+// Enquanto a régua está ativa, os cliques no viewport não selecionam nem transformam objetos
+// (captura de eventos centralizada em SimpleMode.Interaction desde a EV-006).
 
 import * as THREE from 'three';
 
-const DRAG_THRESHOLD = 4; // px: acima disso o gesto é navegação (girar/deslocar a vista), não um clique
-
-function Measure( editor, units, getSnap ) {
+function Measure( editor, units, getSnap, interaction ) {
 
 	const Signal = signals.Signal; // eslint-disable-line no-undef
 	const editorSignals = editor.signals;
@@ -17,13 +16,10 @@ function Measure( editor, units, getSnap ) {
 
 	const viewport = document.getElementById( 'viewport' );
 
-	const raycaster = new THREE.Raycaster();
-	const pointer = new THREE.Vector2();
 	const groundPlane = new THREE.Plane( new THREE.Vector3( 0, 1, 0 ), 0 );
 
 	let active = false;
 	let points = []; // 0, 1 ou 2 pontos (THREE.Vector3)
-	let down = null;
 
 	// visual temporário
 
@@ -116,18 +112,12 @@ function Measure( editor, units, getSnap ) {
 
 	units.changed.add( updateLabel );
 
-	// interação
+	// interação (EV-006: eventos recebidos do controlador único SimpleMode.Interaction)
 
-	function getPoint( event ) {
+	function getPoint( info ) {
 
-		const rect = viewport.getBoundingClientRect();
-
-		pointer.set(
-			( ( event.clientX - rect.left ) / rect.width ) * 2 - 1,
-			- ( ( event.clientY - rect.top ) / rect.height ) * 2 + 1
-		);
-
-		raycaster.setFromCamera( pointer, editor.viewportCamera );
+		const raycaster = info.raycaster;
+		raycaster.ray.copy( info.ray );
 
 		// 1) superfícies de objetos visíveis da cena
 		const objects = [];
@@ -142,7 +132,7 @@ function Measure( editor, units, getSnap ) {
 		if ( hit !== undefined ) return { point: hit.point.clone(), surface: true };
 
 		// 2) plano de referência (chão, y = 0), com encaixe na precisão de movimento escolhida
-		const point = raycaster.ray.intersectPlane( groundPlane, new THREE.Vector3() );
+		const point = info.ray.intersectPlane( groundPlane, new THREE.Vector3() );
 
 		if ( point === null ) return null;
 
@@ -159,87 +149,51 @@ function Measure( editor, units, getSnap ) {
 
 	}
 
-	// captura: impede que o viewport trate o clique como seleção (mousedown/touchstart/dblclick)
-	// pointerdown continua livre para que seja possível girar a vista durante a medição
+	interaction.register( 'measure', {
 
-	function block( event ) {
+		activate() {
 
-		if ( active === false ) return;
+			active = true;
+			viewport.classList.add( 'measuring' );
+			changed.dispatch();
 
-		event.stopPropagation();
+		},
 
-	}
+		deactivate() {
 
-	function onPointerDown( event ) {
+			active = false;
+			viewport.classList.remove( 'measuring' );
+			clear();
 
-		if ( active === false || event.button !== 0 || event.isPrimary === false ) return;
+		},
 
-		down = { x: event.clientX, y: event.clientY };
+		onClick( info ) {
 
-	}
+			const result = getPoint( info );
 
-	function onPointerUp( event ) {
+			if ( result === null ) return;
 
-		if ( active === false || down === null || event.isPrimary === false ) return;
+			if ( points.length === 2 ) points = [];
 
-		const moved = Math.hypot( event.clientX - down.x, event.clientY - down.y );
-		down = null;
-
-		if ( moved > DRAG_THRESHOLD ) return;
-		if ( event.target.tagName !== 'CANVAS' ) return;
-
-		const result = getPoint( event );
-
-		if ( result === null ) return;
-
-		if ( points.length === 2 ) points = [];
-
-		points.push( result.point );
-		updateVisual();
-
-	}
-
-	if ( viewport !== null ) {
-
-		viewport.addEventListener( 'mousedown', block, true );
-		viewport.addEventListener( 'touchstart', block, true );
-		viewport.addEventListener( 'dblclick', block, true );
-		viewport.addEventListener( 'pointerdown', onPointerDown, true );
-		viewport.addEventListener( 'pointerup', onPointerUp, true );
-
-	}
-
-	document.addEventListener( 'keydown', function ( event ) {
-
-		if ( active && event.key === 'Escape' ) {
-
-			event.preventDefault();
-			deactivate();
+			points.push( result.point );
+			updateVisual();
 
 		}
 
 	} );
 
-	// API
+	// API (inalterada desde a EV-002)
 
 	function activate() {
 
-		if ( active ) return;
-
-		active = true;
-		viewport.classList.add( 'measuring' );
-		changed.dispatch();
+		if ( active === false ) interaction.activate( 'measure' );
 
 	}
 
 	function deactivate() {
 
-		if ( active === false && points.length === 0 ) return;
-
-		active = false;
-		down = null;
-		viewport.classList.remove( 'measuring' );
-		clear();
+		if ( active ) interaction.deactivate();
+		else if ( points.length > 0 ) clear();
 
 	}
 

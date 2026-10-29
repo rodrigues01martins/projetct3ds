@@ -15,6 +15,9 @@ import { getSimpleString as t } from './SimpleMode.Strings.js';
 import { createIcon, createSimpleButton, createText } from './SimpleMode.Icons.js';
 
 const TAB_KEY = 'interface/simple/libraryTab';
+
+// EV-006: componentes com base física bem definida (a janela começa no peitoril, então não é apoiada automaticamente)
+const PLACEABLE = new Set( [ 'wall', 'floor', 'panel', 'door', 'table', 'chair', 'shelf', 'platform' ] );
 const TABS = [ 'basics', 'catalog', 'mine' ];
 
 // utilitários compartilhados -------------------------------------------------------
@@ -253,7 +256,18 @@ function SimpleModeLibrary( editor, context, basicsContent ) {
 				card.dataset.component = definition.id;
 				card.addEventListener( 'click', () => insert( createComponent( definition.id ), definition.name ) );
 
-				group.appendChild( card );
+				// EV-006: "Posicionar na cena" — prévia sobre superfícies; a inserção rápida (clique no cartão) continua
+				const row = document.createElement( 'div' );
+				row.className = 'SimpleCardRow';
+				row.appendChild( card );
+
+				if ( PLACEABLE.has( definition.id ) ) {
+
+					row.appendChild( createPlaceButton( definition.name, () => createComponent( definition.id ) ) );
+
+				}
+
+				group.appendChild( row );
 				catalogCards.set( definition.id, card );
 				found ++;
 
@@ -266,6 +280,44 @@ function SimpleModeLibrary( editor, context, basicsContent ) {
 		if ( found === 0 ) panel.appendChild( createText( t( 'library/noResults', search.value.trim() ), 'SimpleEmpty' ).dom );
 
 		highlightSelected();
+
+	}
+
+	// botão secundário "Posicionar na cena" (ferramenta 'place' do controlador de interação)
+	function createPlaceButton( name, create ) {
+
+		const button = createSimpleButton( {
+			icon: 'place', title: t( 'library/place/title', name ), className: 'SimpleIconButton SimplePlaceButton',
+			onClick: function () {
+
+				let probe;
+
+				try {
+
+					probe = create(); // valida antes de abrir a prévia (registros danificados não chegam à cena)
+
+				} catch ( error ) {
+
+					context.notify( error.message || t( 'message/library/insertError' ), 'error' );
+					return;
+
+				}
+
+				let first = probe;
+				context.startTool( 'place', { name, create: () => {
+
+					// a primeira prévia reaproveita a instância já validada; as próximas criam novas
+					const instance = first !== null ? first : create();
+					first = null;
+					return instance;
+
+				} } );
+
+			}
+		} );
+
+		button.dom.dataset.place = name;
+		return button.dom;
 
 	}
 
@@ -459,6 +511,9 @@ function SimpleModeLibrary( editor, context, basicsContent ) {
 
 		const actions = document.createElement( 'span' );
 		actions.className = 'SimpleCardActions';
+
+		// EV-006: posicionar um componente salvo (a validação do registro acontece antes de abrir a prévia)
+		actions.appendChild( createPlaceButton( record.name, () => userLibrary.instantiate( record ) ) );
 
 		actions.appendChild( createSimpleButton( {
 			icon: 'edit', title: t( 'library/mine/rename/title', record.name ), className: 'SimpleIconButton',

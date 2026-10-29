@@ -409,6 +409,28 @@ function SimpleModeProperties( editor, context ) {
 
 	const userLibrary = context.userLibrary;
 
+	// EV-006: apoiar o objeto selecionado em uma superfície horizontal (prévia + SetPositionCommand)
+	const restButton = createSimpleButton( {
+		icon: 'rest', label: t( 'construction/rest/action' ), title: t( 'construction/rest/action/title' ),
+		className: 'SimpleRestButton',
+		onClick: function () {
+
+			const object = getEditableObject();
+			const problem = context.construction.canRest( object );
+
+			if ( problem !== null ) {
+
+				context.notify( problem, 'warning' );
+				return;
+
+			}
+
+			context.startTool( 'rest', { object } );
+
+		}
+	} );
+	actionsSection.body.add( restButton );
+
 	const saveButton = createSimpleButton( {
 		icon: 'bookmark', label: t( 'library/save' ), title: t( 'library/save/title' ),
 		className: 'SimpleSaveComponent',

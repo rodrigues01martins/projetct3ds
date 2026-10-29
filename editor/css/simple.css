@@ -2048,6 +2048,169 @@ body.mode-advanced .SimpleMenu {
 }
 
 /* ------------------------------------------------------------------ */
+/* EV-006 — Construção e montagem                                       */
+/* ------------------------------------------------------------------ */
+
+body.mode-simple #viewport.tool-active canvas {
+	cursor: crosshair;
+}
+
+#simple-center .SimpleConstructionPanel {
+	/* embaixo, para não cobrir a área onde se desenha (a régua continua no alto) */
+	top: auto;
+	bottom: var(--simple-gap);
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 6px 10px;
+	width: max-content;
+	max-width: min(560px, calc(100% - 24px));
+	padding: 8px 8px 8px 12px;
+	border-color: var(--simple-accent);
+}
+
+	#simple-center .SimpleConstructionTitle {
+		font-weight: 700;
+		white-space: nowrap;
+	}
+
+	#simple-center .SimpleConstructionFields {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 6px 10px;
+	}
+
+	#simple-center .SimpleConstructionField {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		font-size: 12px;
+		color: var(--simple-text-muted);
+	}
+
+		#simple-center .SimpleConstructionField .SimpleAxisField {
+			display: flex;
+			align-items: center;
+			width: 104px;
+			height: 28px;
+			background: var(--simple-surface-2);
+			border: 1px solid transparent;
+			border-radius: 7px;
+		}
+
+			#simple-center .SimpleConstructionField .SimpleAxisField:focus-within {
+				border-color: var(--simple-accent);
+				box-shadow: var(--simple-focus);
+			}
+
+		#simple-center .SimpleConstructionField .SimpleNumber {
+			flex: 1;
+			min-width: 0;
+			width: 100%;
+			padding: 0 6px;
+			font: inherit;
+			font-size: 13px;
+			color: var(--simple-text);
+			background: transparent;
+			border: 0;
+			outline: none;
+		}
+
+		#simple-center .SimpleConstructionField .SimpleUnitSuffix {
+			padding: 0 6px 0 2px;
+			font-size: 11px;
+			color: var(--simple-text-muted);
+		}
+
+	#simple-center .SimpleConstructionToggle {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		font-size: 12px;
+		cursor: pointer;
+	}
+
+		#simple-center .SimpleConstructionToggle input {
+			margin: 0;
+			accent-color: var(--simple-accent);
+		}
+
+	#simple-center .SimpleConstructionReadout {
+		flex-basis: 100%;
+		font-size: 13px;
+		font-weight: 600;
+		font-variant-numeric: tabular-nums;
+		text-align: center;
+		color: var(--simple-accent);
+	}
+
+		#simple-center .SimpleConstructionReadout:empty {
+			display: none;
+		}
+
+		#simple-center .SimpleConstructionReadout.invalid {
+			color: var(--simple-danger);
+		}
+
+	#simple-center .SimpleConstructionHint {
+		flex-basis: 100%;
+		margin: 0;
+		text-align: center;
+	}
+
+@media all and ( max-width: 760px ) {
+
+	/* no celular o painel fica acima do botão de ajuda */
+	#simple-center .SimpleConstructionPanel {
+		bottom: calc(var(--simple-gap) + 44px);
+		max-width: calc(100% - 16px);
+	}
+
+}
+
+	#simple-center .SimpleConstructionActions {
+		display: flex;
+		align-items: center;
+		gap: 4px;
+	}
+
+#simple-center .SimpleConstructionLabel {
+	background: var(--simple-accent);
+}
+
+/* biblioteca: botão "Posicionar na cena" ao lado do cartão */
+#simple-left .SimplePlaceButton {
+	flex: none;
+	width: 30px;
+	min-height: 30px;
+}
+
+	#simple-left .SimplePlaceButton .SimpleIcon {
+		width: 17px;
+		height: 17px;
+		color: var(--simple-accent);
+	}
+
+#simple-right .SimpleRestButton {
+	width: 100%;
+	margin-top: 8px;
+}
+
+/* EV-006: com as ferramentas de construção a barra só cabe com rótulos a partir de ~1400 px */
+@media all and ( max-width: 1400px ) {
+
+	#simple-center .SimpleTool .SimpleButtonLabel {
+		display: none;
+	}
+
+	#simple-center .SimpleTool {
+		width: 36px;
+		padding: 0;
+	}
+
+}
+
+/* ------------------------------------------------------------------ */
 /* Mensagens                                                            */
 /* ------------------------------------------------------------------ */
 

@@ -7,6 +7,7 @@ import { getSimpleString as t } from './SimpleMode.Strings.js';
 import { createIcon, createSimpleButton, createText } from './SimpleMode.Icons.js';
 import { SimpleModeLightingPanel } from './SimpleMode.LightingPanel.js';
 import { isLightingGroup } from './SimpleMode.Lighting.js';
+import { SimpleModeConstructionPanel } from './SimpleMode.ConstructionPanel.js';
 
 const TOOLS = [ 'select', 'translate', 'rotate', 'scale' ];
 
@@ -71,37 +72,46 @@ function SimpleModeTools( editor, context ) {
 	} );
 	toolbar.add( focus );
 
-	// EV-002: régua de medição
+	// EV-002/EV-006: ferramentas interativas (medir, desenhar parede, criar piso; posicionar/apoiar vêm dos painéis)
+	// Somente uma fica ativa por vez, coordenada pelo controlador único SimpleMode.Interaction.
 
 	const measure = context.measure;
 	const units = context.units;
+	const interaction = context.interaction;
 
-	const measureButton = createSimpleButton( {
-		icon: 'measure',
-		label: t( 'tools/measure' ),
-		title: t( 'tools/measure/title' ),
-		className: 'SimpleTool',
-		onClick: function () {
+	const INTERACTIVE = [
+		{ id: 'measure', icon: 'measure' },
+		{ id: 'wall', icon: 'wallTool' },
+		{ id: 'floor', icon: 'floorTool' }
+	];
 
-			if ( measure.isActive() ) {
+	const interactiveButtons = {};
 
-				measure.deactivate();
+	for ( const item of INTERACTIVE ) {
 
-			} else {
+		const button = createSimpleButton( {
+			icon: item.icon,
+			label: t( 'tools/' + item.id ),
+			title: t( 'tools/' + item.id + '/title' ),
+			className: 'SimpleTool' + ( item.id !== 'measure' ? ' SimpleBuildTool' : '' ),
+			onClick: () => toggleTool( item.id )
+		} );
 
-				startMeasuring();
+		button.dom.setAttribute( 'aria-pressed', 'false' );
+		button.dom.dataset.tool = item.id;
 
-			}
+		if ( item.id === 'wall' ) toolbar.add( new UIDiv().setClass( 'SimpleToolSeparator' ) );
 
-		}
-	} );
-	measureButton.dom.setAttribute( 'aria-pressed', 'false' );
-	toolbar.add( measureButton );
+		toolbar.add( button );
+		interactiveButtons[ item.id ] = button;
+
+	}
 
 	let currentMode = 'translate';
-	let modeBeforeMeasure = 'translate';
+	let modeBeforeTool = 'translate';
 	let internalChange = false;
-	let wasMeasuring = false;
+	let switching = false;
+	let wasActive = false;
 
 	function dispatchMode( mode ) {
 
@@ -111,13 +121,28 @@ function SimpleModeTools( editor, context ) {
 
 	}
 
-	function startMeasuring() {
+	// ativa uma ferramenta interativa (encerra a anterior) e esconde as alças: nada é movido por engano
+	function startTool( id, options ) {
 
-		modeBeforeMeasure = currentMode;
-		measure.activate();
-		dispatchMode( 'select' ); // esconde as alças: a medição não move nem seleciona objetos
+		if ( interaction.isActive() === false ) modeBeforeTool = currentMode;
+
+		switching = true;
+		interaction.activate( id, options );
+		switching = false;
+
+		if ( interaction.isActive( id ) ) dispatchMode( 'select' );
+		updateToolButtons();
 
 	}
+
+	function toggleTool( id ) {
+
+		if ( interaction.isActive( id ) ) interaction.deactivate();
+		else startTool( id );
+
+	}
+
+	context.startTool = startTool;
 
 	// destaca a ferramenta ativa, inclusive quando alterada por atalho (W/E/R) ou pelo Modo Avançado
 
@@ -125,8 +150,8 @@ function SimpleModeTools( editor, context ) {
 
 		currentMode = mode;
 
-		// trocar de ferramenta encerra a medição
-		if ( internalChange === false && measure.isActive() ) measure.deactivate();
+		// escolher Selecionar/Mover/Girar/Redimensionar encerra medição e construção
+		if ( internalChange === false && interaction.isActive() ) interaction.deactivate();
 
 		updateToolButtons();
 
@@ -134,20 +159,40 @@ function SimpleModeTools( editor, context ) {
 
 	function updateToolButtons() {
 
-		const measuring = measure.isActive();
+		const active = interaction.getActive();
 
 		for ( const tool of TOOLS ) {
 
-			const active = measuring === false && tool === currentMode;
-			buttons[ tool ].dom.classList.toggle( 'active', active );
-			buttons[ tool ].dom.setAttribute( 'aria-pressed', active );
+			const pressed = active === null && tool === currentMode;
+			buttons[ tool ].dom.classList.toggle( 'active', pressed );
+			buttons[ tool ].dom.setAttribute( 'aria-pressed', pressed );
 
 		}
 
-		measureButton.dom.classList.toggle( 'active', measuring );
-		measureButton.dom.setAttribute( 'aria-pressed', measuring );
+		for ( const [ id, button ] of Object.entries( interactiveButtons ) ) {
+
+			button.dom.classList.toggle( 'active', id === active );
+			button.dom.setAttribute( 'aria-pressed', id === active );
+
+		}
 
 	}
+
+	// ao sair de uma ferramenta (Esc, botão, novo projeto, Modo Avançado), volta à ferramenta de transformação anterior
+	interaction.changed.add( function () {
+
+		const active = interaction.isActive();
+
+		if ( wasActive && active === false && switching === false && currentMode === 'select' && modeBeforeTool !== 'select' ) {
+
+			dispatchMode( modeBeforeTool );
+
+		}
+
+		wasActive = active;
+		updateToolButtons();
+
+	} );
 
 	signals.transformModeChanged.add( setActiveTool );
 	setActiveTool( 'translate' );
@@ -241,18 +286,12 @@ function SimpleModeTools( editor, context ) {
 
 	container.dom.appendChild( measure.label );
 
+	// EV-006: opções da ferramenta de construção ativa
+	new SimpleModeConstructionPanel( editor, context, container );
+
 	function updateMeasureStatus() {
 
 		const measuring = measure.isActive();
-
-		// ao sair da medição (Esc, botão ou novo projeto), volta para a ferramenta anterior
-		if ( wasMeasuring && measuring === false && currentMode === 'select' && modeBeforeMeasure !== 'select' ) {
-
-			dispatchMode( modeBeforeMeasure );
-
-		}
-
-		wasMeasuring = measuring;
 
 		measureStatus.dom.hidden = ! measuring;
 		updateToolButtons();
@@ -311,15 +350,15 @@ function SimpleModeTools( editor, context ) {
 
 	function updateEmptyHint() {
 
-		// as luzes do Project3DS não contam como conteúdo; durante a medição o convite não deve receber os cliques
+		// as luzes do Project3DS não contam como conteúdo; com uma ferramenta ativa o convite não deve receber os cliques
 		const hasContent = editor.scene.children.some( ( object ) => isLightingGroup( object ) === false );
-		emptyHint.dom.hidden = hasContent || measure.isActive();
+		emptyHint.dom.hidden = hasContent || interaction.isActive();
 
 	}
 
 	signals.sceneGraphChanged.add( updateEmptyHint );
 	signals.editorCleared.add( updateEmptyHint );
-	measure.changed.add( updateEmptyHint );
+	interaction.changed.add( updateEmptyHint );
 	updateEmptyHint();
 
 	// ajuda contextual (recolhível, aberta por padrão apenas no primeiro uso)
