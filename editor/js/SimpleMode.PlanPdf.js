@@ -172,4 +172,44 @@ function toPDF( drawing, { title = 'Planta baixa', author = '', date = new Date(
 
 }
 
-export { toPDF, encode, textWidth };
+// EV-010: documento com várias páginas (relatórios). A prancha da planta continua usando toPDF (inalterado).
+// pages: [ { sheet: { width, height } (mm), primitives } ] → Blob application/pdf
+function toPDFPages( pages, { title = 'Relatório', author = '', date = new Date() } = {} ) {
+
+	// 1 catálogo, 2 páginas, 3–4 fontes, 5 info; depois, para cada página: objeto da página + conteúdo
+	const pageIds = pages.map( ( page, index ) => 6 + index * 2 );
+	const objects = [
+		'<< /Type /Catalog /Pages 2 0 R >>',
+		`<< /Type /Pages /Kids [${pageIds.map( ( id ) => id + ' 0 R' ).join( ' ' )}] /Count ${pages.length} >>`,
+		'<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>',
+		'<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>',
+		`<< /Title ${literal( encode( title ) )} /Author ${literal( encode( author ) )} /Producer (Project3DS) /CreationDate (${pdfDate( date )}) >>`
+	];
+
+	pages.forEach( ( page, index ) => {
+
+		const content = contentStream( page );
+		objects.push( `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${f( page.sheet.width * PT )} ${f( page.sheet.height * PT )}] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents ${pageIds[ index ] + 1} 0 R >>` );
+		objects.push( `<< /Length ${content.length} >>\nstream\n${content}\nendstream` );
+
+	} );
+
+	let output = '%PDF-1.4\n%Project3DS\n';
+	const offsets = [];
+
+	objects.forEach( ( body, index ) => {
+
+		offsets.push( output.length );
+		output += `${index + 1} 0 obj\n${body}\nendobj\n`;
+
+	} );
+
+	const xref = output.length;
+	output += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n` + offsets.map( ( offset ) => String( offset ).padStart( 10, '0' ) + ' 00000 n \n' ).join( '' );
+	output += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R /Info 5 0 R >>\nstartxref\n${xref}\n%%EOF\n`;
+
+	return new Blob( [ output ], { type: 'application/pdf' } );
+
+}
+
+export { toPDF, toPDFPages, encode, textWidth };

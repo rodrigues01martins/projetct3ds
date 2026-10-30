@@ -241,17 +241,30 @@ function SimpleModeTopbar( editor, context ) {
 	planButton.dom.setAttribute( 'aria-pressed', 'false' );
 	showGroup.add( planButton );
 
-	// o painel da planta é criado depois da barra superior: acompanha o estado quando estiver disponível
+	// EV-010: quantitativos e orçamento
+	const budgetButton = createSimpleButton( {
+		icon: 'budget', label: t( 'topbar/budget' ), title: t( 'topbar/budget/title' ),
+		className: 'SimpleBudgetButton',
+		onClick: () => context.budgetView.toggle()
+	} );
+	budgetButton.dom.setAttribute( 'aria-pressed', 'false' );
+	showGroup.add( budgetButton );
+
+	// os painéis da planta e do orçamento são criados depois da barra superior: acompanha o estado quando disponíveis
 	setTimeout( () => {
 
-		if ( context.planView === undefined ) return;
-		context.planView.changed.add( () => {
+		for ( const [ view, button ] of [[ context.planView, planButton ], [ context.budgetView, budgetButton ]] ) {
 
-			const open = context.planView.isOpen();
-			planButton.dom.classList.toggle( 'active', open );
-			planButton.dom.setAttribute( 'aria-pressed', open );
+			if ( view === undefined ) continue;
+			view.changed.add( () => {
 
-		} );
+				const open = view.isOpen();
+				button.dom.classList.toggle( 'active', open );
+				button.dom.setAttribute( 'aria-pressed', open );
+
+			} );
+
+		}
 
 	} );
 

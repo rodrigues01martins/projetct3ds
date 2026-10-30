@@ -13,6 +13,7 @@ import { isHostedFixture } from './SimpleMode.Openings.js';
 import { SimpleModeViewPanel } from './SimpleMode.ViewPanel.js';
 import { SimpleModeWalkthroughPanel } from './SimpleMode.Walkthrough.js';
 import { SimpleModePlanView } from './SimpleMode.PlanView.js';
+import { SimpleModeBudgetView } from './SimpleMode.BudgetView.js';
 
 const TOOLS = [ 'select', 'translate', 'rotate', 'scale' ];
 
@@ -314,6 +315,9 @@ function SimpleModeTools( editor, context ) {
 
 	// EV-009: planta baixa técnica (prancha 2D sobre a área de visualização)
 	context.planView = new SimpleModePlanView( editor, context, container );
+
+	// EV-010: quantitativos e orçamento (área de trabalho dedicada sobre a visualização)
+	context.budgetView = new SimpleModeBudgetView( editor, context, container );
 
 	function updateMeasureStatus() {
 

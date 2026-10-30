@@ -723,6 +723,7 @@ function SimpleModePlanView( editor, context, container ) {
 		if ( state.open ) return;
 
 		context.interaction.deactivate(); // nenhuma ferramenta do viewport fica ativa por trás da prancha
+		if ( context.budgetView !== undefined ) context.budgetView.close(); // EV-010: uma área de trabalho por vez
 		if ( context.lightingPanel !== undefined ) context.lightingPanel.close();
 
 		state.open = true;

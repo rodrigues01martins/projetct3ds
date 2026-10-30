@@ -197,6 +197,7 @@ function SimpleMode( editor ) {
 
 			// EV-009: a planta baixa é uma visualização do Modo Simples
 			if ( context.planView !== undefined ) context.planView.close();
+			if ( context.budgetView !== undefined ) context.budgetView.close(); // EV-010
 
 			// a ferramenta "Selecionar" não existe no Modo Avançado: volta para "Mover"
 			signals.transformModeChanged.dispatch( 'translate' );

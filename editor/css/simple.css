@@ -3230,3 +3230,521 @@ body.mode-simple.presenting #viewport {
 	}
 
 }
+
+/* ------------------------------------------------------------------ */
+/* EV-010: quantitativos e orçamento                                    */
+/* ------------------------------------------------------------------ */
+
+#simple-center .SimpleBudget {
+	position: absolute;
+	inset: 0;
+	z-index: 6;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	color: var(--simple-text);
+	background: var(--simple-bg);
+}
+
+	#simple-center .SimpleBudget[hidden] {
+		display: none;
+	}
+
+#simple-center .SimpleBudgetHeader {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 12px;
+	padding: 10px 14px;
+	background: var(--simple-surface);
+	border-bottom: 1px solid var(--simple-border);
+}
+
+	#simple-center .SimpleBudgetTitle {
+		margin: 0;
+		font-size: 15px;
+		font-weight: 700;
+	}
+
+	#simple-center .SimpleBudgetTabs {
+		display: flex;
+		gap: 2px;
+		padding: 2px;
+		background: var(--simple-surface-2);
+		border-radius: 9px;
+	}
+
+	#simple-center .SimpleBudgetTab {
+		padding: 6px 12px;
+		font: inherit;
+		font-size: 13px;
+		color: var(--simple-text-muted);
+		background: transparent;
+		border: 0;
+		border-radius: 7px;
+		cursor: pointer;
+	}
+
+		#simple-center .SimpleBudgetTab.active {
+			color: var(--simple-text);
+			font-weight: 600;
+			background: var(--simple-surface);
+			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+		}
+
+		#simple-center .SimpleBudgetTab:focus-visible {
+			box-shadow: var(--simple-focus);
+			outline: none;
+		}
+
+	#simple-center .SimpleBudgetExport {
+		display: flex;
+		gap: 4px;
+		margin-left: auto;
+	}
+
+#simple-center .SimpleBudgetDisclaimer {
+	margin: 0;
+	padding: 6px 14px;
+	font-size: 12px;
+	color: var(--simple-text-muted);
+	background: var(--simple-surface);
+	border-bottom: 1px solid var(--simple-border);
+}
+
+#simple-center .SimpleBudgetPanel {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	min-height: 0;
+	overflow: auto;
+	padding: 12px 14px;
+	gap: 10px;
+}
+
+	#simple-center .SimpleBudgetPanel[hidden] {
+		display: none;
+	}
+
+/* o painel rola por inteiro; os blocos mantêm a altura do conteúdo (sem sobreposição) */
+#simple-center .SimpleBudgetPanel > * {
+	flex: none;
+}
+
+#simple-center .SimpleBudgetToolbar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 12px;
+}
+
+#simple-center .SimpleBudget .SimpleTextInput {
+	height: 30px;
+	box-sizing: border-box;
+	padding: 0 8px !important;
+	font: inherit;
+	font-size: 13px;
+	color: var(--simple-text);
+	background: var(--simple-surface-2);
+	border: 1px solid transparent !important;
+	border-radius: 7px;
+	outline: none;
+	user-select: text;
+}
+
+	#simple-center .SimpleBudget .SimpleTextInput:focus {
+		border-color: var(--simple-accent) !important;
+		box-shadow: var(--simple-focus);
+	}
+
+	#simple-center .SimpleBudget textarea.SimpleTextInput {
+		height: auto;
+		padding: 6px 8px !important;
+		resize: vertical;
+	}
+
+#simple-center .SimpleBudgetSearch {
+	width: 220px;
+}
+
+#simple-center .SimpleBudgetCheck {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 13px;
+	cursor: pointer;
+}
+
+#simple-center .SimpleBudgetCount {
+	margin-left: auto;
+	font-size: 12px;
+	color: var(--simple-text-muted);
+}
+
+#simple-center .SimpleBudgetIssues,
+#simple-center .SimpleBudgetPartial {
+	font-size: 12px;
+}
+
+#simple-center .SimpleBudgetSplit {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 320px;
+	gap: 12px;
+	align-items: start;
+	min-height: 0;
+}
+
+#simple-center .SimpleBudgetTableBox {
+	min-width: 0;
+	overflow: auto;
+	background: var(--simple-surface);
+	border: 1px solid var(--simple-border);
+	border-radius: var(--simple-radius);
+}
+
+#simple-center .SimpleBudgetTable {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 12.5px;
+}
+
+	#simple-center .SimpleBudgetTable th,
+	#simple-center .SimpleBudgetTable td {
+		padding: 6px 8px;
+		text-align: left;
+		vertical-align: middle;
+		border-bottom: 1px solid var(--simple-border);
+	}
+
+	#simple-center .SimpleBudgetTable th {
+		position: sticky;
+		top: 0;
+		z-index: 1;
+		font-size: 11.5px;
+		font-weight: 700;
+		color: var(--simple-text-muted);
+		background: var(--simple-surface-2);
+		white-space: nowrap;
+	}
+
+	#simple-center .SimpleBudgetTable .num {
+		text-align: right;
+		font-variant-numeric: tabular-nums;
+		white-space: nowrap;
+	}
+
+	#simple-center .SimpleBudgetTable tbody tr {
+		cursor: pointer;
+	}
+
+		#simple-center .SimpleBudgetTable tbody tr:hover {
+			background: var(--simple-surface-2);
+		}
+
+		#simple-center .SimpleBudgetTable tbody tr.selected {
+			background: var(--simple-accent-soft);
+		}
+
+		#simple-center .SimpleBudgetTable tbody tr.warning td:last-child {
+			color: #9a6700;
+			font-weight: 600;
+		}
+
+		#simple-center .SimpleBudgetTable tbody tr:focus-visible {
+			outline: 2px solid var(--simple-accent);
+			outline-offset: -2px;
+		}
+
+	#simple-center .SimpleBudgetTable tfoot td {
+		font-weight: 700;
+		background: var(--simple-surface-2);
+	}
+
+	#simple-center .SimpleBudgetCompact {
+		max-width: 760px;
+		background: var(--simple-surface);
+		border: 1px solid var(--simple-border);
+		border-radius: 8px;
+	}
+
+#simple-center .SimpleBudgetSort {
+	padding: 0;
+	font: inherit;
+	color: inherit;
+	background: none;
+	border: 0;
+	cursor: pointer;
+}
+
+#simple-center .SimpleBudgetDescription strong,
+#simple-center .SimpleBudgetDescription small {
+	display: block;
+}
+
+	#simple-center .SimpleBudgetDescription small {
+		font-size: 11px;
+		color: var(--simple-text-muted);
+	}
+
+#simple-center .SimpleBudgetNumber {
+	width: 84px;
+	text-align: right;
+}
+
+	#simple-center .SimpleBudgetNumber.missing {
+		background: #fff2cc !important;
+	}
+
+	#simple-center .SimpleBudgetNumber.missing::placeholder {
+		color: #9a6700;
+	}
+
+#simple-center .SimpleBudgetSubtotal {
+	font-weight: 600;
+}
+
+#simple-center .SimpleBudgetDetail {
+	position: sticky;
+	top: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	padding: 12px;
+	font-size: 13px;
+	background: var(--simple-surface);
+	border: 1px solid var(--simple-border);
+	border-radius: var(--simple-radius);
+}
+
+	#simple-center .SimpleBudgetDetailTitle {
+		margin: 0;
+		font-size: 14px;
+	}
+
+	#simple-center .SimpleBudgetDetailMeta,
+	#simple-center .SimpleBudgetHint {
+		margin: 0;
+		font-size: 12px;
+		color: var(--simple-text-muted);
+	}
+
+	#simple-center .SimpleBudgetNote {
+		margin: 0;
+		padding: 6px 8px;
+		font-size: 12px;
+		background: var(--simple-surface-2);
+		border-radius: 6px;
+	}
+
+		#simple-center .SimpleBudgetNote.warning {
+			color: #7a5200;
+			background: #fff2cc;
+		}
+
+	#simple-center .SimpleBudgetMeasures {
+		display: grid;
+		grid-template-columns: 1fr auto;
+		gap: 3px 10px;
+		margin: 4px 0;
+	}
+
+		#simple-center .SimpleBudgetMeasures dt {
+			color: var(--simple-text-muted);
+		}
+
+		#simple-center .SimpleBudgetMeasures dd {
+			margin: 0;
+			font-variant-numeric: tabular-nums;
+			text-align: right;
+		}
+
+	#simple-center .SimpleBudgetMembers {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 4px;
+	}
+
+	#simple-center .SimpleBudgetCreate {
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+		margin-top: 6px;
+		padding-top: 8px;
+		border-top: 1px solid var(--simple-border);
+	}
+
+		#simple-center .SimpleBudgetCreate h4 {
+			margin: 0;
+			font-size: 13px;
+		}
+
+	#simple-center .SimpleBudgetField {
+		display: grid;
+		grid-template-columns: 120px minmax(0, 1fr);
+		align-items: center;
+		gap: 8px;
+		font-size: 12px;
+		color: var(--simple-text-muted);
+	}
+
+		#simple-center .SimpleBudgetField .SimpleSelect,
+		#simple-center .SimpleBudgetField .SimpleTextInput {
+			width: 100%;
+			min-width: 0;
+		}
+
+	#simple-center .SimpleBudgetItemActions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px;
+		margin-top: 6px;
+	}
+
+#simple-center .SimpleBudgetEmpty {
+	margin: 0;
+	padding: 18px;
+	font-size: 13px;
+	color: var(--simple-text-muted);
+}
+
+#simple-center .SimpleBudgetCards {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+	gap: 8px;
+}
+
+#simple-center .SimpleBudgetCard {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	padding: 10px 12px;
+	background: var(--simple-surface);
+	border: 1px solid var(--simple-border);
+	border-radius: var(--simple-radius);
+}
+
+	#simple-center .SimpleBudgetCard span {
+		font-size: 12px;
+		color: var(--simple-text-muted);
+	}
+
+	#simple-center .SimpleBudgetCard strong {
+		font-size: 17px;
+		font-variant-numeric: tabular-nums;
+	}
+
+	#simple-center .SimpleBudgetCard.warning {
+		background: #fff8e1;
+		border-color: #f0c36d;
+	}
+
+#simple-center .SimpleBudgetSummaryBody {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	max-width: 900px;
+}
+
+#simple-center .SimpleBudgetSectionTitle {
+	margin: 10px 0 2px;
+	font-size: 13px;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--simple-text-muted);
+}
+
+#simple-center .SimpleBudgetAdjustments {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+#simple-center .SimpleBudgetAdjustment {
+	display: grid;
+	grid-template-columns: minmax(140px, 1fr) 150px 110px minmax(110px, auto) 120px 34px;
+	align-items: center;
+	gap: 8px;
+	font-size: 12px;
+}
+
+	#simple-center .SimpleBudgetAdjustment .SimpleBudgetNumber {
+		width: 100%;
+	}
+
+	#simple-center .SimpleBudgetAmount {
+		text-align: right;
+		font-variant-numeric: tabular-nums;
+	}
+
+#simple-center .SimpleBudgetNotes {
+	width: 100%;
+}
+
+#simple-topbar .SimpleBudgetButton.active {
+	color: #fff;
+	background: var(--simple-accent);
+	border-color: var(--simple-accent);
+}
+
+@media all and ( max-width: 1180px ) {
+
+	#simple-center .SimpleBudgetSplit {
+		grid-template-columns: 1fr;
+	}
+
+	#simple-center .SimpleBudgetDetail {
+		position: static;
+	}
+
+}
+
+@media all and ( max-width: 760px ) {
+
+	#simple-center .SimpleBudgetHeader {
+		padding: 8px;
+	}
+
+	#simple-center .SimpleBudgetTitle,
+	#simple-center .SimpleBudgetDisclaimer {
+		display: none;
+	}
+
+	#simple-center .SimpleBudgetSearch {
+		width: 100%;
+	}
+
+	#simple-center .SimpleBudgetAdjustment {
+		grid-template-columns: 1fr 1fr;
+	}
+
+}
+
+/* área de trabalho do orçamento ocupa a largura toda (os painéis voltam ao fechar) */
+body.mode-simple.budget-open #simple-left,
+body.mode-simple.budget-open #simple-right {
+	display: none;
+}
+
+body.mode-simple.budget-open #simple-center {
+	left: 0 !important;
+	right: 0 !important;
+}
+
+#simple-center .SimpleBudgetItems td:nth-child(8) .SimpleBudgetNumber {
+	width: 132px;
+}
+
+@media all and ( max-width: 760px ) {
+
+	/* no celular a área do orçamento ocupa da barra superior até o fim da tela */
+	body.mode-simple.budget-open #simple-center {
+		top: var(--simple-topbar-height) !important;
+		bottom: 0 !important;
+	}
+
+	#simple-center .SimpleBudgetExport {
+		margin-left: 0;
+	}
+
+}
