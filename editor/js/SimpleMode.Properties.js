@@ -26,6 +26,8 @@ import { SimpleModeComponentProperties } from './SimpleMode.ComponentProperties.
 import { getComponentState, isUserComponent } from './SimpleMode.ComponentFactory.js';
 import { getCategory } from './SimpleMode.Components.js';
 import { SimpleModeAppearancePanel } from './SimpleMode.AppearancePanel.js';
+import { SimpleModeOpeningProperties } from './SimpleMode.OpeningProperties.js';
+import { isHostedFixture, getOpeningOf, relinkClone } from './SimpleMode.Openings.js';
 
 const SECTIONS_KEY = 'interface/simple/sections';
 const AXES = [ 'x', 'y', 'z' ];
@@ -198,6 +200,10 @@ function SimpleModeProperties( editor, context ) {
 	const componentDimSection = createSection( 'componentDimensions', t( 'properties/section/dimensions' ) );
 	const componentParamSection = createSection( 'componentParameters', t( 'properties/section/parameters' ) );
 	const componentProperties = new SimpleModeComponentProperties( editor, context, componentDimSection, componentParamSection );
+
+	// EV-007: abertura na parede (porta/janela hospedada) ou resumo das aberturas da parede
+	const openingSection = createSection( 'opening', t( 'properties/section/opening' ) );
+	const openingProperties = new SimpleModeOpeningProperties( editor, context, openingSection );
 
 	// 3. Posição, 4. Rotação, 5. Escala ------------------------------------
 
@@ -674,7 +680,18 @@ function SimpleModeProperties( editor, context ) {
 
 		}
 
+		// EV-007: porta/janela hospedada pertence a um vão; uma nova abertura é inserida pela ferramenta
+		if ( isHostedFixture( object ) ) {
+
+			context.notify( t( 'opening/noDuplicate' ), 'warning' );
+			return;
+
+		}
+
 		const copy = clone( object );
+
+		// EV-007: aberturas da cópia ganham identificadores próprios e apontam para as próprias portas/janelas
+		relinkClone( object, copy );
 
 		// materiais próprios: mudar a cor da cópia não deve alterar o original
 		copy.traverse( function ( child ) {
@@ -721,6 +738,14 @@ function SimpleModeProperties( editor, context ) {
 		if ( object === null ) {
 
 			context.notify( t( 'message/nothingSelected' ) );
+			return;
+
+		}
+
+		// EV-007: remover a porta/janela fecha o vão (abertura inteira, um único Desfazer)
+		if ( isHostedFixture( object ) && getOpeningOf( object ) !== null ) {
+
+			openingProperties.removeHosted();
 			return;
 
 		}
@@ -783,8 +808,15 @@ function SimpleModeProperties( editor, context ) {
 		} );
 
 		// luzes não usam rotação/escala de forma significativa
-		rotation.section.details.hidden = object.isLight === true;
-		scale.section.details.hidden = object.isLight === true;
+		// EV-007: porta/janela hospedada é posicionada pela abertura (seção "Abertura na parede")
+		const hosted = isHostedFixture( object );
+		positionSection.details.hidden = hosted;
+		rotation.section.details.hidden = object.isLight === true || hosted;
+		scale.section.details.hidden = object.isLight === true || hosted;
+		restButton.dom.hidden = hosted;
+
+		openingSection.details.hidden = openingProperties.update( object ) === false;
+		openingSection.setTitle( t( hosted ? 'properties/section/opening' : 'properties/section/openings' ) );
 
 		updateDimensionUI( object );
 

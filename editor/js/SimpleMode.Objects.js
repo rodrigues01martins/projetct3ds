@@ -13,6 +13,7 @@ import { SimpleModeLibrary, getUniqueName } from './SimpleMode.Library.js';
 import { getComponentData, isUserComponent } from './SimpleMode.ComponentFactory.js';
 import { getDefinition } from './SimpleMode.Components.js';
 import { isLightingGroup } from './SimpleMode.Lighting.js';
+import { isHostedFixture } from './SimpleMode.Openings.js';
 
 // Paleta suave usada para diferenciar os objetos recém-criados
 const PALETTE = [ 0x4f8cff, 0xff8a4f, 0x45c48b, 0xf2c94c, 0xb07cff, 0xff6b8b, 0x3cc7d6 ];
@@ -204,63 +205,79 @@ function SimpleModeObjects( editor, context ) {
 
 		for ( const object of objects ) {
 
-			const name = object.name || t( 'objects/unnamed' );
+			addRow( object, false );
 
-			const row = document.createElement( 'div' );
-			row.className = 'SimpleObjectRow';
-			row.setAttribute( 'role', 'listitem' );
+			// EV-007: portas e janelas hospedadas aparecem logo abaixo da parede (hierarquia parede → aberturas)
+			const hosted = [];
+			object.traverse( ( child ) => {
 
-			const mark = document.createElement( 'input' );
-			mark.type = 'checkbox';
-			mark.className = 'SimpleMark';
-			mark.title = t( 'objects/list/mark/title', name );
-			mark.setAttribute( 'aria-label', t( 'objects/list/mark/title', name ) );
-			mark.disabled = alignment.isSupported( object ) === false;
-			mark.addEventListener( 'keydown', ( event ) => event.stopPropagation() );
-			mark.addEventListener( 'change', function () {
-
-				alignment.toggle( object );
-
-			} );
-			row.appendChild( mark );
-
-			const item = document.createElement( 'button' );
-			item.type = 'button';
-			item.className = 'SimpleObjectItem';
-			item.title = t( 'objects/list/item/title', name );
-			item.appendChild( createIcon( getIconFor( object ) ) );
-
-			const label = document.createElement( 'span' );
-			label.className = 'SimpleObjectItemLabel';
-			label.textContent = name;
-			item.appendChild( label );
-
-			item.addEventListener( 'click', function () {
-
-				editor.select( object );
+				if ( child !== object && isHostedFixture( child ) ) hosted.push( child );
 
 			} );
 
-			item.addEventListener( 'dblclick', function () {
-
-				editor.focus( object );
-
-			} );
-
-			const badge = document.createElement( 'span' );
-			badge.className = 'SimpleReferenceBadge';
-			badge.textContent = t( 'objects/list/reference' );
-			badge.title = t( 'objects/list/reference/title' );
-
-			row.appendChild( item );
-			row.appendChild( badge );
-
-			list.dom.appendChild( row );
-			items.set( object, { row, item, mark, badge } );
+			for ( const child of hosted ) addRow( child, true );
 
 		}
 
 		updateSelection();
+
+	}
+
+	function addRow( object, nested ) {
+
+		const name = object.name || t( 'objects/unnamed' );
+
+		const row = document.createElement( 'div' );
+		row.className = 'SimpleObjectRow' + ( nested ? ' nested' : '' );
+		row.setAttribute( 'role', 'listitem' );
+
+		const mark = document.createElement( 'input' );
+		mark.type = 'checkbox';
+		mark.className = 'SimpleMark';
+		mark.title = t( 'objects/list/mark/title', name );
+		mark.setAttribute( 'aria-label', t( 'objects/list/mark/title', name ) );
+		mark.disabled = nested || alignment.isSupported( object ) === false;
+		mark.addEventListener( 'keydown', ( event ) => event.stopPropagation() );
+		mark.addEventListener( 'change', function () {
+
+			alignment.toggle( object );
+
+		} );
+		row.appendChild( mark );
+
+		const item = document.createElement( 'button' );
+		item.type = 'button';
+		item.className = 'SimpleObjectItem';
+		item.title = t( 'objects/list/item/title', name );
+		item.appendChild( createIcon( getIconFor( object ) ) );
+
+		const label = document.createElement( 'span' );
+		label.className = 'SimpleObjectItemLabel';
+		label.textContent = name;
+		item.appendChild( label );
+
+		item.addEventListener( 'click', function () {
+
+			editor.select( object );
+
+		} );
+
+		item.addEventListener( 'dblclick', function () {
+
+			editor.focus( object );
+
+		} );
+
+		const badge = document.createElement( 'span' );
+		badge.className = 'SimpleReferenceBadge';
+		badge.textContent = t( 'objects/list/reference' );
+		badge.title = t( 'objects/list/reference/title' );
+
+		row.appendChild( item );
+		row.appendChild( badge );
+
+		list.dom.appendChild( row );
+		items.set( object, { row, item, mark, badge } );
 
 	}
 

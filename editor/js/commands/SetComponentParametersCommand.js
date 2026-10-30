@@ -1,7 +1,8 @@
 import { Command } from '../Command.js';
 
 import { getDefinition } from '../SimpleMode.Components.js';
-import { regenerateComponent } from '../SimpleMode.ComponentFactory.js';
+import { regenerateComponent, editorHooks } from '../SimpleMode.ComponentFactory.js';
+import { syncHostedFixtures } from '../SimpleMode.Openings.js';
 
 /**
  * EV-003 — altera os parâmetros de um componente paramétrico (ex.: largura da mesa) e regenera suas peças.
@@ -50,47 +51,10 @@ class SetComponentParametersCommand extends Command {
 		const editor = this.editor;
 		const definition = getDefinition( this.componentId );
 
-		regenerateComponent( this.object, definition, parameters, {
+		regenerateComponent( this.object, definition, parameters, editorHooks( editor ) );
 
-			editor,
-
-			addPart( mesh, group, index ) {
-
-				editor.addObject( mesh, group, index );
-
-			},
-
-			removePart( mesh ) {
-
-				editor.removeObject( mesh );
-				mesh.geometry.dispose();
-
-			},
-
-			replaceGeometry( mesh, geometry ) {
-
-				const old = mesh.geometry;
-				mesh.geometry = geometry;
-				editor.addGeometry( geometry );
-
-				// descarta a geometria antiga só se nenhum outro objeto da cena a utiliza
-				let shared = false;
-				editor.scene.traverse( ( child ) => {
-
-					if ( child !== mesh && child.geometry === old ) shared = true;
-
-				} );
-
-				if ( shared === false ) {
-
-					delete editor.geometries[ old.uuid ];
-					old.dispose();
-
-				}
-
-			}
-
-		} );
+		// EV-007: parede com portas/janelas — batentes e molduras acompanham a nova espessura
+		syncHostedFixtures( editor, this.object );
 
 		this.object.updateMatrixWorld( true );
 

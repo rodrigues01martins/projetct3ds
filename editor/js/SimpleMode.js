@@ -22,6 +22,9 @@ import { LightingService } from './SimpleMode.LightingPanel.js';
 import { SimpleModeTemplateGallery } from './SimpleMode.TemplateGallery.js';
 import { Interaction } from './SimpleMode.Interaction.js';
 import { ConstructionTools } from './SimpleMode.ConstructionTools.js';
+import { OpeningTools } from './SimpleMode.OpeningTools.js';
+import { findHostedFixture, isHostedFixture, getOpeningOf } from './SimpleMode.Openings.js';
+import { RemoveWallOpeningCommand } from './commands/RemoveWallOpeningCommand.js';
 
 import { getSimpleString as t } from './SimpleMode.Strings.js';
 
@@ -84,8 +87,19 @@ function SimpleMode( editor ) {
 		// EV-004: as luzes do Project3DS são controladas pelo painel Iluminação (não são selecionadas no Modo Simples)
 		if ( isOwnedLighting( object, editor.scene ) ) return null;
 
+		// EV-007: porta/janela hospedada tem prioridade (clicar nela seleciona a porta; na parede, a parede)
+		const hosted = findHostedFixture( object, editor.scene );
+		if ( hosted !== null ) return hosted;
+
 		const root = findComponentRoot( object, editor.scene );
 		return root !== null ? root : object;
+
+	};
+
+	// EV-007: no Modo Simples, porta/janela hospedada não recebe alças livres (move só ao longo da parede)
+	editor.transformFilter = function ( object ) {
+
+		return currentMode !== 'simple' || isHostedFixture( object ) === false;
 
 	};
 
@@ -99,6 +113,32 @@ function SimpleMode( editor ) {
 
 	// EV-006: desenhar parede, criar piso, posicionar componente e apoiar objeto
 	context.construction = new ConstructionTools( editor, context, interaction );
+
+	// EV-007: inserir porta, inserir janela e reposicionar abertura
+	context.openings = new OpeningTools( editor, context, interaction );
+
+	// EV-007: Delete/Backspace sobre uma porta/janela hospedada remove a abertura inteira (vão fechado, um Desfazer)
+	window.addEventListener( 'keydown', function ( event ) {
+
+		if ( currentMode !== 'simple' ) return;
+		if ( event.key !== 'Delete' && event.key !== 'Backspace' ) return;
+
+		const target = event.target;
+		if ( target !== null && ( target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test( target.tagName ) ) ) return;
+
+		const object = editor.selected;
+		const opening = isHostedFixture( object ) ? getOpeningOf( object ) : null;
+		if ( opening === null ) return;
+
+		event.preventDefault();
+		event.stopImmediatePropagation();
+
+		const wall = object.parent;
+		editor.execute( new RemoveWallOpeningCommand( editor, wall, opening.id ) );
+		editor.select( wall );
+		notify( t( 'opening/removed' ), 'success' );
+
+	}, true );
 
 	container.add(
 		new SimpleModeTopbar( editor, context ),
@@ -127,8 +167,10 @@ function SimpleMode( editor ) {
 		// ao entrar no Modo Simples, uma peça selecionada no Avançado passa a selecionar o componente inteiro
 		if ( mode === 'simple' && editor.selected !== null ) {
 
-			const root = findComponentRoot( editor.selected, editor.scene );
+			const hosted = findHostedFixture( editor.selected, editor.scene );
+			const root = hosted !== null ? hosted : findComponentRoot( editor.selected, editor.scene );
 			if ( root !== null && root !== editor.selected ) editor.select( root );
+			else if ( isHostedFixture( editor.selected ) ) signals.objectSelected.dispatch( editor.selected ); // retira as alças livres
 
 		}
 

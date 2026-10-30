@@ -13,6 +13,7 @@ import * as THREE from 'three';
 
 import { getDefinition, getDefaultParameters, migrateParameters, validateParameters } from './SimpleMode.Components.js';
 import { reapplyComponentAppearance } from './SimpleMode.Appearance.js';
+import { buildWallGeometry } from './SimpleMode.WallGeometry.js';
 
 const META_KEY = 'project3ds';
 
@@ -128,6 +129,7 @@ function createGeometry( part ) {
 	const [ x, y, z ] = part.size.map( ( value ) => Math.max( value, 1e-4 ) );
 
 	if ( part.shape === 'cylinder' ) return new THREE.CylinderGeometry( x / 2, x / 2, y, 24 );
+	if ( part.shape === 'wall-openings' ) return buildWallGeometry( x, y, z, part.openings ); // EV-007
 
 	return new THREE.BoxGeometry( x, y, z );
 
@@ -177,7 +179,7 @@ function createComponent( id, overrides = {} ) {
 
 	for ( const key in materialSpecs ) materials[ key ] = createMaterial( materialSpecs[ key ] );
 
-	for ( const part of definition.parts( parameters ) ) group.add( createPartMesh( part, materials[ part.material ] ) );
+	for ( const part of definition.parts( parameters, { openings: [] } ) ) group.add( createPartMesh( part, materials[ part.material ] ) );
 
 	return group;
 
@@ -193,7 +195,10 @@ function createComponent( id, overrides = {} ) {
 
 function regenerateComponent( group, definition, parameters, hooks ) {
 
-	const parts = definition.parts( parameters );
+	// EV-007: aberturas registradas na parede (fonte única de verdade em userData.project3ds.openings)
+	const meta = getMeta( group );
+	const openings = meta !== null && Array.isArray( meta.openings ) ? meta.openings : [];
+	const parts = definition.parts( parameters, { openings } );
 	const materialSpecs = definition.materials( parameters );
 
 	// peças atuais indexadas pelo identificador estável
@@ -267,8 +272,57 @@ function regenerateComponent( group, definition, parameters, hooks ) {
 
 }
 
+// Hooks padrão para regenerar componentes que já estão na cena (mantêm os registros do Editor coerentes).
+// Antes ficavam dentro do SetComponentParametersCommand; agora são compartilhados com os comandos de abertura (EV-007).
+function editorHooks( editor ) {
+
+	return {
+
+		editor,
+
+		addPart( mesh, group, index ) {
+
+			editor.addObject( mesh, group, index );
+
+		},
+
+		removePart( mesh ) {
+
+			editor.removeObject( mesh );
+			mesh.geometry.dispose();
+
+		},
+
+		replaceGeometry( mesh, geometry ) {
+
+			const old = mesh.geometry;
+			mesh.geometry = geometry;
+			editor.addGeometry( geometry );
+
+			// descarta a geometria antiga só se nenhum outro objeto da cena a utiliza
+			let shared = false;
+			editor.scene.traverse( ( child ) => {
+
+				if ( child !== mesh && child.geometry === old ) shared = true;
+
+			} );
+
+			if ( shared === false ) {
+
+				delete editor.geometries[ old.uuid ];
+				old.dispose();
+
+			}
+
+		}
+
+	};
+
+}
+
 export {
 	META_KEY,
+	editorHooks,
 	getMeta,
 	setMeta,
 	getComponentData,

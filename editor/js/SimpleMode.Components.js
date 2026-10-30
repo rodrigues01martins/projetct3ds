@@ -35,9 +35,17 @@ const COMPONENTS = [
 			{ key: 'color', label: 'Cor', type: 'color', material: 'main', default: '#e8e4dc' }
 		],
 		materials: ( p ) => ( { main: { label: 'Parede', color: p.color, roughness: 0.9 } } ),
-		parts: ( p ) => [
-			{ id: 'parede', label: 'Parede', size: [ p.width, p.height, p.thickness ], position: [ 0, p.height / 2, 0 ], material: 'main' }
-		]
+		// EV-007: com aberturas (portas/janelas hospedadas) a peça usa a geometria com vãos reais;
+		// sem aberturas continua sendo a caixa da EV-003
+		parts: ( p, context ) => {
+
+			const openings = context !== undefined && Array.isArray( context.openings ) ? context.openings : [];
+
+			return [
+				{ id: 'parede', label: 'Parede', size: [ p.width, p.height, p.thickness ], position: [ 0, p.height / 2, 0 ], material: 'main', shape: openings.length > 0 ? 'wall-openings' : 'box', openings }
+			];
+
+		}
 	},
 
 	// C02 ------------------------------------------------------------------

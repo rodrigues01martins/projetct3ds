@@ -14,12 +14,18 @@ import { MultiCmdsCommand } from './commands/MultiCmdsCommand.js';
 import { validateParameters } from './SimpleMode.Components.js';
 import { getComponentState } from './SimpleMode.ComponentFactory.js';
 import { getPartMeta } from './SimpleMode.Appearance.js';
+import { SetWallOpeningCommand } from './commands/SetWallOpeningCommand.js';
+import { isWall, isHostedFixture, getOpenings, getOpeningOf, getWallParameters } from './SimpleMode.Openings.js';
+import { validateOpening, validateWallChange } from './SimpleMode.OpeningValidation.js';
 
 import { getSimpleString as t } from './SimpleMode.Strings.js';
 import { createSimpleButton, createText } from './SimpleMode.Icons.js';
 import { SimpleNumberInput } from './SimpleMode.Inputs.js';
 
 const AXIS_INDEX = { x: 0, y: 1, z: 2 };
+
+// EV-007: parâmetros de porta/janela hospedada definidos pela parede (profundidade = espessura + 2 cm; peitoril = posição)
+const HOSTED_LOCKED = [ 'frameDepth', 'leafThickness', 'depth', 'sill' ];
 
 function SimpleModeComponentProperties( editor, context, dimensionSection, parameterSection ) {
 
@@ -142,6 +148,47 @@ function SimpleModeComponentProperties( editor, context, dimensionSection, param
 
 		if ( parameters[ parameter.key ] === state.parameters[ parameter.key ] ) return;
 
+		// EV-007: largura/altura de porta/janela hospedada mudam o vão inteiro (abertura + componente + parede)
+		if ( isHostedFixture( object ) ) {
+
+			if ( HOSTED_LOCKED.includes( parameter.key ) ) {
+
+				context.notify( t( 'opening/lockedParameter' ), 'warning' );
+				refresh();
+				return;
+
+			}
+
+			const opening = getOpeningOf( object );
+
+			if ( opening !== null && ( parameter.key === 'width' || parameter.key === 'height' ) ) {
+
+				const candidate = Object.assign( {}, opening, { [ parameter.key ]: value } );
+				const problem = validateOpening( getWallParameters( object.parent ), getOpenings( object.parent ), candidate, { ignoreId: opening.id } );
+
+				if ( problem !== null ) {
+
+					context.notify( t( 'opening/problem/' + problem.code ), 'warning' );
+					refresh();
+					return;
+
+				}
+
+				editor.execute( new SetWallOpeningCommand( editor, object.parent, opening.id, { [ parameter.key ]: value } ) );
+				return;
+
+			}
+
+		}
+
+		// EV-007: parede com aberturas não pode ficar menor que seus vãos (validado antes de alterar)
+		if ( isWall( object ) && wallChangeBlocked( object, parameters ) ) {
+
+			refresh();
+			return;
+
+		}
+
 		const invalid = validateParameters( state.definition, parameters );
 
 		if ( invalid !== null ) {
@@ -186,6 +233,8 @@ function SimpleModeComponentProperties( editor, context, dimensionSection, param
 
 		}
 
+		if ( isWall( object ) && wallChangeBlocked( object, parameters ) ) return;
+
 		const command = new MultiCmdsCommand( editor, [
 			new SetComponentParametersCommand( editor, object, parameters ),
 			new SetScaleCommand( editor, object, object.scale.clone().set( 1, 1, 1 ) )
@@ -194,6 +243,19 @@ function SimpleModeComponentProperties( editor, context, dimensionSection, param
 		editor.execute( command );
 
 		context.notify( t( 'message/component/scaleApplied' ), 'success' );
+
+	}
+
+	function wallChangeBlocked( wall, parameters ) {
+
+		const openings = getOpenings( wall );
+		if ( openings.length === 0 ) return false;
+
+		const problem = validateWallChange( parameters, openings );
+		if ( problem === null ) return false;
+
+		context.notify( t( 'opening/wallBlocked', t( 'opening/problem/' + problem.code ) ), 'warning' );
+		return true;
 
 	}
 
@@ -206,6 +268,7 @@ function SimpleModeComponentProperties( editor, context, dimensionSection, param
 		const { object, state } = current;
 		const scaled = isScaled( object );
 		const unit = units.getUnit();
+		const hosted = isHostedFixture( object );
 
 		for ( const { parameter, input, row } of fields ) {
 
@@ -228,7 +291,10 @@ function SimpleModeComponentProperties( editor, context, dimensionSection, param
 			const factor = parameter.dimension !== undefined ? Math.abs( object.scale.getComponent( AXIS_INDEX[ parameter.dimension ] ) ) : 1;
 
 			input.setValue( value * factor );
-			input.setDisabled( state.editable !== true || ( parameter.dimension !== undefined && scaled ) );
+			const locked = hosted && HOSTED_LOCKED.includes( parameter.key );
+			input.setDisabled( state.editable !== true || ( parameter.dimension !== undefined && scaled ) || locked );
+			row.dom.classList.toggle( 'disabled', locked );
+			row.dom.title = locked ? t( 'opening/lockedParameter' ) : ( parameter.hint || '' );
 
 			const suffix = row.dom.querySelector( '.SimpleUnitSuffix' );
 			if ( suffix !== null ) suffix.textContent = unit.label;

@@ -9,6 +9,7 @@ import { AddObjectCommand } from './commands/AddObjectCommand.js';
 
 import { CATEGORIES, COMPONENTS, getDefaultParameters, getParameterSize } from './SimpleMode.Components.js';
 import { createComponent, getComponentData, findComponentRoot } from './SimpleMode.ComponentFactory.js';
+import { findHostedFixture } from './SimpleMode.Openings.js';
 import { isLightingGroup } from './SimpleMode.Lighting.js';
 
 import { getSimpleString as t } from './SimpleMode.Strings.js';
@@ -353,7 +354,8 @@ function SimpleModeLibrary( editor, context, basicsContent ) {
 	// realça o cartão do tipo de componente selecionado na cena
 	function highlightSelected() {
 
-		const root = editor.selected !== null ? findComponentRoot( editor.selected, editor.scene ) : null;
+		const hosted = findHostedFixture( editor.selected, editor.scene ); // EV-007: porta/janela dentro da parede
+		const root = editor.selected !== null ? ( hosted !== null ? hosted : findComponentRoot( editor.selected, editor.scene ) ) : null;
 		const data = root !== null ? getComponentData( root ) : null;
 
 		for ( const [ id, card ] of catalogCards ) card.classList.toggle( 'current', data !== null && data.id === id );

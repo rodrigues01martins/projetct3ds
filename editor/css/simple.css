@@ -2196,8 +2196,8 @@ body.mode-simple #viewport.tool-active canvas {
 	margin-top: 8px;
 }
 
-/* EV-006: com as ferramentas de construção a barra só cabe com rótulos a partir de ~1400 px */
-@media all and ( max-width: 1400px ) {
+/* EV-006/EV-007: com as ferramentas de construção e de aberturas a barra só cabe com rótulos a partir de ~1640 px */
+@media all and ( max-width: 1640px ) {
 
 	#simple-center .SimpleTool .SimpleButtonLabel {
 		display: none;
@@ -2512,4 +2512,39 @@ body.mode-simple #viewport.tool-active canvas {
 		display: none;
 	}
 
+}
+
+/* ------------------------------------------------------------------ */
+/* EV-007: portas e janelas em paredes                                  */
+/* ------------------------------------------------------------------ */
+
+/* lista: aberturas aninhadas sob a parede */
+#simple-left .SimpleObjectRow.nested {
+	padding-left: 18px;
+}
+
+	#simple-left .SimpleObjectRow.nested .SimpleMark {
+		visibility: hidden;
+	}
+
+	#simple-left .SimpleObjectRow.nested .SimpleObjectItem {
+		font-size: 12px;
+	}
+
+#simple-right .SimpleOpeningWall {
+	margin: 4px 0 8px;
+}
+
+#simple-right .SimpleOpeningActions {
+	flex-wrap: wrap;
+	margin-top: 8px;
+}
+
+#simple-right .SimpleOpeningHosted .SimpleNotice,
+#simple-right .SimpleOpeningWallSummary .SimpleNotice {
+	margin-top: 8px;
+}
+
+#simple-right .SimpleComponentFields .SimpleDimensionRow.disabled {
+	opacity: 0.6;
 }

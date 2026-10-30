@@ -309,6 +309,13 @@ function Viewport( editor ) {
 
 	}
 
+	// EV-007: the Simple Mode may forbid free transforms (e.g. doors/windows hosted in a wall)
+	function canAttach( object ) {
+
+		return canTransform( object ) && ( editor.transformFilter === undefined || editor.transformFilter( object ) );
+
+	}
+
 	signals.transformModeChanged.add( function ( mode ) {
 
 		transformMode = mode;
@@ -321,7 +328,7 @@ function Viewport( editor ) {
 
 			transformControls.setMode( mode );
 
-			if ( transformControls.object === undefined && canTransform( editor.selected ) ) {
+			if ( transformControls.object === undefined && canAttach( editor.selected ) ) {
 
 				transformControls.attach( editor.selected );
 
@@ -472,7 +479,7 @@ function Viewport( editor ) {
 
 			}
 
-			if ( transformMode !== 'select' ) transformControls.attach( object );
+			if ( transformMode !== 'select' && canAttach( object ) ) transformControls.attach( object );
 
 		}
 

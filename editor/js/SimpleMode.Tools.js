@@ -8,6 +8,8 @@ import { createIcon, createSimpleButton, createText } from './SimpleMode.Icons.j
 import { SimpleModeLightingPanel } from './SimpleMode.LightingPanel.js';
 import { isLightingGroup } from './SimpleMode.Lighting.js';
 import { SimpleModeConstructionPanel } from './SimpleMode.ConstructionPanel.js';
+import { SimpleModeOpeningPanel } from './SimpleMode.OpeningTools.js';
+import { isHostedFixture } from './SimpleMode.Openings.js';
 
 const TOOLS = [ 'select', 'translate', 'rotate', 'scale' ];
 
@@ -82,7 +84,9 @@ function SimpleModeTools( editor, context ) {
 	const INTERACTIVE = [
 		{ id: 'measure', icon: 'measure' },
 		{ id: 'wall', icon: 'wallTool' },
-		{ id: 'floor', icon: 'floorTool' }
+		{ id: 'floor', icon: 'floorTool' },
+		{ id: 'door', icon: 'door' }, // EV-007
+		{ id: 'window', icon: 'window' }
 	];
 
 	const interactiveButtons = {};
@@ -100,7 +104,7 @@ function SimpleModeTools( editor, context ) {
 		button.dom.setAttribute( 'aria-pressed', 'false' );
 		button.dom.dataset.tool = item.id;
 
-		if ( item.id === 'wall' ) toolbar.add( new UIDiv().setClass( 'SimpleToolSeparator' ) );
+		if ( item.id === 'wall' || item.id === 'door' ) toolbar.add( new UIDiv().setClass( 'SimpleToolSeparator' ) );
 
 		toolbar.add( button );
 		interactiveButtons[ item.id ] = button;
@@ -152,6 +156,13 @@ function SimpleModeTools( editor, context ) {
 
 		// escolher Selecionar/Mover/Girar/Redimensionar encerra medição e construção
 		if ( internalChange === false && interaction.isActive() ) interaction.deactivate();
+
+		// EV-007: porta/janela hospedada só se move ao longo da parede (sem alças livres)
+		if ( mode !== 'select' && internalChange === false && document.body.classList.contains( 'mode-simple' ) && isHostedFixture( editor.selected ) ) {
+
+			context.notify( t( 'opening/locked' ) );
+
+		}
 
 		updateToolButtons();
 
@@ -288,6 +299,9 @@ function SimpleModeTools( editor, context ) {
 
 	// EV-006: opções da ferramenta de construção ativa
 	new SimpleModeConstructionPanel( editor, context, container );
+
+	// EV-007: opções da ferramenta Porta/Janela/Reposicionar
+	new SimpleModeOpeningPanel( editor, context, container );
 
 	function updateMeasureStatus() {
 

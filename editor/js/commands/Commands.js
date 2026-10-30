@@ -1,9 +1,11 @@
 export { AddObjectCommand } from './AddObjectCommand.js';
 export { AddScriptCommand } from './AddScriptCommand.js';
+export { AddWallOpeningCommand } from './AddWallOpeningCommand.js';
 export { MoveObjectCommand } from './MoveObjectCommand.js';
 export { MultiCmdsCommand } from './MultiCmdsCommand.js';
 export { RemoveObjectCommand } from './RemoveObjectCommand.js';
 export { RemoveScriptCommand } from './RemoveScriptCommand.js';
+export { RemoveWallOpeningCommand } from './RemoveWallOpeningCommand.js';
 export { SetAppearanceCommand } from './SetAppearanceCommand.js';
 export { SetColorCommand } from './SetColorCommand.js';
 export { SetComponentParametersCommand } from './SetComponentParametersCommand.js';
@@ -24,3 +26,4 @@ export { SetScriptValueCommand } from './SetScriptValueCommand.js';
 export { SetShadowValueCommand } from './SetShadowValueCommand.js';
 export { SetUuidCommand } from './SetUuidCommand.js';
 export { SetValueCommand } from './SetValueCommand.js';
+export { SetWallOpeningCommand } from './SetWallOpeningCommand.js';

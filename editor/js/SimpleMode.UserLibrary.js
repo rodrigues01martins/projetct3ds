@@ -19,6 +19,7 @@ import { getComponentData, setMeta, createComponent, findComponentRoot } from '.
 import { getAppearance, getProcedural, applyPart, rebuildProceduralMaps, stripProceduralMaps } from './SimpleMode.Appearance.js';
 import { sanitizeSpec } from './SimpleMode.MaterialCatalog.js';
 import { isKnownTexture } from './SimpleMode.Textures.js';
+import { isHostedFixture, getOpeningOf, containsOpenings } from './SimpleMode.Openings.js';
 
 const DB_NAME = 'project3ds-library';
 const DB_VERSION = 1;
@@ -280,6 +281,10 @@ function createRecord( object, name, category ) {
 		// componente paramétrico: guarda só a definição (pequeno, reconstruído com geometria nova)
 		const parameters = migrateParameters( definition, data.parameters, data.version );
 
+		// EV-007: janela hospedada salva sozinha volta a ser independente (peitoril = altura do vão na parede)
+		const opening = isHostedFixture( object ) ? getOpeningOf( object ) : null;
+		if ( parameters !== null && opening !== null && opening.type === 'window' ) parameters.sill = opening.bottomY;
+
 		if ( parameters !== null && validateParameters( definition, parameters ) === null ) {
 
 			record.kind = 'parametric';
@@ -467,7 +472,11 @@ function UserLibrary() {
 		canSave( object, scene ) {
 
 			if ( object === null || object === scene || object.parent === null ) return 'Selecione um objeto da cena.';
-			const root = findComponentRoot( object, scene );
+
+			// EV-007: o vínculo parede → porta/janela não é guardado em "Meus componentes"
+			if ( containsOpenings( object ) ) return 'Paredes com portas ou janelas ainda não podem ser salvas em "Meus componentes". Salve a parede sem aberturas ou a porta/janela separadamente.';
+
+			const root = isHostedFixture( object ) ? object : findComponentRoot( object, scene );
 			if ( root !== null && root !== object ) return 'Selecione o componente inteiro, não uma parte dele.';
 
 			const data = getComponentData( object );
