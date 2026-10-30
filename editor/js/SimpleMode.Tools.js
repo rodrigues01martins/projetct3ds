@@ -12,6 +12,7 @@ import { SimpleModeOpeningPanel } from './SimpleMode.OpeningTools.js';
 import { isHostedFixture } from './SimpleMode.Openings.js';
 import { SimpleModeViewPanel } from './SimpleMode.ViewPanel.js';
 import { SimpleModeWalkthroughPanel } from './SimpleMode.Walkthrough.js';
+import { SimpleModePlanView } from './SimpleMode.PlanView.js';
 
 const TOOLS = [ 'select', 'translate', 'rotate', 'scale' ];
 
@@ -310,6 +311,9 @@ function SimpleModeTools( editor, context ) {
 
 	// EV-008: orientações e saída da exploração em primeira pessoa
 	new SimpleModeWalkthroughPanel( editor, context, container );
+
+	// EV-009: planta baixa técnica (prancha 2D sobre a área de visualização)
+	context.planView = new SimpleModePlanView( editor, context, container );
 
 	function updateMeasureStatus() {
 

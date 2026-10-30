@@ -117,6 +117,7 @@ function Presentation( editor, context, interaction, cameras ) {
 
 		}
 
+		if ( context.planView !== undefined ) context.planView.close(); // EV-009: a apresentação usa a cena 3D
 		context.startTool( 'present' );
 		return true;
 

@@ -28,3 +28,4 @@ export { SetUuidCommand } from './SetUuidCommand.js';
 export { SetValueCommand } from './SetValueCommand.js';
 export { SetWallOpeningCommand } from './SetWallOpeningCommand.js';
 export { SetSavedViewsCommand } from './SetSavedViewsCommand.js';
+export { SetPlanCommand } from './SetPlanCommand.js';

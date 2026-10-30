@@ -232,6 +232,29 @@ function SimpleModeTopbar( editor, context ) {
 		onClick: () => context.presentation.start()
 	} ) );
 
+	// EV-009: planta baixa e documentação técnica
+	const planButton = createSimpleButton( {
+		icon: 'plan', label: t( 'topbar/plan' ), title: t( 'topbar/plan/title' ),
+		className: 'SimplePlanButton',
+		onClick: () => context.planView.toggle()
+	} );
+	planButton.dom.setAttribute( 'aria-pressed', 'false' );
+	showGroup.add( planButton );
+
+	// o painel da planta é criado depois da barra superior: acompanha o estado quando estiver disponível
+	setTimeout( () => {
+
+		if ( context.planView === undefined ) return;
+		context.planView.changed.add( () => {
+
+			const open = context.planView.isOpen();
+			planButton.dom.classList.toggle( 'active', open );
+			planButton.dom.setAttribute( 'aria-pressed', open );
+
+		} );
+
+	} );
+
 	// espaço flexível
 
 	container.add( new UIDiv().setClass( 'SimpleSpacer' ) );

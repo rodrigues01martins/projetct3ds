@@ -57,6 +57,9 @@ const ICON_PATHS = {
 	templates: '<rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><path d="M17 14v6M14 17h6"/>',
 	light: '<circle cx="12" cy="11" r="4.5"/><path d="M9.5 18h5M10.5 21h3M12 2v1.5M4.2 4.2l1.1 1.1M19.8 4.2l-1.1 1.1M2 11h1.5M20.5 11H22"/>',
 
+	// EV-009 — planta baixa
+	plan: '<path d="M3 4h18v16H3z"/><path d="M3 11h7v9M10 4v4M14 4v7h7M14 15h7"/>',
+
 	// EV-008 — visualização e apresentação
 	views: '<path d="M12 3 4 7.5v9L12 21l8-4.5v-9z"/><path d="M4 7.5 12 12l8-4.5M12 12v9"/>',
 	walk: '<circle cx="13" cy="4.5" r="1.8"/><path d="m10 21 2.5-6 2.5 2.5V21"/><path d="M12.5 15 11 9.5l-3 2V15"/><path d="m11 9.5 3.5-.5 2 3 2.5 1"/>',

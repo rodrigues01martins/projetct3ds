@@ -195,6 +195,9 @@ function SimpleMode( editor ) {
 			// EV-008: o Modo Avançado usa a câmera principal (perspectiva equivalente à vista técnica atual)
 			cameras.toPerspective();
 
+			// EV-009: a planta baixa é uma visualização do Modo Simples
+			if ( context.planView !== undefined ) context.planView.close();
+
 			// a ferramenta "Selecionar" não existe no Modo Avançado: volta para "Mover"
 			signals.transformModeChanged.dispatch( 'translate' );
 
