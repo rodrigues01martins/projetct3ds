@@ -9,6 +9,8 @@ class EditorControls extends THREE.EventDispatcher {
 		// API
 
 		this.enabled = true;
+		this.object = object; // EV-008: pode ser trocada (câmera ortográfica transitória das vistas técnicas)
+		this.enableRotate = true; // EV-008: falso nas vistas ortográficas técnicas (arrastar desloca a vista)
 		this.center = new THREE.Vector3();
 		this.panSpeed = 0.002;
 		this.zoomSpeed = 0.1;
@@ -60,9 +62,23 @@ class EditorControls extends THREE.EventDispatcher {
 
 			}
 
+			var object = scope.object;
+
 			delta.set( 0, 0, 1 );
 			delta.applyQuaternion( object.quaternion );
-			delta.multiplyScalar( distance * 4 );
+
+			if ( object.isOrthographicCamera ) {
+
+				// mantém a distância da câmera; o enquadramento é feito pelo zoom
+				delta.multiplyScalar( Math.max( object.position.distanceTo( center ), distance * 4 ) );
+				object.zoom = Math.min( object.top - object.bottom, object.right - object.left ) / ( distance * 2 * 1.3 );
+				object.updateProjectionMatrix();
+
+			} else {
+
+				delta.multiplyScalar( distance * 4 );
+
+			}
 
 			object.position.copy( center ).add( delta );
 
@@ -72,9 +88,21 @@ class EditorControls extends THREE.EventDispatcher {
 
 		this.pan = function ( delta ) {
 
-			var distance = object.position.distanceTo( center );
+			var object = scope.object;
 
-			delta.multiplyScalar( distance * scope.panSpeed );
+			if ( object.isOrthographicCamera ) {
+
+				// unidades do mundo por pixel: altura visível / altura do elemento
+				var height = domElement !== null && domElement.clientHeight > 0 ? domElement.clientHeight : 1;
+				delta.multiplyScalar( ( object.top - object.bottom ) / object.zoom / height );
+
+			} else {
+
+				var distance = object.position.distanceTo( center );
+				delta.multiplyScalar( distance * scope.panSpeed );
+
+			}
+
 			delta.applyMatrix3( normalMatrix.getNormalMatrix( object.matrix ) );
 
 			object.position.add( delta );
@@ -85,6 +113,19 @@ class EditorControls extends THREE.EventDispatcher {
 		};
 
 		this.zoom = function ( delta ) {
+
+			var object = scope.object;
+
+			if ( object.isOrthographicCamera ) {
+
+				// projeção ortográfica: aproximar = aumentar o zoom (mover a câmera não muda a escala)
+				object.zoom = THREE.MathUtils.clamp( object.zoom * Math.pow( 1.1, - delta.z ), 0.01, 1000 );
+				object.updateProjectionMatrix();
+
+				scope.dispatchEvent( changeEvent );
+				return;
+
+			}
 
 			var distance = object.position.distanceTo( center );
 
@@ -101,6 +142,10 @@ class EditorControls extends THREE.EventDispatcher {
 		};
 
 		this.rotate = function ( delta ) {
+
+			if ( scope.enableRotate === false ) return;
+
+			var object = scope.object;
 
 			vector.copy( object.position ).sub( center );
 
@@ -207,7 +252,7 @@ class EditorControls extends THREE.EventDispatcher {
 
 			if ( event.button === 0 ) {
 
-				state = STATE.ROTATE;
+				state = scope.enableRotate ? STATE.ROTATE : STATE.PAN;
 
 			} else if ( event.button === 1 ) {
 
@@ -355,7 +400,18 @@ class EditorControls extends THREE.EventDispatcher {
 				case 1:
 					touches[ 0 ].set( event.pageX, event.pageY, 0 ).divideScalar( window.devicePixelRatio );
 					touches[ 1 ].set( event.pageX, event.pageY, 0 ).divideScalar( window.devicePixelRatio );
-					scope.rotate( touches[ 0 ].sub( getClosest( touches[ 0 ], prevTouches ) ).multiplyScalar( - 1 ) );
+					if ( scope.enableRotate ) {
+
+						scope.rotate( touches[ 0 ].sub( getClosest( touches[ 0 ], prevTouches ) ).multiplyScalar( - 1 ) );
+
+					} else {
+
+						var offset = touches[ 0 ].clone().sub( getClosest( touches[ 0 ], prevTouches ) );
+						offset.x = - offset.x;
+						scope.pan( offset );
+
+					}
+
 					break;
 
 				case 2:

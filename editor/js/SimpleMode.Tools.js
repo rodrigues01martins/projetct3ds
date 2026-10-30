@@ -10,6 +10,8 @@ import { isLightingGroup } from './SimpleMode.Lighting.js';
 import { SimpleModeConstructionPanel } from './SimpleMode.ConstructionPanel.js';
 import { SimpleModeOpeningPanel } from './SimpleMode.OpeningTools.js';
 import { isHostedFixture } from './SimpleMode.Openings.js';
+import { SimpleModeViewPanel } from './SimpleMode.ViewPanel.js';
+import { SimpleModeWalkthroughPanel } from './SimpleMode.Walkthrough.js';
 
 const TOOLS = [ 'select', 'translate', 'rotate', 'scale' ];
 
@@ -263,6 +265,9 @@ function SimpleModeTools( editor, context ) {
 	// EV-004: iluminação (acesso discreto ao lado de Encaixe e Grade)
 	context.lightingPanel = new SimpleModeLightingPanel( editor, context, options, container );
 
+	// EV-008: seletor "Vistas" (fim da barra de opções), controles junto ao viewport e "Minhas vistas"
+	context.viewPanel = new SimpleModeViewPanel( editor, context, options, container );
+
 	function updatePrecision() {
 
 		snapSelect.value = precision.getSnapOption().id;
@@ -302,6 +307,9 @@ function SimpleModeTools( editor, context ) {
 
 	// EV-007: opções da ferramenta Porta/Janela/Reposicionar
 	new SimpleModeOpeningPanel( editor, context, container );
+
+	// EV-008: orientações e saída da exploração em primeira pessoa
+	new SimpleModeWalkthroughPanel( editor, context, container );
 
 	function updateMeasureStatus() {
 

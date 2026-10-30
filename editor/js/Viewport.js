@@ -42,6 +42,16 @@ function Viewport( editor ) {
 	const scene = editor.scene;
 	const sceneHelpers = editor.sceneHelpers;
 
+	// EV-008: as vistas técnicas do Modo Simples exibem uma câmera ortográfica TRANSITÓRIA (fora da cena e de
+	// editor.cameras, userData.transientView = true). Seleção, alças, navegação e auxiliares usam sempre a câmera
+	// efetivamente exibida; nos demais casos o comportamento original (editor.camera) é mantido.
+	function getEditingCamera() {
+
+		const viewportCamera = editor.viewportCamera;
+		return viewportCamera.userData.transientView === true ? viewportCamera : camera;
+
+	}
+
 	// helpers
 
 	const GRID_COLORS_LIGHT = [ 0x999999, 0x777777 ];
@@ -177,6 +187,22 @@ function Viewport( editor ) {
 
 		}
 
+		// EV-008: câmera ortográfica transitória mantém a altura visível e ajusta a largura à proporção
+		const transient = editor.viewportCamera;
+
+		if ( transient.userData.transientView === true && transient.isOrthographicCamera ) {
+
+			const aspect = container.dom.offsetWidth / container.dom.offsetHeight;
+			const height = transient.userData.frustumHeight;
+
+			transient.left = - height * aspect / 2;
+			transient.right = height * aspect / 2;
+			transient.top = height / 2;
+			transient.bottom = - height / 2;
+			transient.updateProjectionMatrix();
+
+		}
+
 	}
 
 	const onDownPosition = new THREE.Vector2();
@@ -194,7 +220,7 @@ function Viewport( editor ) {
 
 		if ( onDownPosition.distanceTo( onUpPosition ) === 0 ) {
 
-			const intersects = selector.getPointerIntersects( onUpPosition, camera );
+			const intersects = selector.getPointerIntersects( onUpPosition, getEditingCamera() );
 			signals.intersectionsDetected.dispatch( intersects );
 
 			render();
@@ -256,7 +282,7 @@ function Viewport( editor ) {
 		const array = getMousePosition( container.dom, event.clientX, event.clientY );
 		onDoubleClickPosition.fromArray( array );
 
-		const intersects = selector.getPointerIntersects( onDoubleClickPosition, camera );
+		const intersects = selector.getPointerIntersects( onDoubleClickPosition, getEditingCamera() );
 
 		if ( intersects.length > 0 ) {
 
@@ -278,8 +304,8 @@ function Viewport( editor ) {
 	const controls = new EditorControls( camera );
 	controls.addEventListener( 'change', function () {
 
-		signals.cameraChanged.dispatch( camera );
-		signals.refreshSidebarObject3D.dispatch( camera );
+		signals.cameraChanged.dispatch( controls.object );
+		signals.refreshSidebarObject3D.dispatch( controls.object );
 
 	} );
 	viewHelper.center = controls.center;
@@ -408,6 +434,7 @@ function Viewport( editor ) {
 		transformControls.connect( newRenderer.domElement );
 
 		renderer = newRenderer;
+		editor.viewportRenderer = renderer; // EV-008: exportação de imagem do Modo Simples (mesmos materiais, sombras e iluminação)
 
 		renderer.setAnimationLoop( animate );
 		renderer.setClearColor( 0xaaaaaa );
@@ -723,7 +750,12 @@ function Viewport( editor ) {
 
 		// disable EditorControls when setting a user camera
 
-		controls.enabled = ( viewportCamera === editor.camera );
+		// EV-008: a câmera ortográfica transitória continua editável (seleção, alças e navegação nela)
+		const editing = getEditingCamera();
+		controls.object = editing;
+		controls.enabled = ( viewportCamera === editor.camera || viewportCamera === editing );
+		transformControls.camera = editing;
+		viewHelper.panel.dom.hidden = editing !== camera; // orientação da vista perspectiva
 
 		initPT();
 		render();
@@ -947,12 +979,15 @@ function Viewport( editor ) {
 		renderer.setViewport( 0, 0, container.dom.offsetWidth, container.dom.offsetHeight );
 		renderer.render( scene, editor.viewportCamera );
 
-		if ( camera === editor.viewportCamera ) {
+		// EV-008: no Modo Apresentação a vista fica limpa (sem grade, alças, seleção e auxiliares)
+		if ( getEditingCamera() === editor.viewportCamera && editor.hideViewportHelpers !== true ) {
+
+			const editing = editor.viewportCamera;
 
 			renderer.autoClear = false;
-			if ( grid.visible === true ) renderer.render( grid, camera );
-			if ( sceneHelpers.visible === true ) renderer.render( sceneHelpers, camera );
-			if ( renderer.xr.isPresenting !== true ) viewHelper.render( renderer );
+			if ( grid.visible === true ) renderer.render( grid, editing );
+			if ( sceneHelpers.visible === true ) renderer.render( sceneHelpers, editing );
+			if ( renderer.xr.isPresenting !== true && editing === camera ) viewHelper.render( renderer );
 			renderer.autoClear = true;
 
 		}

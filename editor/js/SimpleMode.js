@@ -25,6 +25,9 @@ import { ConstructionTools } from './SimpleMode.ConstructionTools.js';
 import { OpeningTools } from './SimpleMode.OpeningTools.js';
 import { findHostedFixture, isHostedFixture, getOpeningOf } from './SimpleMode.Openings.js';
 import { RemoveWallOpeningCommand } from './commands/RemoveWallOpeningCommand.js';
+import { CameraController } from './SimpleMode.CameraController.js';
+import { Walkthrough } from './SimpleMode.Walkthrough.js';
+import { Presentation, SimpleModePresentationBar } from './SimpleMode.Presentation.js';
 
 import { getSimpleString as t } from './SimpleMode.Strings.js';
 
@@ -117,6 +120,12 @@ function SimpleMode( editor ) {
 	// EV-007: inserir porta, inserir janela e reposicionar abertura
 	context.openings = new OpeningTools( editor, context, interaction );
 
+	// EV-008: vistas e câmeras transitórias, exploração em primeira pessoa e apresentação das vistas salvas
+	const cameras = new CameraController( editor );
+	context.cameras = cameras;
+	context.walkthrough = new Walkthrough( editor, context, interaction, cameras );
+	context.presentation = new Presentation( editor, context, interaction, cameras );
+
 	// EV-007: Delete/Backspace sobre uma porta/janela hospedada remove a abertura inteira (vão fechado, um Desfazer)
 	window.addEventListener( 'keydown', function ( event ) {
 
@@ -147,6 +156,9 @@ function SimpleMode( editor ) {
 		new SimpleModeProperties( editor, context ),
 		toasts
 	);
+
+	// EV-008: barra discreta do Modo Apresentação (fora dos painéis, que ficam ocultos durante a apresentação)
+	container.add( new SimpleModePresentationBar( editor, context ) );
 
 	// EV-005: galeria de projetos prontos (aberta por "Novo" ou pelo convite da cena vazia)
 	const gallery = new SimpleModeTemplateGallery( editor, context );
@@ -179,6 +191,9 @@ function SimpleMode( editor ) {
 			// encerra a régua e as ferramentas de construção, removendo prévias e marcadores temporários
 			interaction.deactivate();
 			measure.deactivate();
+
+			// EV-008: o Modo Avançado usa a câmera principal (perspectiva equivalente à vista técnica atual)
+			cameras.toPerspective();
 
 			// a ferramenta "Selecionar" não existe no Modo Avançado: volta para "Mover"
 			signals.transformModeChanged.dispatch( 'translate' );

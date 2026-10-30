@@ -2260,6 +2260,22 @@ body.mode-simple #viewport.tool-active canvas {
 /* Responsivo                                                           */
 /* ------------------------------------------------------------------ */
 
+/* EV-008: com Imagem e Apresentar a barra superior só cabe com todos os rótulos a partir de ~1600 px */
+@media all and ( max-width: 1600px ) {
+
+	#simple-topbar .SimpleHistoryGroup .SimpleButtonLabel,
+	#simple-topbar .SimpleShowGroup .SimpleButtonLabel {
+		display: none;
+	}
+
+	#simple-topbar .SimpleHistoryGroup .SimpleButton,
+	#simple-topbar .SimpleShowGroup .SimpleButton {
+		width: 36px;
+		padding: 0;
+	}
+
+}
+
 @media all and ( max-width: 1180px ) {
 
 	:root {
@@ -2547,4 +2563,351 @@ body.mode-simple #viewport.tool-active canvas {
 
 #simple-right .SimpleComponentFields .SimpleDimensionRow.disabled {
 	opacity: 0.6;
+}
+
+/* ------------------------------------------------------------------ */
+/* EV-008: vistas, exploração, Minhas vistas, exportação e apresentação */
+/* ------------------------------------------------------------------ */
+
+/* seletor "Vista" na barra de opções */
+#simple-center .SimpleViewSelect.orthographic .SimpleIcon {
+	color: var(--simple-accent);
+}
+
+/* controles junto ao viewport (acima do indicador de orientação) */
+#simple-center .SimpleViewControls {
+	position: absolute;
+	right: var(--simple-gap);
+	bottom: 140px;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	padding: 4px;
+	background: var(--simple-surface);
+	border: 1px solid var(--simple-border);
+	border-radius: var(--simple-radius);
+	box-shadow: var(--simple-shadow);
+}
+
+	#simple-center .SimpleViewControl {
+		width: 34px;
+		height: 34px;
+		padding: 0;
+		justify-content: center;
+		background: transparent;
+		border-color: transparent;
+	}
+
+		#simple-center .SimpleViewControl.active {
+			color: #fff;
+			background: var(--simple-accent);
+		}
+
+		#simple-center .SimpleViewControl.disabled {
+			opacity: 0.45;
+		}
+
+/* painel "Minhas vistas" */
+#simple-center .SimpleSavedViews {
+	right: calc(var(--simple-gap) + 52px);
+	bottom: 140px;
+	width: 320px;
+	max-width: calc(100% - 80px);
+	max-height: calc(100% - 200px);
+}
+
+	#simple-center .SimpleSavedViewForm {
+		display: flex;
+		gap: 6px;
+		margin: 8px 0;
+	}
+
+		#simple-center .SimpleSavedViewForm .SimpleTextInput {
+			flex: 1;
+			min-width: 0;
+		}
+
+		#simple-center .SimpleSavedViewForm .SimpleButton {
+			flex: none;
+		}
+
+	#simple-center .SimpleSavedViewList {
+		display: grid;
+		gap: 2px;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	#simple-center .SimpleSavedView {
+		display: flex;
+		align-items: center;
+		gap: 4px;
+		padding: 2px 2px 2px 6px;
+		border-radius: 8px;
+	}
+
+		#simple-center .SimpleSavedView:hover {
+			background: var(--simple-surface-2);
+		}
+
+	#simple-center .SimpleSavedViewNumber {
+		flex: none;
+		width: 18px;
+		font-size: 11px;
+		font-weight: 700;
+		color: var(--simple-text-muted);
+		text-align: center;
+	}
+
+	#simple-center .SimpleSavedViewGo {
+		display: flex;
+		flex: 1;
+		align-items: center;
+		gap: 6px;
+		min-width: 0;
+		padding: 6px 4px;
+		font: inherit;
+		text-align: left;
+		color: var(--simple-text);
+		background: transparent;
+		border: 0;
+		border-radius: 6px;
+		cursor: pointer;
+	}
+
+		#simple-center .SimpleSavedViewGo:focus-visible {
+			box-shadow: var(--simple-focus);
+			outline: none;
+		}
+
+	#simple-center .SimpleSavedViewName {
+		overflow: hidden;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+	}
+
+	#simple-center .SimpleSavedViewRename {
+		flex: 1;
+		min-width: 0;
+		height: 30px;
+	}
+
+	#simple-center .SimpleSavedViewActions {
+		display: flex;
+		flex: none;
+	}
+
+		#simple-center .SimpleSavedViewActions .SimpleIconButton {
+			width: 26px;
+			height: 26px;
+		}
+
+		#simple-center .SimpleSavedViewActions .SimpleIconButton:disabled {
+			opacity: 0.3;
+			cursor: default;
+		}
+
+	#simple-center .SimpleSavedViewEmpty {
+		display: block;
+		margin: 4px 0;
+	}
+
+	#simple-center .SimpleSavedViewFooter {
+		margin-top: 10px;
+	}
+
+/* exploração em primeira pessoa */
+body.mode-simple #viewport.exploring canvas {
+	cursor: grab;
+}
+
+#simple-center .SimpleWalkKeys {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px 12px;
+	font-size: 12px;
+	color: var(--simple-text-muted);
+}
+
+	#simple-center .SimpleWalkKeys kbd {
+		display: inline-block;
+		padding: 1px 5px;
+		font: inherit;
+		font-size: 11px;
+		font-weight: 700;
+		color: var(--simple-text);
+		background: var(--simple-surface-2);
+		border: 1px solid var(--simple-border);
+		border-radius: 4px;
+	}
+
+/* exportar imagem (painel suspenso da barra superior) */
+#simple-export {
+	position: fixed;
+	z-index: 20;
+	box-sizing: border-box;
+	width: 320px;
+	max-width: calc(100vw - 16px);
+	padding: 10px 14px 14px;
+	color: var(--simple-text);
+	background: var(--simple-surface);
+	border: 1px solid var(--simple-border);
+	border-radius: var(--simple-radius);
+	box-shadow: var(--simple-shadow);
+}
+
+	#simple-export .SimpleExportField {
+		display: grid;
+		gap: 4px;
+		margin-top: 10px;
+	}
+
+	#simple-export .SimpleExportStatus {
+		display: block;
+		margin: 10px 0;
+	}
+
+		#simple-export .SimpleExportStatus.invalid {
+			color: var(--simple-danger, #d93025);
+		}
+
+/* Modo Apresentação: só a cena e uma barra discreta */
+body.mode-simple.presenting #simple-topbar,
+body.mode-simple.presenting #simple-left,
+body.mode-simple.presenting #simple-right,
+body.mode-simple.presenting #simple-center,
+body.mode-simple.presenting #viewHelper {
+	display: none !important;
+}
+
+body.mode-simple.presenting #viewport {
+	top: 0 !important;
+	left: 0 !important;
+	right: 0 !important;
+	bottom: 0 !important;
+}
+
+#simple-mode .SimplePresentationBar {
+	position: fixed;
+	left: 50%;
+	bottom: 20px;
+	z-index: 30;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 6px;
+	font-family: var(--simple-font, system-ui, sans-serif);
+	color: var(--simple-text);
+	background: var(--simple-surface);
+	border: 1px solid var(--simple-border);
+	border-radius: 999px;
+	box-shadow: var(--simple-shadow);
+	transform: translateX(-50%);
+	opacity: 0.92;
+}
+
+	#simple-mode .SimplePresentationBar:hover,
+	#simple-mode .SimplePresentationBar:focus-within {
+		opacity: 1;
+	}
+
+	#simple-mode .SimplePresentationInfo {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		min-width: 140px;
+		max-width: 46vw;
+		padding: 0 8px;
+		line-height: 1.2;
+	}
+
+	#simple-mode .SimplePresentationName {
+		overflow: hidden;
+		max-width: 100%;
+		font-weight: 700;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+	}
+
+	#simple-mode .SimplePresentationPosition {
+		font-size: 12px;
+		color: var(--simple-text-muted);
+	}
+
+	#simple-mode .SimplePresentationBar .SimplePresentExit {
+		border-radius: 999px;
+	}
+
+@media all and ( max-width: 760px ) {
+
+	/* barra de opções rola na horizontal em vez de vazar da tela */
+	#simple-center .SimpleViewOptions {
+		overflow-x: auto;
+	}
+
+	/* controles em linha, ao lado do botão de ajuda (o indicador de orientação fica à direita) */
+	#simple-center .SimpleViewControls {
+		left: calc(var(--simple-gap) + 50px);
+		right: auto;
+		bottom: var(--simple-gap);
+		flex-direction: row;
+	}
+
+	#simple-center .SimpleSavedViews {
+		left: var(--simple-gap);
+		right: var(--simple-gap);
+		bottom: calc(var(--simple-gap) + 52px);
+		width: auto;
+		max-width: none;
+		max-height: calc(100% - 120px);
+	}
+
+}
+
+/* campos de texto e cabeçalhos dos painéis da EV-008 (mesmo visual do painel direito) */
+#simple-center .SimpleSavedViews .SimpleTextInput,
+#simple-export .SimpleTextInput {
+	width: 100%;
+	height: 34px;
+	box-sizing: border-box;
+	padding: 0 10px !important;
+	font: inherit;
+	color: var(--simple-text);
+	background: var(--simple-surface-2);
+	border: 1px solid transparent !important;
+	border-radius: 8px;
+	outline: none;
+	user-select: text;
+}
+
+	#simple-center .SimpleSavedViews .SimpleTextInput:focus,
+	#simple-export .SimpleTextInput:focus {
+		border-color: var(--simple-accent) !important;
+		box-shadow: var(--simple-focus);
+	}
+
+#simple-export .SimpleHelpHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+#simple-export .SimpleHelpTitle {
+	font-weight: 700;
+}
+
+#simple-export .SimpleSubLabel {
+	font-size: 12px;
+	color: var(--simple-text-muted);
+}
+
+#simple-export .SimpleSelect {
+	width: 100%;
+}
+
+#simple-export .SimpleActions {
+	display: grid;
+	grid-template-columns: 1fr auto;
+	gap: 8px;
 }

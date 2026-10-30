@@ -5,6 +5,7 @@ import { UIDiv, UIInput } from './libs/ui.js';
 
 import { getSimpleString as t } from './SimpleMode.Strings.js';
 import { createIcon, createSimpleButton, createText } from './SimpleMode.Icons.js';
+import { SimpleModeImageExport } from './SimpleMode.ImageExport.js';
 
 function SimpleModeTopbar( editor, context ) {
 
@@ -168,7 +169,7 @@ function SimpleModeTopbar( editor, context ) {
 
 	// histórico
 
-	const historyGroup = new UIDiv().setClass( 'SimpleGroup' );
+	const historyGroup = new UIDiv().setClass( 'SimpleGroup SimpleHistoryGroup' );
 	container.add( historyGroup );
 
 	const undo = createSimpleButton( {
@@ -208,6 +209,28 @@ function SimpleModeTopbar( editor, context ) {
 
 	signals.historyChanged.add( updateHistoryButtons );
 	updateHistoryButtons();
+
+	// EV-008: exportar imagem PNG e apresentar as vistas salvas
+
+	const showGroup = new UIDiv().setClass( 'SimpleGroup SimpleShowGroup' );
+	container.add( showGroup );
+
+	const exportButton = createSimpleButton( {
+		icon: 'image', label: t( 'topbar/export' ), title: t( 'topbar/export/title' ),
+		onClick: () => imageExport.toggle()
+	} );
+	exportButton.dom.setAttribute( 'aria-haspopup', 'dialog' );
+	exportButton.dom.setAttribute( 'aria-expanded', 'false' );
+	exportButton.dom.setAttribute( 'aria-controls', 'simple-export' );
+	showGroup.add( exportButton );
+
+	const imageExport = new SimpleModeImageExport( editor, context, exportButton.dom );
+	context.imageExport = imageExport;
+
+	showGroup.add( createSimpleButton( {
+		icon: 'present', label: t( 'topbar/present' ), title: t( 'topbar/present/title' ),
+		onClick: () => context.presentation.start()
+	} ) );
 
 	// espaço flexível
 

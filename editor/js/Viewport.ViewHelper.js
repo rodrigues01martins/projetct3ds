@@ -32,6 +32,8 @@ class ViewHelper extends ViewHelperBase {
 
 		container.add( panel );
 
+		this.panel = panel; // EV-008: oculto nas vistas ortográficas técnicas do Modo Simples
+
 	}
 
 }

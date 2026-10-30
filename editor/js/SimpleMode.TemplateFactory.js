@@ -18,8 +18,9 @@ import { getDefinition, getDefaultParameters, validateParameters } from './Simpl
 import { createComponent } from './SimpleMode.ComponentFactory.js';
 import { applyPart, getParts } from './SimpleMode.Appearance.js';
 import { getMaterialPreset, specFromPreset } from './SimpleMode.MaterialCatalog.js';
-import { getScenario, defaultSettings, createLightingGroup, applySettingsToGroup, isLightingGroup } from './SimpleMode.Lighting.js';
+import { getScenario, defaultSettings, createLightingGroup, applySettingsToGroup } from './SimpleMode.Lighting.js';
 import { UNITS } from './SimpleMode.Units.js';
+import { getProjectBox, perspectiveFrame } from './SimpleMode.CameraController.js';
 import { TEMPLATE_LIMITS, getTemplateCategory } from './SimpleMode.ProjectTemplates.js';
 
 const DEFAULT_CAMERA_DIRECTION = [ 0.9, 0.8, 1.3 ]; // de frente e à direita, levemente de cima (isométrica aproximada)
@@ -127,39 +128,25 @@ function prepareTemplate( template ) {
 
 // câmera -------------------------------------------------------------------------------------------
 
-// Enquadra os objetos úteis da cena (sem auxiliares nem o grupo de iluminação), mantendo a câmera do editor
+// Enquadra os objetos úteis da cena (sem auxiliares nem o grupo de iluminação), mantendo a câmera do editor.
+// EV-008: limites e distância vêm do módulo de câmeras (o mesmo cálculo de "Enquadrar projeto").
 function frameScene( editor, direction = DEFAULT_CAMERA_DIRECTION ) {
 
-	const box = new THREE.Box3();
-
-	for ( const object of editor.scene.children ) {
-
-		if ( isLightingGroup( object ) || object.isLight === true ) continue;
-		box.expandByObject( object, true );
-
-	}
+	const box = getProjectBox( editor );
 
 	if ( box.isEmpty() ) return false;
 
 	const camera = editor.camera;
-	const center = box.getCenter( new THREE.Vector3() );
-	const radius = box.getBoundingSphere( new THREE.Sphere() ).radius;
+	const frame = perspectiveFrame( box, direction, camera.fov, camera.aspect );
 
-	// distância para que a esfera envolvente caiba no menor ângulo de visão (vertical ou horizontal)
-	const vertical = THREE.MathUtils.degToRad( camera.fov );
-	const horizontal = 2 * Math.atan( Math.tan( vertical / 2 ) * camera.aspect );
-	const distance = radius / Math.sin( Math.min( vertical, horizontal ) / 2 ) * 1.05;
-
-	const offset = new THREE.Vector3().fromArray( direction ).normalize().multiplyScalar( distance );
-
-	camera.position.copy( center ).add( offset );
-	camera.lookAt( center );
-	camera.near = Math.max( 0.001, distance / 1000 );
-	camera.far = Math.max( 1e4, distance * 100 );
+	camera.position.copy( frame.position );
+	camera.lookAt( frame.target );
+	camera.near = Math.max( 0.001, frame.distance / 1000 );
+	camera.far = Math.max( 1e4, frame.distance * 100 );
 	camera.updateProjectionMatrix();
 	camera.updateMatrixWorld();
 
-	if ( editor.controls !== undefined ) editor.controls.center.copy( center );
+	if ( editor.controls !== undefined ) editor.controls.center.copy( frame.target );
 
 	editor.signals.cameraChanged.dispatch( camera );
 

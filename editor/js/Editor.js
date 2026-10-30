@@ -672,6 +672,9 @@ Editor.prototype = {
 		var loader = new THREE.ObjectLoader();
 		var camera = await loader.parseAsync( json.camera );
 
+		// EV-008: a câmera do editor é sempre perspectiva; outro tipo (arquivo inconsistente) não é copiado sobre ela
+		if ( camera.isPerspectiveCamera !== true ) camera = _DEFAULT_CAMERA.clone();
+
 		const existingUuid = this.camera.uuid;
 		const incomingUuid = camera.uuid;
 
@@ -730,7 +733,8 @@ Editor.prototype = {
 				toneMapping: this.config.getKey( 'project/renderer/toneMapping' ),
 				toneMappingExposure: this.config.getKey( 'project/renderer/toneMappingExposure' )
 			},
-			camera: this.viewportCamera.toJSON(),
+			// EV-008: a câmera ortográfica transitória das vistas técnicas nunca é gravada como câmera do editor
+			camera: ( this.viewportCamera.userData.transientView === true ? this.camera : this.viewportCamera ).toJSON(),
 			controls: this.controls.toJSON(),
 			scene: this.scene.toJSON(),
 			scripts: this.scripts,
