@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<!-- EV-012: visualizador somente leitura. A política abaixo só permite código deste site (nenhum script, folha
+		     de estilo, imagem remota, requisição externa ou plugin indicado pelo arquivo recebido pode ser carregado). -->
+		<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tQiVMI/2hb9eJZ5z1iMsFs6FWM3vzaI0WVLYOUsc6Kg='; style-src 'self'; img-src 'self' data: blob:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'">
+		<meta name="referrer" content="no-referrer">
+		<title>Visualizador Project3DS</title>
+		<link rel="icon" href="../../files/favicon.ico">
+		<link rel="stylesheet" href="css/viewer.css">
+		<script type="importmap">{ "imports": { "three": "../../build/three.module.js", "three/addons/": "../../examples/jsm/" } }</script>
+	</head>
+	<body>
+		<noscript>O Visualizador Project3DS precisa de JavaScript habilitado.</noscript>
+		<script type="module" src="js/Viewer.js"></script>
+	</body>
+</html>

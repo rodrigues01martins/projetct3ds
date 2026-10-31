@@ -32,6 +32,9 @@ import { ProjectDialog } from './SimpleMode.ProjectDialog.js';
 import { ProjectManager } from './SimpleMode.ProjectManager.js';
 import { SimpleModeProjectGallery } from './SimpleMode.ProjectGallery.js';
 import { SimpleModeProjectStatus } from './SimpleMode.ProjectStatus.js';
+import { ReviewManager } from './SimpleMode.ReviewManager.js';
+import { SimpleModeShareDialog } from './SimpleMode.ShareDialog.js';
+import { SimpleModeReviewPanel } from './SimpleMode.ReviewPanel.js';
 
 import { getSimpleString as t } from './SimpleMode.Strings.js';
 
@@ -174,6 +177,14 @@ function SimpleMode( editor ) {
 	context.openProjects = ( tab ) => projectGallery.open( tab );
 	new SimpleModeProjectStatus( editor, context, context.projectStatusAnchor, container.dom );
 
+	// EV-012: compartilhamento (pacote de visualização) e revisões devolvidas pelos destinatários
+	context.reviews = new ReviewManager( editor, context );
+	const shareDialog = new SimpleModeShareDialog( editor, context, container.dom );
+	const reviewPanel = new SimpleModeReviewPanel( editor, context, context.reviews, container.dom );
+	context.openShare = () => shareDialog.show();
+	context.openReviews = () => reviewPanel.show();
+	context.importReview = () => reviewPanel.importFile();
+
 	// EV-005: galeria de projetos prontos (aberta por "Novo" ou pelo convite da cena vazia)
 	const gallery = new SimpleModeTemplateGallery( editor, context );
 	container.dom.appendChild( gallery.dom );
@@ -284,6 +295,7 @@ function SimpleMode( editor ) {
 		notify,
 		context,
 		projects: context.projects,
+		reviews: context.reviews,
 		initialMode: config.getKey( MODE_KEY ) === 'advanced' ? 'advanced' : 'simple'
 	};
 

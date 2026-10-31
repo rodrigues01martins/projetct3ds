@@ -70,6 +70,19 @@ const assets = [
 
 	'../examples/jsm/environments/ColorEnvironment.js',
 	'../examples/jsm/environments/RoomEnvironment.js',
+	'../examples/jsm/controls/OrbitControls.js',
+
+	// EV-012 — visualizador somente leitura (rede primeiro: com conexão, sempre a versão publicada mais recente;
+	// o cache só atende sem conexão. Pacotes de versão de formato desconhecida são recusados com aviso.)
+	'./viewer/',
+	'./viewer/index.html',
+	'./viewer/css/viewer.css',
+	'./viewer/js/Viewer.js',
+	'./viewer/js/ViewerLoader.js',
+	'./viewer/js/ViewerControls.js',
+	'./viewer/js/ViewerSelection.js',
+	'./viewer/js/ViewerComments.js',
+	'./viewer/js/ViewerFeedback.js',
 
 	'../examples/jsm/exporters/DRACOExporter.js',
 	'../examples/jsm/exporters/GLTFExporter.js',
@@ -198,6 +211,13 @@ const assets = [
 	'./js/SimpleMode.ProjectStatus.js',
 	'./js/SimpleMode.ProjectStorage.js',
 	'./js/SimpleMode.ProjectThumbnails.js',
+	'./js/SimpleMode.ShareData.js',
+	'./js/SimpleMode.ShareExport.js',
+	'./js/SimpleMode.ShareDialog.js',
+	'./js/SimpleMode.ReviewData.js',
+	'./js/SimpleMode.ReviewManager.js',
+	'./js/SimpleMode.ReviewPanel.js',
+	'./js/SimpleMode.ReviewMarkers.js',
 	'./js/SimpleMode.Properties.js',
 	'./js/SimpleMode.Quantities.js',
 	'./js/SimpleMode.QuantityRules.js',
@@ -279,6 +299,7 @@ const assets = [
 	'./js/commands/SetSavedViewsCommand.js',
 	'./js/commands/SetPlanCommand.js',
 	'./js/commands/SetBudgetCommand.js',
+	'./js/commands/SetProjectReviewsCommand.js',
 	'./js/commands/SetRotationCommand.js',
 	'./js/commands/SetScaleCommand.js',
 	'./js/commands/SetValueCommand.js',

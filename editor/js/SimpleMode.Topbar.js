@@ -196,6 +196,97 @@ function SimpleModeTopbar( editor, context ) {
 	exportJSONButton.dom.dataset.action = 'export-json';
 	fileGroup.add( exportJSONButton );
 
+	// EV-012: compartilhar o projeto (pacote de visualização) e acompanhar as revisões devolvidas
+	const shareButton = createSimpleButton( {
+		icon: 'share', label: t( 'topbar/share' ), title: t( 'topbar/share/title' ),
+		className: 'SimpleShareButton',
+		onClick: () => ( shareMenu.hidden ? openShareMenu() : closeShareMenu() )
+	} );
+	shareButton.dom.dataset.action = 'share';
+	shareButton.dom.setAttribute( 'aria-haspopup', 'menu' );
+	shareButton.dom.setAttribute( 'aria-expanded', 'false' );
+	fileGroup.add( shareButton );
+
+	// classes próprias (não .SimpleMenuItem): o menu "Novo" continua com exatamente as suas duas opções
+	const shareMenu = document.createElement( 'div' );
+	shareMenu.className = 'SimpleMenu SimpleShareMenu';
+	shareMenu.setAttribute( 'role', 'menu' );
+	shareMenu.setAttribute( 'aria-label', t( 'topbar/share' ) );
+	shareMenu.hidden = true;
+
+	for ( const [ key, icon, action ] of [[ 'share', 'share', () => context.openShare() ], [ 'reviews', 'comment', () => context.openReviews() ], [ 'import', 'open', () => context.importReview() ]] ) {
+
+		const item = document.createElement( 'button' );
+		item.type = 'button';
+		item.className = 'SimpleShareMenuItem';
+		item.dataset.item = key;
+		item.setAttribute( 'role', 'menuitem' );
+		item.tabIndex = - 1;
+		item.appendChild( createIcon( icon ) );
+		const text = document.createElement( 'span' );
+		const strong = document.createElement( 'strong' );
+		strong.textContent = t( 'topbar/share/' + key );
+		const hint = document.createElement( 'small' );
+		hint.textContent = t( 'topbar/share/' + key + '/hint' );
+		text.append( strong, hint );
+		item.appendChild( text );
+		item.addEventListener( 'click', () => {
+
+			closeShareMenu( false );
+			action();
+
+		} );
+		shareMenu.appendChild( item );
+
+	}
+
+	shareMenu.addEventListener( 'keydown', function ( event ) {
+
+		event.stopPropagation();
+		const items = [ ...shareMenu.querySelectorAll( '.SimpleShareMenuItem' ) ];
+		const index = items.indexOf( document.activeElement );
+		if ( event.key === 'ArrowDown' || event.key === 'ArrowUp' ) {
+
+			event.preventDefault();
+			items[ ( index + ( event.key === 'ArrowDown' ? 1 : items.length - 1 ) ) % items.length ].focus();
+
+		} else if ( event.key === 'Escape' || event.key === 'Tab' ) {
+
+			event.preventDefault();
+			closeShareMenu();
+
+		}
+
+	} );
+
+	document.body.appendChild( shareMenu );
+
+	function openShareMenu() {
+
+		const rect = shareButton.dom.getBoundingClientRect();
+		shareMenu.style.left = Math.max( 8, Math.min( rect.left, window.innerWidth - 300 ) ) + 'px';
+		shareMenu.style.top = ( rect.bottom + 6 ) + 'px';
+		shareMenu.hidden = false;
+		shareButton.dom.setAttribute( 'aria-expanded', 'true' );
+		shareMenu.querySelector( '.SimpleShareMenuItem' ).focus();
+
+	}
+
+	function closeShareMenu( restoreFocus = true ) {
+
+		if ( shareMenu.hidden ) return;
+		shareMenu.hidden = true;
+		shareButton.dom.setAttribute( 'aria-expanded', 'false' );
+		if ( restoreFocus ) shareButton.dom.focus();
+
+	}
+
+	document.addEventListener( 'mousedown', ( event ) => {
+
+		if ( shareMenu.hidden === false && shareMenu.contains( event.target ) === false && shareButton.dom.contains( event.target ) === false ) closeShareMenu( false );
+
+	} );
+
 	// histórico
 
 	const historyGroup = new UIDiv().setClass( 'SimpleGroup SimpleHistoryGroup' );

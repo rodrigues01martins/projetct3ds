@@ -4285,3 +4285,634 @@ body.mode-simple.budget-open #simple-center {
 	}
 
 }
+
+/* ============================================================================================================
+   EV-012 — Compartilhamento, visualização e revisão colaborativa
+   ============================================================================================================ */
+
+#simple-topbar .SimpleShareButton .SimpleButtonLabel {
+	display: none;
+}
+
+/* telas médias: a marca dá lugar ao botão Compartilhar (a barra cabe sem rolagem) */
+@media all and ( min-width: 761px ) and ( max-width: 1100px ) {
+
+	#simple-topbar .SimpleBrand {
+		display: none;
+	}
+
+}
+
+.SimpleShareMenu {
+	width: 300px;
+}
+
+	.SimpleShareMenu .SimpleShareMenuItem {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		padding: 8px 10px;
+		font: inherit;
+		text-align: left;
+		color: var(--simple-text);
+		background: transparent;
+		border: 0;
+		border-radius: 8px;
+		cursor: pointer;
+	}
+
+		.SimpleShareMenu .SimpleShareMenuItem:hover,
+		.SimpleShareMenu .SimpleShareMenuItem:focus-visible {
+			outline: none;
+			background: var(--simple-accent-soft);
+		}
+
+		.SimpleShareMenu .SimpleShareMenuItem > span {
+			display: flex;
+			flex-direction: column;
+			gap: 2px;
+		}
+
+		.SimpleShareMenu .SimpleShareMenuItem strong {
+			font-size: 13px;
+		}
+
+		.SimpleShareMenu .SimpleShareMenuItem small {
+			font-size: 12px;
+			color: var(--simple-text-muted);
+		}
+
+/* diálogo de compartilhamento */
+#simple-mode .SimpleShareOverlay {
+	position: fixed;
+	inset: 0;
+	z-index: 16;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 16px;
+	box-sizing: border-box;
+	background: #0007;
+}
+
+	#simple-mode .SimpleShareOverlay[hidden] {
+		display: none !important;
+	}
+
+#simple-mode .SimpleSharePanel {
+	display: flex;
+	flex-direction: column;
+	width: min(640px, 100%);
+	max-height: min(90vh, 860px);
+	box-sizing: border-box;
+	overflow: hidden;
+	color: var(--simple-text);
+	background: var(--simple-surface);
+	border-radius: 14px;
+	box-shadow: 0 20px 60px -10px #0008;
+}
+
+#simple-mode .SimpleShareHeader,
+#simple-mode .SimpleReviewsHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 14px 16px 8px 20px;
+}
+
+	#simple-mode .SimpleShareTitle,
+	#simple-mode .SimpleReviewsTitle {
+		margin: 0;
+		font-size: 17px;
+		font-weight: 700;
+	}
+
+	#simple-mode .SimpleShareClose .SimpleButtonLabel,
+	#simple-mode .SimpleReviewsClose .SimpleButtonLabel {
+		display: none;
+	}
+
+#simple-mode .SimpleShareBody {
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow: auto;
+	padding: 4px 20px 12px;
+	font-size: 13px;
+	line-height: 1.45;
+}
+
+	#simple-mode .SimpleShareIntro {
+		margin: 0 0 12px;
+		color: var(--simple-text-muted);
+	}
+
+	#simple-mode .SimpleShareFields {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 10px 14px;
+		margin-bottom: 12px;
+	}
+
+	#simple-mode .SimpleShareField {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+		font-weight: 600;
+		font-size: 12px;
+	}
+
+		#simple-mode .SimpleShareField:last-child {
+			grid-column: 1 / -1;
+		}
+
+		#simple-mode .SimpleShareField .SimpleInput {
+			width: 100%;
+			box-sizing: border-box;
+			font: inherit;
+			font-weight: 400;
+			font-size: 13px;
+		}
+
+		#simple-mode .SimpleShareField textarea.SimpleInput {
+			resize: vertical;
+			min-height: 56px;
+		}
+
+	#simple-mode .SimpleShareStatic {
+		font-weight: 400;
+		font-size: 13px;
+		padding: 6px 0;
+	}
+
+	#simple-mode .SimpleShareContents {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 4px 14px;
+		margin: 0 0 12px;
+		padding: 8px 12px 10px;
+		border: 1px solid var(--simple-border);
+		border-radius: 10px;
+	}
+
+		#simple-mode .SimpleShareContents legend {
+			padding: 0 4px;
+			font-weight: 700;
+			font-size: 12px;
+		}
+
+	#simple-mode .SimpleShareExcluded,
+	#simple-mode .SimpleShareNotes {
+		margin-bottom: 12px;
+		padding: 8px 12px;
+		background: var(--simple-bg);
+		border-radius: 10px;
+	}
+
+		#simple-mode .SimpleShareExcluded ul,
+		#simple-mode .SimpleShareNotes ul {
+			margin: 4px 0 0;
+			padding-left: 18px;
+			columns: 2;
+			column-gap: 24px;
+		}
+
+	#simple-mode .SimpleShareWarning {
+		margin: 0;
+		padding: 8px 12px;
+		color: #7a4d00;
+		background: #fff4d6;
+		border-radius: 10px;
+	}
+
+	#simple-mode .SimpleShareSummary {
+		width: 100%;
+		margin-bottom: 12px;
+		border-collapse: collapse;
+	}
+
+		#simple-mode .SimpleShareSummary th,
+		#simple-mode .SimpleShareSummary td {
+			padding: 5px 8px;
+			text-align: left;
+			vertical-align: top;
+			border-bottom: 1px solid var(--simple-border);
+		}
+
+		#simple-mode .SimpleShareSummary th {
+			width: 42%;
+			font-weight: 600;
+		}
+
+		#simple-mode .SimpleShareSummary tr[data-included="yes"] td::before {
+			content: "✓ ";
+			color: var(--simple-success);
+		}
+
+		#simple-mode .SimpleShareSummary tr[data-included="no"] td {
+			color: var(--simple-text-muted);
+		}
+
+		#simple-mode .SimpleShareSummary tr[data-included="no"] td::before {
+			content: "✕ ";
+		}
+
+	#simple-mode .SimpleShareAddress {
+		display: block;
+		margin: 6px 0 12px;
+		padding: 8px 10px;
+		overflow-wrap: anywhere;
+		background: var(--simple-bg);
+		border-radius: 8px;
+	}
+
+	#simple-mode .SimpleShareSteps {
+		margin: 0 0 10px;
+		padding-left: 20px;
+	}
+
+	#simple-mode .SimpleShareHint,
+	#simple-mode .SimpleReviewsHint {
+		margin: 6px 0;
+		font-size: 12px;
+		color: var(--simple-text-muted);
+	}
+
+#simple-mode .SimpleShareActions {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+	gap: 8px;
+	padding: 12px 20px 16px;
+	border-top: 1px solid var(--simple-border);
+}
+
+/* painel de revisões (gaveta à direita, sobre o painel de propriedades) */
+#simple-mode .SimpleReviewsPanel {
+	position: fixed;
+	top: var(--simple-topbar-height);
+	right: 0;
+	bottom: 0;
+	z-index: 14;
+	display: flex;
+	flex-direction: column;
+	width: min(400px, 100vw);
+	box-sizing: border-box;
+	overflow: auto;
+	color: var(--simple-text);
+	font-size: 13px;
+	background: var(--simple-surface);
+	border-left: 1px solid var(--simple-border);
+	box-shadow: -10px 0 30px -18px #0006;
+}
+
+	#simple-mode .SimpleReviewsPanel[hidden] {
+		display: none !important;
+	}
+
+	#simple-mode .SimpleReviewsToolbar,
+	#simple-mode .SimpleReviewsFilters,
+	#simple-mode .SimpleReviewActions {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 6px 8px;
+		padding: 4px 16px;
+	}
+
+	#simple-mode .SimpleReviewsHint {
+		padding: 0 16px;
+	}
+
+	#simple-mode .SimpleReviewsCounts {
+		display: grid;
+		grid-template-columns: repeat(5, 1fr);
+		gap: 4px;
+		padding: 6px 16px;
+	}
+
+		#simple-mode .SimpleReviewsCount {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 1px;
+			padding: 6px 2px;
+			font: inherit;
+			font-size: 11px;
+			color: var(--simple-text-muted);
+			background: var(--simple-bg);
+			border: 1px solid transparent;
+			border-radius: 8px;
+			cursor: pointer;
+		}
+
+			#simple-mode .SimpleReviewsCount strong {
+				font-size: 16px;
+				color: var(--simple-text);
+			}
+
+			#simple-mode .SimpleReviewsCount.active {
+				border-color: var(--simple-accent);
+				background: var(--simple-accent-soft);
+			}
+
+	#simple-mode .SimpleReviewsFilters .SimpleReviewsSearch {
+		flex: 1 1 140px;
+		min-width: 0;
+	}
+
+	#simple-mode .SimpleReviewsFilters .SimpleReviewsComponent {
+		flex: 1 1 120px;
+		min-width: 0;
+	}
+
+	#simple-mode .SimpleReviewsList {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		padding: 8px 16px 16px;
+	}
+
+	#simple-mode .SimpleReviewsEmpty {
+		color: var(--simple-text-muted);
+	}
+
+#simple-mode .SimpleReviewItem {
+	padding: 8px 10px;
+	background: var(--simple-bg);
+	border: 1px solid transparent;
+	border-radius: 10px;
+}
+
+	#simple-mode .SimpleReviewItem.selected {
+		border-color: var(--simple-accent);
+		background: var(--simple-surface);
+	}
+
+	#simple-mode .SimpleReviewItemHead {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		width: 100%;
+		padding: 0;
+		font: inherit;
+		text-align: left;
+		color: inherit;
+		background: none;
+		border: 0;
+		cursor: pointer;
+	}
+
+	#simple-mode .SimpleReviewNumber {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		flex: none;
+		width: 22px;
+		height: 22px;
+		font-size: 12px;
+		font-weight: 700;
+		color: #fff;
+		background: var(--simple-accent);
+		border-radius: 50%;
+	}
+
+	#simple-mode .SimpleReviewMeta {
+		flex: 1;
+		min-width: 0;
+		font-size: 12px;
+		color: var(--simple-text-muted);
+	}
+
+	#simple-mode .SimpleReviewStatusPill {
+		flex: none;
+		padding: 2px 8px;
+		font-size: 11px;
+		border-radius: 999px;
+		background: var(--simple-surface);
+		border: 1px solid var(--simple-border);
+	}
+
+	#simple-mode .SimpleReviewItem[data-status="open"] .SimpleReviewStatusPill { color: #9a6700; }
+	#simple-mode .SimpleReviewItem[data-status="analysis"] .SimpleReviewStatusPill { color: var(--simple-accent); }
+	#simple-mode .SimpleReviewItem[data-status="resolved"] .SimpleReviewStatusPill { color: var(--simple-success); }
+	#simple-mode .SimpleReviewItem[data-status="discarded"] .SimpleReviewStatusPill { color: var(--simple-text-muted); text-decoration: line-through; }
+
+	#simple-mode .SimpleReviewAnchor {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 4px 6px;
+		margin-top: 4px;
+		font-size: 12px;
+		font-weight: 600;
+	}
+
+	#simple-mode .SimpleReviewText {
+		margin: 4px 0 0;
+		white-space: pre-wrap;
+		overflow-wrap: anywhere;
+	}
+
+	#simple-mode .SimpleReviewRepliesCount {
+		font-size: 11px;
+		color: var(--simple-text-muted);
+	}
+
+#simple-mode .SimpleReviewBadge {
+	display: inline-block;
+	padding: 1px 6px;
+	font-size: 11px;
+	font-weight: 600;
+	border-radius: 6px;
+	background: var(--simple-accent-soft);
+	color: var(--simple-accent);
+}
+
+	#simple-mode .SimpleReviewBadge.missing,
+	#simple-mode .SimpleReviewBadge.conflict {
+		background: var(--simple-danger-soft);
+		color: var(--simple-danger);
+	}
+
+	#simple-mode .SimpleReviewBadge.stale {
+		background: #fff4d6;
+		color: #7a4d00;
+	}
+
+	#simple-mode .SimpleReviewBadge.project {
+		background: var(--simple-bg);
+		color: var(--simple-text-muted);
+	}
+
+#simple-mode .SimpleReviewDetails {
+	margin-top: 8px;
+	padding-top: 8px;
+	border-top: 1px solid var(--simple-border);
+}
+
+	#simple-mode .SimpleReviewDetails .SimpleReviewActions {
+		padding: 6px 0;
+	}
+
+	#simple-mode .SimpleReviewInfo {
+		display: grid;
+		grid-template-columns: auto 1fr;
+		gap: 2px 10px;
+		margin: 0 0 8px;
+		font-size: 12px;
+	}
+
+		#simple-mode .SimpleReviewInfo dt {
+			color: var(--simple-text-muted);
+		}
+
+		#simple-mode .SimpleReviewInfo dd {
+			margin: 0;
+			overflow-wrap: anywhere;
+		}
+
+	#simple-mode .SimpleReviewStatusRow {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		font-weight: 600;
+	}
+
+	#simple-mode .SimpleReviewWarning {
+		margin: 6px 0;
+		padding: 6px 10px;
+		font-size: 12px;
+		color: #7a4d00;
+		background: #fff4d6;
+		border-radius: 8px;
+	}
+
+	#simple-mode .SimpleReviewReply {
+		margin: 6px 0 0 12px;
+		padding: 6px 8px;
+		border-left: 3px solid var(--simple-border);
+	}
+
+		#simple-mode .SimpleReviewReply.own {
+			border-left-color: var(--simple-accent);
+		}
+
+	#simple-mode .SimpleReviewReplyForm {
+		display: flex;
+		gap: 6px;
+		align-items: flex-end;
+		margin-top: 8px;
+	}
+
+		#simple-mode .SimpleReviewReplyForm textarea {
+			flex: 1;
+			min-width: 0;
+			font: inherit;
+			resize: vertical;
+		}
+
+#simple-mode .SimpleReviewsImportView {
+	padding: 0 16px 16px;
+}
+
+	#simple-mode .SimpleReviewsImportView h3 {
+		margin: 4px 0 8px;
+		font-size: 14px;
+	}
+
+	#simple-mode .SimpleReviewsImportView .SimpleReviewActions {
+		padding: 8px 0 0;
+		justify-content: flex-end;
+	}
+
+	#simple-mode .SimpleReviewImportList {
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+		margin: 8px 0;
+		padding: 0;
+		list-style: none;
+	}
+
+		#simple-mode .SimpleReviewImportList li {
+			padding: 6px 8px;
+			background: var(--simple-bg);
+			border-radius: 8px;
+		}
+
+			#simple-mode .SimpleReviewImportList li strong {
+				margin-left: 6px;
+				font-size: 12px;
+			}
+
+/* marcadores: HTML sobre o viewport (não fazem parte da cena) */
+.SimpleReviewMarkers {
+	position: absolute;
+	inset: 0;
+	z-index: 3;
+	overflow: hidden;
+	pointer-events: none;
+}
+
+	.SimpleReviewMarkers[hidden] {
+		display: none;
+	}
+
+	.SimpleReviewMarker {
+		position: absolute;
+		left: 0;
+		top: 0;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 24px;
+		height: 24px;
+		padding: 0 6px;
+		box-sizing: border-box;
+		font: 700 12px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+		color: #fff;
+		background: #0a84ff;
+		border: 2px solid #fff;
+		border-radius: 12px 12px 12px 2px;
+		box-shadow: 0 2px 6px #0006;
+		cursor: pointer;
+		pointer-events: auto;
+	}
+
+		.SimpleReviewMarker[hidden] {
+			display: none;
+		}
+
+		.SimpleReviewMarker[data-status="resolved"] {
+			background: #2f9e66;
+		}
+
+		.SimpleReviewMarker[data-status="discarded"] {
+			background: #687083;
+		}
+
+		.SimpleReviewMarker.active {
+			outline: 3px solid #ffb020;
+		}
+
+@media all and ( max-width: 760px ) {
+
+	#simple-mode .SimpleShareFields,
+	#simple-mode .SimpleShareContents {
+		grid-template-columns: 1fr;
+	}
+
+	#simple-mode .SimpleShareExcluded ul,
+	#simple-mode .SimpleShareNotes ul {
+		columns: 1;
+	}
+
+	#simple-mode .SimpleReviewsPanel {
+		top: auto;
+		height: 70vh;
+		width: 100vw;
+		border-left: 0;
+		border-top: 1px solid var(--simple-border);
+	}
+
+}

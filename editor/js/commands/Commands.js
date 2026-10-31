@@ -30,3 +30,4 @@ export { SetWallOpeningCommand } from './SetWallOpeningCommand.js';
 export { SetSavedViewsCommand } from './SetSavedViewsCommand.js';
 export { SetPlanCommand } from './SetPlanCommand.js';
 export { SetBudgetCommand } from './SetBudgetCommand.js';
+export { SetProjectReviewsCommand } from './SetProjectReviewsCommand.js';
