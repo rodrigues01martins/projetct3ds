@@ -7,13 +7,13 @@ import { formatDate } from './SimpleMode.ProjectData.js';
 
 const LABELS = {
 	idle: { text: '', title: '' },
-	unregistered: { text: 'Não salvo em Meus projetos', title: 'A cena ainda não está em Meus projetos. Ela será registrada ao salvar (Ctrl+S) ou na primeira gravação automática.' },
-	pending: { text: 'Alterações pendentes', title: 'Há alterações que serão salvas automaticamente neste navegador em instantes.' },
-	draft: { text: 'Alterações pendentes', title: 'Salvamento automático desligado: as alterações estão num rascunho de recuperação até "Salvar projeto".' },
+	unregistered: { text: 'Não salvo', title: 'A cena ainda não está em Meus projetos. Ela será registrada ao salvar (Ctrl+S) ou na primeira gravação automática.' },
+	pending: { text: 'Pendente', title: 'Há alterações que serão salvas automaticamente neste navegador em instantes.' },
+	draft: { text: 'Pendente', title: 'Salvamento automático desligado: as alterações estão num rascunho de recuperação até "Salvar projeto".' },
 	saving: { text: 'Salvando…', title: 'Gravando no armazenamento local do navegador.' },
 	saved: { text: 'Salvo', title: 'Projeto salvo neste navegador.' },
-	error: { text: 'Erro ao salvar', title: 'A última gravação falhou. Os dados salvos anteriormente foram preservados.' },
-	conflict: { text: 'Conflito com outra aba', title: 'O projeto foi salvo em outra aba. Escolha recarregar ou salvar uma cópia.' },
+	error: { text: 'Erro', title: 'A última gravação falhou. Os dados salvos anteriormente foram preservados.' },
+	conflict: { text: 'Conflito', title: 'O projeto foi salvo em outra aba. Escolha recarregar ou salvar uma cópia.' },
 	loading: { text: 'Carregando…', title: 'Trocando de projeto.' }
 };
 
