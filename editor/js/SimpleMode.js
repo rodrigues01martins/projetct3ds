@@ -28,6 +28,10 @@ import { RemoveWallOpeningCommand } from './commands/RemoveWallOpeningCommand.js
 import { CameraController } from './SimpleMode.CameraController.js';
 import { Walkthrough } from './SimpleMode.Walkthrough.js';
 import { Presentation, SimpleModePresentationBar } from './SimpleMode.Presentation.js';
+import { ProjectDialog } from './SimpleMode.ProjectDialog.js';
+import { ProjectManager } from './SimpleMode.ProjectManager.js';
+import { SimpleModeProjectGallery } from './SimpleMode.ProjectGallery.js';
+import { SimpleModeProjectStatus } from './SimpleMode.ProjectStatus.js';
 
 import { getSimpleString as t } from './SimpleMode.Strings.js';
 
@@ -114,6 +118,11 @@ function SimpleMode( editor ) {
 
 	const context = { notify, setMode, units, precision, measure, alignment, userLibrary, interaction };
 
+	// EV-011: diálogo de confirmação e gestão de projetos (identidade, autosave, versões, recuperação).
+	// Criada antes dos painéis: instala os envoltórios de Editor.toJSON/clear antes de qualquer carregamento.
+	context.dialog = new ProjectDialog( container.dom );
+	context.projects = new ProjectManager( editor, context );
+
 	// EV-006: desenhar parede, criar piso, posicionar componente e apoiar objeto
 	context.construction = new ConstructionTools( editor, context, interaction );
 
@@ -159,6 +168,11 @@ function SimpleMode( editor ) {
 
 	// EV-008: barra discreta do Modo Apresentação (fora dos painéis, que ficam ocultos durante a apresentação)
 	container.add( new SimpleModePresentationBar( editor, context ) );
+
+	// EV-011: "Meus projetos" e indicador de persistência
+	const projectGallery = new SimpleModeProjectGallery( editor, context, container.dom );
+	context.openProjects = ( tab ) => projectGallery.open( tab );
+	new SimpleModeProjectStatus( editor, context, context.projectStatusAnchor, container.dom );
 
 	// EV-005: galeria de projetos prontos (aberta por "Novo" ou pelo convite da cena vazia)
 	const gallery = new SimpleModeTemplateGallery( editor, context );
@@ -269,6 +283,7 @@ function SimpleMode( editor ) {
 		createAdvancedToggle,
 		notify,
 		context,
+		projects: context.projects,
 		initialMode: config.getKey( MODE_KEY ) === 'advanced' ? 'advanced' : 'simple'
 	};
 

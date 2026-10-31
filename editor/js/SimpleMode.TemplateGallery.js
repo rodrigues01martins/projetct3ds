@@ -323,7 +323,17 @@ function SimpleModeTemplateGallery( editor, context ) {
 			// cópia de segurança opcional do projeto atual, pelo mesmo "Salvar" da barra superior
 			if ( replacing && backup.checked && context.saveProject !== undefined ) context.saveProject();
 
-			await applyTemplate( editor, template, { onTitle: context.setProjectTitle } );
+			// EV-011: o modelo vira um projeto independente em Meus projetos (o projeto atual é preservado antes)
+			const run = () => applyTemplate( editor, template, { onTitle: context.setProjectTitle } );
+			if ( context.projects !== undefined && context.projects.state.available ) {
+
+				if ( ( await context.projects.applyTemplate( run, template ) ) === false ) return;
+
+			} else {
+
+				await run();
+
+			}
 
 			close( false );
 			context.notify( t( 'message/template/opened', template.name ), 'success' );

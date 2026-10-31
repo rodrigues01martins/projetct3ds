@@ -32,6 +32,9 @@ function SimpleModeTopbar( editor, context ) {
 
 		config.setKey( 'project/title', projectName.getValue().trim() );
 
+		// EV-011: renomeia o projeto ativo (mesmo identificador; nenhum projeto novo é criado)
+		if ( context.projects !== undefined ) context.projects.renameActive( projectName.getValue().trim() );
+
 	} );
 	projectName.dom.addEventListener( 'keydown', function ( event ) {
 
@@ -39,6 +42,11 @@ function SimpleModeTopbar( editor, context ) {
 
 	} );
 	container.add( projectName );
+
+	// EV-011: indicador de persistência ao lado do título (criado pelo SimpleMode: Salvo · Pendente · Salvando · Erro)
+	const statusAnchor = new UIDiv().setClass( 'SimpleProjectStatusAnchor' );
+	container.add( statusAnchor );
+	context.projectStatusAnchor = statusAnchor.dom;
 
 	// o título é limpo pelo editor quando a cena é reiniciada (Sidebar.Project.App)
 
@@ -151,21 +159,42 @@ function SimpleModeTopbar( editor, context ) {
 
 	} );
 
-	fileGroup.add( createSimpleButton( {
+	const openButton = createSimpleButton( {
 		icon: 'open', label: t( 'topbar/open' ), title: t( 'topbar/open/title' ),
 		onClick: function () {
 
-			if ( editor.scene.children.length > 0 && confirm( t( 'confirm/open' ) ) === false ) return;
+			// EV-011: com Meus projetos o projeto atual é preservado; sem ele, confirma como antes
+			const preserved = context.projects !== undefined && context.projects.state.available;
+			if ( preserved === false && editor.scene.children.length > 0 && confirm( t( 'confirm/open' ) ) === false ) return;
 
 			openInput.click();
 
 		}
-	} ) );
+	} );
+	openButton.dom.dataset.action = 'open-json';
+	fileGroup.add( openButton );
 
-	fileGroup.add( createSimpleButton( {
+	// EV-011: "Meus projetos" (galeria local), "Salvar" no navegador e "Exportar" arquivo JSON são ações distintas
+	const projectsButton = createSimpleButton( {
+		icon: 'folder', label: t( 'topbar/projects' ), title: t( 'topbar/projects/title' ),
+		onClick: () => context.openProjects()
+	} );
+	projectsButton.dom.dataset.action = 'projects';
+	fileGroup.add( projectsButton );
+
+	const saveLocalButton = createSimpleButton( {
 		icon: 'save', label: t( 'topbar/save' ), title: t( 'topbar/save/title' ),
+		onClick: saveLocal
+	} );
+	saveLocalButton.dom.dataset.action = 'save-project';
+	fileGroup.add( saveLocalButton );
+
+	const exportJSONButton = createSimpleButton( {
+		icon: 'bookmark', label: t( 'topbar/exportJSON' ), title: t( 'topbar/exportJSON/title' ),
 		onClick: saveProject
-	} ) );
+	} );
+	exportJSONButton.dom.dataset.action = 'export-json';
+	fileGroup.add( exportJSONButton );
 
 	// histórico
 
@@ -364,12 +393,33 @@ function SimpleModeTopbar( editor, context ) {
 
 	// ações de arquivo
 
-	function newProject() {
+	// EV-011: o projeto atual é preservado em Meus projetos antes de limpar (sem perda silenciosa)
+	async function newProject() {
+
+		if ( context.projects !== undefined && context.projects.state.available ) {
+
+			if ( await context.projects.newBlank() ) context.notify( t( 'message/newProject' ), 'success' );
+			return;
+
+		}
 
 		if ( editor.scene.children.length > 0 && confirm( t( 'confirm/new' ) ) === false ) return;
 
 		editor.clear();
 		context.notify( t( 'message/newProject' ), 'success' );
+
+	}
+
+	async function saveLocal() {
+
+		if ( context.projects === undefined || context.projects.state.available === false ) {
+
+			context.notify( t( 'message/projects/unavailable' ), 'warning' );
+			return;
+
+		}
+
+		if ( await context.projects.save( 'manual' ) ) context.notify( t( 'message/projects/saved' ), 'success' );
 
 	}
 
@@ -449,6 +499,20 @@ function SimpleModeTopbar( editor, context ) {
 
 		const title = ( json.project && typeof json.project.title === 'string' && json.project.title !== '' ) ?
 			json.project.title : file.name.replace( /\.json$/i, '' );
+
+		// EV-011: o arquivo vira um projeto NOVO em Meus projetos (transição segura; o projeto atual é preservado)
+		if ( context.projects !== undefined && context.projects.state.available ) {
+
+			if ( await context.projects.importJSON( json, title ) ) {
+
+				projectName.setValue( config.getKey( 'project/title' ) );
+				context.notify( t( 'message/opened', config.getKey( 'project/title' ) ), 'success' );
+
+			}
+
+			return;
+
+		}
 
 		async function onEditorCleared() {
 

@@ -117,17 +117,16 @@
 
 				editor.storage.get( async function ( state ) {
 
-					if ( isLoadingFromHash ) return;
+					// EV-011: a gestão de projetos decide qual estado carregar (projeto ativo, recuperação ou estado antigo)
+					// e só então libera os salvamentos automáticos — um único carregamento, sem disputa na inicialização
+					if ( isLoadingFromHash ) {
 
-					if ( state !== undefined ) {
-
-						await editor.fromJSON( state );
-
-					} else {
-
-						editor.signals.sceneEnvironmentChanged.dispatch( 'Default' );
+						await simpleMode.projects.startup( undefined, { external: true } );
+						return;
 
 					}
+
+					await simpleMode.projects.startup( state );
 
 					const selected = editor.config.getKey( 'selected' );
 
@@ -151,13 +150,20 @@
 
 					}
 
+					// EV-011: nada é gravado durante a troca de projeto (a cena nova é gravada ao final da transição)
+					if ( simpleMode.projects.isTransitioning() ) return;
+
 					clearTimeout( timeout );
 
 					timeout = setTimeout( function () {
 
+						if ( simpleMode.projects.isTransitioning() ) return;
+
 						editor.signals.savingStarted.dispatch();
 
 						timeout = setTimeout( function () {
+
+							if ( simpleMode.projects.isTransitioning() ) return; // temporizador antigo nunca grava sobre a cena nova
 
 							editor.storage.set( editor.toJSON() );
 
@@ -182,6 +188,8 @@
 				signals.sceneGraphChanged.add( saveState );
 				signals.scriptChanged.add( saveState );
 				signals.historyChanged.add( saveState );
+
+				simpleMode.projects.setNativeSave( saveState );
 
 			} );
 

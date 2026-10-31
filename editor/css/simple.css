@@ -2264,12 +2264,16 @@ body.mode-simple #viewport.tool-active canvas {
 @media all and ( max-width: 1600px ) {
 
 	#simple-topbar .SimpleHistoryGroup .SimpleButtonLabel,
-	#simple-topbar .SimpleShowGroup .SimpleButtonLabel {
+	#simple-topbar .SimpleShowGroup .SimpleButtonLabel,
+	#simple-topbar [data-action="open-json"] .SimpleButtonLabel,
+	#simple-topbar [data-action="export-json"] .SimpleButtonLabel {
 		display: none;
 	}
 
 	#simple-topbar .SimpleHistoryGroup .SimpleButton,
-	#simple-topbar .SimpleShowGroup .SimpleButton {
+	#simple-topbar .SimpleShowGroup .SimpleButton,
+	#simple-topbar [data-action="open-json"],
+	#simple-topbar [data-action="export-json"] {
 		width: 36px;
 		padding: 0;
 	}
@@ -3745,6 +3749,525 @@ body.mode-simple.budget-open #simple-center {
 
 	#simple-center .SimpleBudgetExport {
 		margin-left: 0;
+	}
+
+}
+
+/* ------------------------------------------------------------------ */
+/* EV-011: gestão de projetos, versões e recuperação                    */
+/* ------------------------------------------------------------------ */
+
+#simple-topbar .SimpleProjectStatusAnchor {
+	display: flex;
+	align-items: center;
+	flex: none;
+	min-width: 0;
+}
+
+/* o indicador de projeto (pendente/salvando/salvo/erro) substitui o aviso "Salvo" do salvamento nativo */
+#simple-topbar:has(.SimpleProjectStatusAnchor) .SimpleSaving {
+	display: none;
+}
+
+#simple-mode .SimpleProjectStatus {
+	padding: 3px 8px;
+	font: inherit;
+	font-size: 11.5px;
+	white-space: nowrap;
+	color: var(--simple-text-muted);
+	background: var(--simple-surface-2);
+	border: 0;
+	border-radius: 999px;
+	cursor: pointer;
+	max-width: 150px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+	#simple-mode .SimpleProjectStatus[data-status="saved"] {
+		color: #1a7f37;
+	}
+
+	#simple-mode .SimpleProjectStatus[data-status="pending"],
+	#simple-mode .SimpleProjectStatus[data-status="draft"],
+	#simple-mode .SimpleProjectStatus[data-status="unregistered"] {
+		color: #9a6700;
+		background: #fff8e1;
+	}
+
+	#simple-mode .SimpleProjectStatus[data-status="error"],
+	#simple-mode .SimpleProjectStatus[data-status="conflict"] {
+		color: #fff;
+		background: var(--simple-danger);
+	}
+
+#simple-mode .SimpleProjectBanner {
+	position: fixed;
+	top: calc(var(--simple-topbar-height) + 8px);
+	left: 50%;
+	z-index: 18; /* abaixo dos menus suspensos (20): o aviso nunca bloqueia um comando */
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+	max-width: min(760px, calc(100vw - 24px));
+	padding: 10px 12px;
+	font-size: 13px;
+	color: var(--simple-text);
+	background: #fff8e1;
+	border: 1px solid #f0c36d;
+	border-radius: var(--simple-radius);
+	box-shadow: var(--simple-shadow);
+	transform: translateX(-50%);
+}
+
+	#simple-mode .SimpleProjectBanner p {
+		flex: 1 1 100%;
+		margin: 0;
+	}
+
+/* diálogo genérico */
+#simple-mode .SimpleDialogOverlay {
+	position: fixed;
+	inset: 0;
+	z-index: 60;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 16px;
+	background: rgba(15, 20, 30, 0.45);
+}
+
+	#simple-mode .SimpleDialogOverlay[hidden] {
+		display: none;
+	}
+
+#simple-mode .SimpleDialog {
+	box-sizing: border-box;
+	width: 460px;
+	max-width: 100%;
+	max-height: calc(100vh - 32px);
+	overflow: auto;
+	padding: 18px;
+	color: var(--simple-text);
+	background: var(--simple-surface);
+	border-radius: var(--simple-radius);
+	box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+}
+
+	#simple-mode .SimpleDialogTitle {
+		margin: 0 0 8px;
+		font-size: 16px;
+	}
+
+	#simple-mode .SimpleDialogMessage {
+		margin: 0 0 10px;
+		font-size: 13px;
+		line-height: 1.45;
+	}
+
+	#simple-mode .SimpleDialogDetails {
+		margin: 0 0 10px;
+		padding-left: 18px;
+		font-size: 12.5px;
+		line-height: 1.5;
+		word-break: break-word;
+	}
+
+	#simple-mode .SimpleDialogField {
+		display: grid;
+		gap: 4px;
+		margin-bottom: 12px;
+		font-size: 12px;
+		color: var(--simple-text-muted);
+	}
+
+	#simple-mode .SimpleDialog .SimpleTextInput,
+	#simple-mode .SimpleProjects .SimpleTextInput {
+		height: 32px;
+		box-sizing: border-box;
+		padding: 0 10px !important;
+		font: inherit;
+		font-size: 13px;
+		color: var(--simple-text);
+		background: var(--simple-surface-2);
+		border: 1px solid transparent !important;
+		border-radius: 8px;
+		outline: none;
+		user-select: text;
+	}
+
+		#simple-mode .SimpleDialog .SimpleTextInput:focus,
+		#simple-mode .SimpleProjects .SimpleTextInput:focus {
+			border-color: var(--simple-accent) !important;
+			box-shadow: var(--simple-focus);
+		}
+
+	#simple-mode .SimpleDialogActions {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: flex-end;
+		gap: 8px;
+	}
+
+/* Meus projetos */
+#simple-mode .SimpleProjectsOverlay {
+	position: fixed;
+	inset: 0;
+	z-index: 50;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 16px;
+	background: rgba(15, 20, 30, 0.4);
+}
+
+	#simple-mode .SimpleProjectsOverlay[hidden] {
+		display: none;
+	}
+
+#simple-mode .SimpleProjects {
+	display: flex;
+	flex-direction: column;
+	width: 1080px;
+	max-width: 100%;
+	height: min(820px, calc(100vh - 32px));
+	overflow: hidden;
+	color: var(--simple-text);
+	background: var(--simple-bg);
+	border-radius: var(--simple-radius);
+	box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+}
+
+#simple-mode .SimpleProjectsHeader {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 12px;
+	padding: 12px 16px;
+	background: var(--simple-surface);
+	border-bottom: 1px solid var(--simple-border);
+}
+
+	#simple-mode .SimpleProjectsTitle {
+		margin: 0;
+		font-size: 16px;
+	}
+
+	#simple-mode .SimpleProjectsClose {
+		margin-left: auto;
+	}
+
+#simple-mode .SimpleProjectsNotice {
+	margin: 0;
+	padding: 6px 16px;
+	font-size: 12px;
+	color: var(--simple-text-muted);
+	background: var(--simple-surface);
+	border-bottom: 1px solid var(--simple-border);
+}
+
+#simple-mode .SimpleProjectsBody {
+	flex: 1;
+	min-height: 0;
+	overflow: auto;
+	padding: 14px 16px;
+}
+
+	#simple-mode .SimpleProjectsBody > div {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+	}
+
+#simple-mode .SimpleProjectsActive {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 12px;
+	padding: 10px 12px;
+	background: var(--simple-surface);
+	border: 1px solid var(--simple-border);
+	border-radius: var(--simple-radius);
+}
+
+	#simple-mode .SimpleProjectsActiveName {
+		display: flex;
+		flex-direction: column;
+		margin-right: auto;
+	}
+
+		#simple-mode .SimpleProjectsActiveName small {
+			font-size: 11px;
+			color: var(--simple-text-muted);
+		}
+
+	#simple-mode .SimpleProjectStatusText {
+		font-size: 12px;
+		color: var(--simple-text-muted);
+	}
+
+	#simple-mode .SimpleProjectsAutosave {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		font-size: 12.5px;
+	}
+
+#simple-mode .SimpleProjectsBanners p {
+	margin: 0 0 6px;
+	font-size: 13px;
+}
+
+#simple-mode .SimpleProjectsBannerActions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+#simple-mode .SimpleProjectsGrid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+	gap: 12px;
+}
+
+#simple-mode .SimpleProjectCard {
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	background: var(--simple-surface);
+	border: 1px solid var(--simple-border);
+	border-radius: var(--simple-radius);
+}
+
+	#simple-mode .SimpleProjectCard.active {
+		border-color: var(--simple-accent);
+		box-shadow: 0 0 0 1px var(--simple-accent);
+	}
+
+#simple-mode .SimpleProjectThumb {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	aspect-ratio: 16 / 9;
+	color: var(--simple-text-muted);
+	background: var(--simple-surface-2);
+}
+
+	#simple-mode .SimpleProjectThumb img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+
+	#simple-mode .SimpleProjectThumb .SimpleIcon svg {
+		width: 36px;
+		height: 36px;
+		opacity: 0.4;
+	}
+
+#simple-mode .SimpleProjectBadge {
+	position: absolute;
+	top: 8px;
+	left: 8px;
+	padding: 2px 8px;
+	font-size: 11px;
+	font-weight: 700;
+	color: #fff;
+	background: var(--simple-accent);
+	border-radius: 999px;
+}
+
+#simple-mode .SimpleProjectInfo {
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+	padding: 10px 12px 4px;
+}
+
+	#simple-mode .SimpleProjectName {
+		margin: 0;
+		overflow: hidden;
+		font-size: 14px;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+	}
+
+	#simple-mode .SimpleProjectDescription,
+	#simple-mode .SimpleProjectMeta {
+		margin: 0;
+		font-size: 11.5px;
+		color: var(--simple-text-muted);
+	}
+
+#simple-mode .SimpleProjectActions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 2px;
+	padding: 8px 10px 10px;
+}
+
+	#simple-mode .SimpleProjectActions .SimpleProjectOpen {
+		margin-right: auto;
+	}
+
+	#simple-mode .SimpleProjectActions .SimpleIconButton .SimpleButtonLabel,
+	#simple-mode .SimpleProjectVersionActions .SimpleIconButton .SimpleButtonLabel {
+		display: none;
+	}
+
+#simple-mode .SimpleProjectsEmpty {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 10px;
+	padding: 24px;
+	font-size: 14px;
+	background: var(--simple-surface);
+	border: 1px dashed var(--simple-border);
+	border-radius: var(--simple-radius);
+}
+
+	#simple-mode .SimpleProjectsEmpty p {
+		margin: 0;
+	}
+
+#simple-mode .SimpleProjectsSectionTitle {
+	margin: 0;
+	font-size: 14px;
+}
+
+#simple-mode .SimpleProjects .SimpleBudgetTable {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 12.5px;
+	background: var(--simple-surface);
+}
+
+	#simple-mode .SimpleProjects .SimpleBudgetTable th,
+	#simple-mode .SimpleProjects .SimpleBudgetTable td {
+		padding: 6px 8px;
+		text-align: left;
+		border-bottom: 1px solid var(--simple-border);
+	}
+
+	#simple-mode .SimpleProjects .SimpleBudgetTable th {
+		font-size: 11.5px;
+		color: var(--simple-text-muted);
+		background: var(--simple-surface-2);
+	}
+
+	#simple-mode .SimpleProjects .SimpleBudgetTable .num {
+		text-align: right;
+		font-variant-numeric: tabular-nums;
+	}
+
+#simple-mode .SimpleProjectVersionActions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 2px;
+}
+
+#simple-mode .SimpleProjectPinned {
+	color: var(--simple-accent);
+}
+
+#simple-mode .SimpleProjectsTrashRow {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+	padding: 10px 12px;
+	background: var(--simple-surface);
+	border: 1px solid var(--simple-border);
+	border-radius: 8px;
+}
+
+	#simple-mode .SimpleProjectsTrashRow > div {
+		margin-right: auto;
+	}
+
+#simple-mode .SimpleProjects .SimpleBudgetMeasures {
+	display: grid;
+	grid-template-columns: 1fr auto;
+	gap: 4px 12px;
+	max-width: 560px;
+	margin: 0;
+	font-size: 13px;
+}
+
+	#simple-mode .SimpleProjects .SimpleBudgetMeasures dt {
+		color: var(--simple-text-muted);
+	}
+
+	#simple-mode .SimpleProjects .SimpleBudgetMeasures dd {
+		margin: 0;
+		text-align: right;
+	}
+
+#simple-mode .SimpleProjects .SimpleBudgetHint,
+#simple-mode .SimpleProjects .SimpleBudgetEmpty {
+	margin: 0;
+	font-size: 12.5px;
+	color: var(--simple-text-muted);
+}
+
+#simple-mode .SimpleProjects .SimpleBudgetToolbar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 10px;
+}
+
+#simple-mode .SimpleProjects .SimpleBudgetSearch {
+	width: 220px;
+}
+
+#simple-mode .SimpleProjects .SimpleBudgetTab {
+	padding: 6px 12px;
+	font: inherit;
+	font-size: 13px;
+	color: var(--simple-text-muted);
+	background: transparent;
+	border: 0;
+	border-radius: 7px;
+	cursor: pointer;
+}
+
+	#simple-mode .SimpleProjects .SimpleBudgetTab.active {
+		color: var(--simple-text);
+		font-weight: 600;
+		background: var(--simple-surface);
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+	}
+
+#simple-mode .SimpleProjects .SimpleProjectsTabs {
+	display: flex;
+	gap: 2px;
+	padding: 2px;
+	background: var(--simple-surface-2);
+	border-radius: 9px;
+}
+
+@media all and ( max-width: 760px ) {
+
+	#simple-mode .SimpleProjectsOverlay {
+		padding: 0;
+	}
+
+	#simple-mode .SimpleProjects {
+		height: 100vh;
+		border-radius: 0;
+	}
+
+	#simple-mode .SimpleProjects .SimpleBudgetSearch {
+		width: 100%;
+	}
+
+	#simple-topbar .SimpleProjectStatusAnchor {
+		display: none;
 	}
 
 }
