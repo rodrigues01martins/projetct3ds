@@ -153,6 +153,9 @@ function ProjectManager( editor, context ) {
 	const baseFromJSON = editor.fromJSON.bind( editor );
 	editor.fromJSON = async function ( json ) {
 
+		// JSON sem "scripts" (gerado por outras ferramentas ou versões) deixaria editor.scripts indefinido e quebraria a
+		// lista da cena do Modo Avançado; completa com um objeto vazio sem alterar o JSON recebido
+		if ( json !== null && typeof json === 'object' && ( json.scripts === null || typeof json.scripts !== 'object' ) ) json = Object.assign( {}, json, { scripts: {} } );
 		await baseFromJSON( json );
 		stripSceneMeta();
 

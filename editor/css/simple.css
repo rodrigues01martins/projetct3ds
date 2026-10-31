@@ -4271,3 +4271,17 @@ body.mode-simple.budget-open #simple-center {
 	}
 
 }
+
+/* EV-011 — telas médias (até 1100px): nome e indicador mais compactos para a barra caber sem rolagem */
+@media all and ( min-width: 761px ) and ( max-width: 1100px ) {
+
+	#simple-topbar .SimpleProjectName {
+		min-width: 72px;
+	}
+
+	#simple-mode .SimpleProjectStatus {
+		max-width: 76px;
+		padding: 3px 6px;
+	}
+
+}

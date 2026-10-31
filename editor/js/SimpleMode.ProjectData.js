@@ -78,8 +78,10 @@ function validateState( json ) {
 
 	if ( json === null || typeof json !== 'object' ) return 'O arquivo não é um projeto válido.';
 	if ( json.scene === undefined || json.scene === null || typeof json.scene !== 'object' ) return 'O projeto não contém uma cena.';
-	if ( json.scene.object === undefined || typeof json.scene.object !== 'object' ) return 'A cena do projeto está incompleta.';
+	if ( json.scene.object === undefined || json.scene.object === null || typeof json.scene.object !== 'object' ) return 'A cena do projeto está incompleta.';
+	if ( json.scene.object.type !== 'Scene' ) return 'A raiz do projeto não é uma cena.';
 	if ( json.camera === undefined || json.camera === null || typeof json.camera !== 'object' ) return 'O projeto não contém a câmera do editor.';
+	if ( json.camera.object === undefined || json.camera.object === null || /Camera$/.test( String( json.camera.object.type ) ) === false ) return 'A câmera do editor está inválida.';
 	if ( json.scene.metadata !== undefined && json.scene.metadata.type !== undefined && json.scene.metadata.type !== 'Object' ) return 'Formato de cena desconhecido.';
 	return null;
 
