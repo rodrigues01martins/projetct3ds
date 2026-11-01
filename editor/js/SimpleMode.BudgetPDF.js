@@ -51,7 +51,7 @@ function wrap( value, max, size = SIZE, bold = false ) {
 
 // documento com páginas e cursor vertical ------------------------------------------------------------------------
 
-function Document( { projectTitle, date, title } ) {
+function Document( { projectTitle, date, title, footer = 'Estimativa preliminar — não é orçamento executivo nem referência oficial de preços.', header = 'Project3DS — ' } ) {
 
 	const pages = [];
 	let page = null;
@@ -82,7 +82,7 @@ function Document( { projectTitle, date, title } ) {
 
 		page = { sheet: PAGE, primitives: [] };
 		pages.push( page );
-		text( left, MARGIN + 5, 'Project3DS — ' + title, { size: 3.6, weight: 'bold' } );
+		text( left, MARGIN + 5, header + title, { size: 3.6, weight: 'bold' } );
 		text( right, MARGIN + 5, fit( projectTitle || 'Projeto sem nome', 120, 3.2 ), { size: 3.2, anchor: 'end' } );
 		text( right, MARGIN + 10, 'Emitido em ' + date.toLocaleDateString( 'pt-BR' ), { size: 2.4, anchor: 'end', fill: '#555555' } );
 		line( left, MARGIN + HEADER - 3, right, MARGIN + HEADER - 3, '#000000', 0.35 );
@@ -190,7 +190,7 @@ function Document( { projectTitle, date, title } ) {
 
 			page = p;
 			line( left, PAGE.height - MARGIN - FOOTER + 3, right, PAGE.height - MARGIN - FOOTER + 3, '#999999', 0.2 );
-			text( left, PAGE.height - MARGIN - 1, 'Estimativa preliminar — não é orçamento executivo nem referência oficial de preços.', { size: 2.3, fill: '#555555' } );
+			text( left, PAGE.height - MARGIN - 1, footer, { size: 2.3, fill: '#555555' } );
 			text( right, PAGE.height - MARGIN - 1, `Página ${index + 1} de ${pages.length}`, { size: 2.3, anchor: 'end', fill: '#555555' } );
 
 		} );
@@ -291,4 +291,4 @@ function toReportPDF( report ) {
 
 }
 
-export { toReportPDF, buildReportPages };
+export { toReportPDF, buildReportPages, Document as PDFDocument };

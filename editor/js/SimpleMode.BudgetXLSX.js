@@ -198,6 +198,13 @@ function summarySheet( report ) {
 function toXLSX( report ) {
 
 	const sheets = [[ 'Quantitativos', quantitiesSheet( report ) ], [ 'Orçamento', budgetSheet( report ) ], [ 'Resumo', summarySheet( report ) ]];
+	return buildWorkbook( sheets, ( report.projectTitle || 'Projeto' ) + ' — Quantitativos e orçamento' );
+
+}
+
+// EV-015: gerador genérico (reutilizado pela lista técnica de peças) — sheets: [ [ nome, { rows, widths, header, filter } ] ]
+function buildWorkbook( sheets, title ) {
+
 	const now = new Date().toISOString().replace( /\.\d+Z$/, 'Z' );
 
 	const files = {
@@ -206,7 +213,7 @@ function toXLSX( report ) {
 		'_rels/.rels': `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/><Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/></Relationships>`,
 		'docProps/core.xml': `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcmitype="http://purl.org/dc/dcmitype/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><dc:title>${escapeXML( ( report.projectTitle || 'Projeto' ) + ' — Quantitativos e orçamento' )}</dc:title><dc:creator>Project3DS</dc:creator><dcterms:created xsi:type="dcterms:W3CDTF">${now}</dcterms:created><dcterms:modified xsi:type="dcterms:W3CDTF">${now}</dcterms:modified></cp:coreProperties>`,
+<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcmitype="http://purl.org/dc/dcmitype/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><dc:title>${escapeXML( title )}</dc:title><dc:creator>Project3DS</dc:creator><dcterms:created xsi:type="dcterms:W3CDTF">${now}</dcterms:created><dcterms:modified xsi:type="dcterms:W3CDTF">${now}</dcterms:modified></cp:coreProperties>`,
 		'docProps/app.xml': `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes"><Application>Project3DS</Application></Properties>`,
 		'xl/workbook.xml': `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -223,4 +230,4 @@ function toXLSX( report ) {
 
 }
 
-export { toXLSX, columnName, escapeXML as escapeXLSX };
+export { toXLSX, columnName, escapeXML as escapeXLSX, buildWorkbook, S as XLSX_STYLES, text as xlsxText, number as xlsxNumber, formula as xlsxFormula, empty as xlsxEmpty };
