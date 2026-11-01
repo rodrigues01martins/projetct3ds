@@ -25,6 +25,7 @@ const STYLE = {
 	symbol: { stroke: '#000000', width: 0.25 },
 	thin: { stroke: '#000000', width: 0.13 },
 	hidden: { stroke: '#555555', width: 0.18, dash: [ 1.5, 1 ] },
+	imported: { stroke: '#555555', width: 0.18, dash: [ 3, 0.8, 0.6, 0.8 ] }, // EV-013: contorno simplificado de modelo importado
 	dimension: { stroke: '#222222', width: 0.13 },
 	frame: { stroke: '#000000', width: 0.5 },
 	cell: { stroke: '#000000', width: 0.25 }
@@ -238,7 +239,7 @@ function buildDrawing( model, plan, { unit = 'cm', projectTitle = '', date = new
 
 		for ( const item of model.furniture ) {
 
-			for ( const hull of item.parts ) out.push( poly( hull.map( P ), STYLE.projected, Object.assign( { closed: true, uuid: item.uuid, role: 'furniture' }, mark( item.uuid ) ) ) );
+			for ( const hull of item.parts ) out.push( poly( hull.map( P ), item.imported ? STYLE.imported : STYLE.projected, Object.assign( { closed: true, uuid: item.uuid, role: item.imported ? 'imported' : 'furniture' }, mark( item.uuid ) ) ) );
 
 		}
 

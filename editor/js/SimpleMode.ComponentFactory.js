@@ -58,6 +58,14 @@ function isUserComponent( object ) {
 
 }
 
+// EV-013: raiz de um modelo 3D importado (grupo principal; as malhas internas não são selecionadas isoladamente)
+function isImportedModelRoot( object ) {
+
+	const meta = getMeta( object );
+	return meta !== null && meta.importedAsset !== null && typeof meta.importedAsset === 'object' && typeof meta.importedAsset.assetId === 'string';
+
+}
+
 // Ancestral mais alto (abaixo da cena) que representa um componente: é ele que o Modo Simples seleciona
 function findComponentRoot( object, scene ) {
 
@@ -66,7 +74,7 @@ function findComponentRoot( object, scene ) {
 
 	while ( current !== null && current !== undefined && current !== scene ) {
 
-		if ( isComponent( current ) || isUserComponent( current ) ) root = current;
+		if ( isComponent( current ) || isUserComponent( current ) || isImportedModelRoot( current ) ) root = current;
 		current = current.parent;
 
 	}
@@ -329,6 +337,7 @@ export {
 	getComponentState,
 	isComponent,
 	isUserComponent,
+	isImportedModelRoot,
 	findComponentRoot,
 	createComponent,
 	regenerateComponent

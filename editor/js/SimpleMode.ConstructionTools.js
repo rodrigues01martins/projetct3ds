@@ -557,7 +557,7 @@ function ConstructionTools( editor, context, interaction ) {
 
 	// ===================================================================== POSICIONAR COMPONENTE
 
-	const place = { create: null, name: '', instance: null, base: new THREE.Box3(), rotation: 0, position: null };
+	const place = { create: null, name: '', instance: null, base: new THREE.Box3(), rotation: 0, position: null, simplePreview: false };
 
 	function measurePlacement() {
 
@@ -576,6 +576,15 @@ function ConstructionTools( editor, context, interaction ) {
 
 			previewRoot.remove( objectPreview );
 			objectPreview = null;
+
+		}
+
+		// EV-013: modelos pesados — prévia só pela caixa/contorno (sem copiar nem desenhar todas as malhas)
+		if ( place.simplePreview ) {
+
+			objectPreview = new THREE.Group();
+			previewRoot.add( objectPreview );
+			return;
 
 		}
 
@@ -673,6 +682,7 @@ function ConstructionTools( editor, context, interaction ) {
 			state.label = options.name;
 			place.create = options.create;
 			place.name = options.name;
+			place.simplePreview = options.simplePreview === true;
 			place.rotation = 0;
 			place.position = null;
 			place.instance = options.create();

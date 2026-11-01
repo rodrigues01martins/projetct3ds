@@ -10,7 +10,7 @@ import { AddObjectCommand } from './commands/AddObjectCommand.js';
 import { getSimpleString as t } from './SimpleMode.Strings.js';
 import { createIcon, createSimpleButton, createText } from './SimpleMode.Icons.js';
 import { SimpleModeLibrary, getUniqueName } from './SimpleMode.Library.js';
-import { getComponentData, isUserComponent } from './SimpleMode.ComponentFactory.js';
+import { getComponentData, isUserComponent, isImportedModelRoot } from './SimpleMode.ComponentFactory.js';
 import { getDefinition } from './SimpleMode.Components.js';
 import { isLightingGroup } from './SimpleMode.Lighting.js';
 import { isHostedFixture } from './SimpleMode.Openings.js';
@@ -170,6 +170,7 @@ function SimpleModeObjects( editor, context ) {
 		}
 
 		if ( isUserComponent( object ) ) return 'bookmark';
+		if ( isImportedModelRoot( object ) ) return 'model'; // EV-013
 
 		if ( object.isMesh && object.geometry ) {
 

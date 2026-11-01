@@ -23,7 +23,9 @@ import { createIcon, createSimpleButton, createText } from './SimpleMode.Icons.j
 import { SimpleNumberInput } from './SimpleMode.Inputs.js';
 import { getDimensionInfo, computeScaleForSize } from './SimpleMode.Dimensions.js';
 import { SimpleModeComponentProperties } from './SimpleMode.ComponentProperties.js';
-import { getComponentState, isUserComponent } from './SimpleMode.ComponentFactory.js';
+import { getComponentState, isUserComponent, isImportedModelRoot } from './SimpleMode.ComponentFactory.js';
+import { SimpleModeExternalModelProperties } from './SimpleMode.ExternalModelProperties.js';
+import { categoryName as modelCategoryName } from './SimpleMode.ExternalModelStorage.js';
 import { getCategory } from './SimpleMode.Components.js';
 import { SimpleModeAppearancePanel } from './SimpleMode.AppearancePanel.js';
 import { SimpleModeOpeningProperties } from './SimpleMode.OpeningProperties.js';
@@ -255,6 +257,10 @@ function SimpleModeProperties( editor, context ) {
 	// EV-004: acabamentos (materiais, texturas procedurais e partes lógicas dos componentes)
 	const colorSection = createSection( 'appearance', t( 'properties/section/appearance' ) );
 	const appearancePanel = new SimpleModeAppearancePanel( editor, context, colorSection );
+
+	// EV-013: modelo importado — origem, correções de importação e materiais da instância (no lugar dos acabamentos)
+	const importedSection = createSection( 'imported', 'Modelo importado' );
+	const importedProperties = new SimpleModeExternalModelProperties( editor, context, context.modelLibrary, importedSection );
 
 	// 7. Alinhamento e distribuição -------------------------------------------
 
@@ -774,6 +780,7 @@ function SimpleModeProperties( editor, context ) {
 		}
 
 		if ( isUserComponent( object ) ) return t( 'type/userComponent' );
+		if ( isImportedModelRoot( object ) ) return 'Modelo importado';
 		if ( info.primitive !== null ) return t( TYPE_NAMES[ info.primitive ] );
 		if ( object.isLight ) return t( 'type/light' );
 		if ( object.isCamera ) return t( 'type/camera' );
@@ -827,6 +834,11 @@ function SimpleModeProperties( editor, context ) {
 		// EV-004: aparência para básicos, componentes e grupos/malhas com material
 		colorSection.details.hidden = appearancePanel.update( object ) === false;
 
+		// EV-013: modelo importado usa a seção própria (os acabamentos da EV-004 não reconstroem materiais glTF)
+		const imported = importedProperties.update( object );
+		importedSection.details.hidden = imported === false;
+		if ( imported ) colorSection.details.hidden = true;
+
 		updateCategory( object );
 
 	}
@@ -844,6 +856,10 @@ function SimpleModeProperties( editor, context ) {
 		} else if ( isUserComponent( object ) ) {
 
 			text = t( 'properties/category', t( 'library/tab/mine' ) );
+
+		} else if ( isImportedModelRoot( object ) ) {
+
+			text = t( 'properties/category', modelCategoryName( object.userData.project3ds.importedAsset.category ) );
 
 		}
 

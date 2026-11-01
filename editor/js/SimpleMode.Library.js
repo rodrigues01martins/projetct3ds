@@ -1,5 +1,5 @@
 // EV-003 — Biblioteca Inteligente de Componentes 3D
-// Painel esquerdo: abas Básicos | Biblioteca | Meus componentes, com busca e cartões compactos.
+// Painel esquerdo: abas Básicos | Biblioteca | Meus componentes | Modelos (EV-013), com busca e cartões compactos.
 
 import * as THREE from 'three';
 
@@ -12,6 +12,9 @@ import { createComponent, getComponentData, findComponentRoot } from './SimpleMo
 import { findHostedFixture } from './SimpleMode.Openings.js';
 import { isLightingGroup } from './SimpleMode.Lighting.js';
 
+import { SimpleModeExternalModelLibraryView } from './SimpleMode.ExternalModelLibraryView.js';
+import { createInstance } from './SimpleMode.ExternalModelInstances.js';
+
 import { getSimpleString as t } from './SimpleMode.Strings.js';
 import { createIcon, createSimpleButton, createText } from './SimpleMode.Icons.js';
 
@@ -19,7 +22,7 @@ const TAB_KEY = 'interface/simple/libraryTab';
 
 // EV-006: componentes com base física bem definida (a janela começa no peitoril, então não é apoiada automaticamente)
 const PLACEABLE = new Set( [ 'wall', 'floor', 'panel', 'door', 'table', 'chair', 'shelf', 'platform' ] );
-const TABS = [ 'basics', 'catalog', 'mine' ];
+const TABS = [ 'basics', 'catalog', 'mine', 'models' ];
 
 // utilitários compartilhados -------------------------------------------------------
 
@@ -151,6 +154,7 @@ function SimpleModeLibrary( editor, context, basicsContent ) {
 
 		renderCatalog();
 		renderMine();
+		modelsView.render();
 
 	} );
 	searchRow.dom.appendChild( search );
@@ -187,6 +191,7 @@ function SimpleModeLibrary( editor, context, basicsContent ) {
 		if ( config.getKey( TAB_KEY ) !== tab ) config.setKey( TAB_KEY, tab );
 
 		if ( tab === 'mine' && userLibrary.isLoaded() === false ) userLibrary.load();
+		if ( tab === 'models' && modelLibrary.isLoaded() === false ) modelLibrary.load(); // só metadados e miniaturas
 
 	}
 
@@ -553,6 +558,55 @@ function SimpleModeLibrary( editor, context, basicsContent ) {
 
 	}
 
+	// EV-013: modelos importados ----------------------------------------------------------------
+
+	const modelLibrary = context.modelLibrary;
+
+	const modelsView = new SimpleModeExternalModelLibraryView( editor, context, modelLibrary, panels.models.dom, {
+		matches,
+		insert: async ( record ) => {
+
+			try {
+
+				const instance = await modelLibrary.instantiate( record );
+				insert( instance, record.name );
+
+			} catch ( error ) {
+
+				console.error( error );
+				context.notify( error.message || 'Não foi possível inserir o modelo.', 'error' );
+
+			}
+
+		},
+		place: async ( record ) => {
+
+			try {
+
+				const template = await modelLibrary.loadTemplate( record ); // valida e decodifica antes da prévia
+				const asset = modelLibrary.assetOf( record );
+				const heavy = record.stats && record.stats.vertices > 150000;
+				context.startTool( 'place', { name: record.name, create: () => createInstance( template, asset, record.defaults ), simplePreview: heavy } );
+
+			} catch ( error ) {
+
+				context.notify( error.message || 'Não foi possível carregar o modelo.', 'error' );
+
+			}
+
+		},
+		openRecord: ( record ) => context.openExternalModelRecord( record )
+	} );
+
+	context.insertImportedModel = ( object ) => insert( object, object.name );
+	context.showImportedModels = () => selectTab( 'models' );
+	context.importExternalModel = () => {
+
+		selectTab( 'models' );
+		modelsView.chooseFiles();
+
+	};
+
 	// eventos
 
 	userLibrary.changed.add( renderMine );
@@ -571,6 +625,7 @@ function SimpleModeLibrary( editor, context, basicsContent ) {
 
 	renderCatalog();
 	renderMine();
+	modelsView.render();
 
 	const initialTab = config.getKey( TAB_KEY );
 	selectTab( TABS.includes( initialTab ) ? initialTab : 'basics' );

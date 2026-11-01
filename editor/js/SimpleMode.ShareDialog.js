@@ -166,6 +166,20 @@ function SimpleModeShareDialog( editor, context, root ) {
 
 		}
 
+		// EV-013: modelos importados — limitações do visualizador e aviso de licença (o usuário pode cancelar)
+		const imported = prepared.importedModels || [];
+		if ( imported.length > 0 ) {
+
+			const box = el( 'div', 'SimpleShareNotes SimpleShareImported' );
+			box.appendChild( el( 'strong', '', `Modelos importados no pacote: ${imported.length}` ) );
+			const list = el( 'ul' );
+			for ( const model of imported ) list.appendChild( el( 'li', '', model.lost.length > 0 ? `${model.name}: o visualizador não reproduz ${model.lost.join( ', ' )} (aparência aproximada)` : `${model.name}: geometria, materiais e texturas suportados` ) );
+			box.appendChild( list );
+			box.appendChild( el( 'p', 'SimpleShareHint', 'Verifique as condições de licença dos modelos de terceiros antes de redistribuí-los. Informações de licença e origem cadastradas na sua biblioteca não são enviadas.' ) );
+			body.appendChild( box );
+
+		}
+
 		body.appendChild( el( 'p', 'SimpleShareWarning', 'Qualquer pessoa que receber o arquivo poderá copiá-lo e repassá-lo. O visualizador é somente leitura, mas isso não impede a extração da geometria.' ) );
 		panel.appendChild( body );
 

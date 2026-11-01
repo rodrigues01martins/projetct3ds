@@ -1125,7 +1125,7 @@ body.mode-simple #viewport.measuring canvas {
 
 #simple-left .SimpleTabs {
 	display: grid;
-	grid-template-columns: repeat(3, 1fr);
+	grid-template-columns: repeat(2, 1fr); /* EV-013: quatro abas em 2 × 2 (Básicos | Biblioteca / Meus | Modelos) */
 	gap: 2px;
 	padding: 3px;
 	background: var(--simple-surface-2);
@@ -4915,4 +4915,387 @@ body.mode-simple.budget-open #simple-center {
 		border-top: 1px solid var(--simple-border);
 	}
 
+}
+
+/* ============================================================================================================
+   EV-013 — Importação e biblioteca de modelos 3D externos
+   ============================================================================================================ */
+
+#simple-left .SimpleTab {
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+#simple-left .SimpleModelLibraryBar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 6px;
+	margin-bottom: 6px;
+}
+
+	#simple-left .SimpleModelImportButton {
+		flex: 1 1 100%;
+		min-width: 0;
+		justify-content: center;
+	}
+
+	#simple-left .SimpleModelLibraryBar .SimpleModelBackupExport,
+	#simple-left .SimpleModelLibraryBar .SimpleModelBackupImport {
+		flex: 1 1 0;
+		min-width: 0;
+		font-size: 12px;
+	}
+
+#simple-left .SimpleModelCardRow {
+	align-items: center;
+}
+
+	#simple-left .SimpleModelSelect {
+		flex: none;
+		margin: 0 2px 0 0;
+	}
+
+	#simple-left .SimpleModelCard .SimpleCardDetail + .SimpleCardDetail {
+		opacity: 0.8;
+	}
+
+	#simple-left .SimpleModelThumb {
+		flex: none;
+		width: 44px;
+		height: 33px;
+		object-fit: cover;
+		border-radius: 6px;
+		background: var(--simple-surface-2);
+	}
+
+/* janela de importação / pré-visualização */
+#simple-mode .SimpleModelOverlay {
+	position: fixed;
+	inset: 0;
+	z-index: 17;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 16px;
+	box-sizing: border-box;
+	background: #0007;
+}
+
+	#simple-mode .SimpleModelOverlay[hidden] {
+		display: none !important;
+	}
+
+#simple-mode .SimpleModelPanel {
+	display: flex;
+	flex-direction: column;
+	width: min(1080px, 100%);
+	max-height: min(92vh, 900px);
+	box-sizing: border-box;
+	overflow: hidden;
+	color: var(--simple-text);
+	font-size: 13px;
+	background: var(--simple-surface);
+	border-radius: 14px;
+	box-shadow: 0 20px 60px -10px #0008;
+}
+
+#simple-mode .SimpleModelHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 14px 16px 8px 20px;
+}
+
+	#simple-mode .SimpleModelTitle {
+		margin: 0;
+		font-size: 17px;
+		font-weight: 700;
+	}
+
+	#simple-mode .SimpleModelClose .SimpleButtonLabel {
+		display: none;
+	}
+
+#simple-mode .SimpleModelStatus {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 10px;
+	padding: 32px 24px;
+	text-align: center;
+}
+
+	#simple-mode .SimpleModelStatus.error {
+		align-items: stretch;
+		text-align: left;
+	}
+
+	#simple-mode .SimpleModelSpinner {
+		width: 28px;
+		height: 28px;
+		border: 3px solid var(--simple-border);
+		border-top-color: var(--simple-accent);
+		border-radius: 50%;
+		animation: simple-model-spin 0.9s linear infinite;
+	}
+
+@keyframes simple-model-spin {
+
+	to {
+		transform: rotate(360deg);
+	}
+
+}
+
+#simple-mode .SimpleModelBody {
+	display: grid;
+	grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+	gap: 16px;
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow: auto;
+	padding: 4px 20px 12px;
+}
+
+	#simple-mode .SimpleModelPreviewHost {
+		position: relative;
+		height: 340px;
+		overflow: hidden;
+		background: #e9ebef;
+		border: 1px solid var(--simple-border);
+		border-radius: 10px;
+	}
+
+		#simple-mode .SimpleModelPreviewCanvas {
+			display: block;
+			width: 100%;
+			height: 100%;
+			touch-action: none;
+		}
+
+	#simple-mode .SimpleModelPreviewTools,
+	#simple-mode .SimpleModelRow {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 6px;
+		margin: 8px 0;
+	}
+
+	#simple-mode .SimpleModelInfo,
+	#simple-mode .SimpleModelFacts {
+		display: grid;
+		grid-template-columns: auto 1fr;
+		gap: 3px 12px;
+		margin: 6px 0 0;
+		font-size: 12.5px;
+	}
+
+		#simple-mode .SimpleModelInfo dt,
+		#simple-mode .SimpleModelFacts dt {
+			color: var(--simple-text-muted);
+		}
+
+		#simple-mode .SimpleModelInfo dd,
+		#simple-mode .SimpleModelFacts dd {
+			margin: 0;
+			overflow-wrap: anywhere;
+		}
+
+	#simple-mode .SimpleModelSettings {
+		min-width: 0;
+	}
+
+	#simple-mode .SimpleModelSection {
+		margin: 0 0 10px;
+		padding: 8px 12px 10px;
+		border: 1px solid var(--simple-border);
+		border-radius: 10px;
+	}
+
+		#simple-mode .SimpleModelSection legend,
+		#simple-mode .SimpleModelSection summary {
+			padding: 0 4px;
+			font-weight: 700;
+			font-size: 12px;
+			cursor: default;
+		}
+
+		#simple-mode details.SimpleModelSection summary {
+			cursor: pointer;
+		}
+
+	#simple-mode .SimpleModelField {
+		display: flex;
+		flex-direction: column;
+		gap: 3px;
+		margin-top: 6px;
+		font-size: 12px;
+		font-weight: 600;
+	}
+
+		#simple-mode .SimpleModelField .SimpleInput,
+		#simple-mode .SimpleModelField .SimpleSelect,
+		#simple-mode .SimpleModelField .SimpleNumber {
+			width: 100%;
+			box-sizing: border-box;
+			font: inherit;
+			font-weight: 400;
+			font-size: 13px;
+		}
+
+	#simple-mode .SimpleModelDims {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 8px;
+	}
+
+	#simple-mode .SimpleModelHint {
+		margin: 4px 0;
+		font-size: 12px;
+		color: var(--simple-text-muted);
+	}
+
+	#simple-mode .SimpleModelWarning {
+		margin: 6px 0;
+		padding: 6px 10px;
+		font-size: 12px;
+		color: #7a4d00;
+		background: #fff4d6;
+		border-radius: 8px;
+	}
+
+	#simple-mode .SimpleModelOk {
+		margin: 6px 0;
+		padding: 6px 10px;
+		font-size: 12px;
+		color: #1a6b43;
+		background: #e3f6ec;
+		border-radius: 8px;
+	}
+
+	#simple-mode .SimpleModelErrorText {
+		margin: 6px 0;
+		font-weight: 600;
+		color: var(--simple-danger);
+	}
+
+	#simple-mode .SimpleModelErrorList {
+		margin: 4px 0;
+		padding-left: 18px;
+		color: var(--simple-danger);
+	}
+
+#simple-mode .SimpleModelActions {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+	gap: 8px;
+	padding: 12px 20px 16px;
+	border-top: 1px solid var(--simple-border);
+}
+
+	#simple-mode .SimpleModelActions .SimpleButton:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+
+/* propriedades: modelo importado */
+#simple-right .SimpleModelMaterial {
+	margin-top: 8px;
+	padding: 6px 8px;
+	background: var(--simple-surface-2);
+	border-radius: 8px;
+}
+
+	#simple-right .SimpleModelMaterialName {
+		font-size: 12px;
+		font-weight: 600;
+		overflow-wrap: anywhere;
+	}
+
+	#simple-right .SimpleModelMaterialControls {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 4px 10px;
+		margin-top: 4px;
+	}
+
+	#simple-right .SimpleModelMaterialColor {
+		width: 32px;
+		height: 24px;
+		padding: 0;
+		border: 1px solid var(--simple-border);
+		border-radius: 6px;
+	}
+
+	#simple-right .SimpleModelMaterialField {
+		display: flex;
+		flex-direction: column;
+		font-size: 11px;
+		color: var(--simple-text-muted);
+	}
+
+		#simple-right .SimpleModelMaterialField input {
+			width: 70px;
+		}
+
+#simple-right .SimpleModelFacts,
+#simple-right .SimpleModelHint {
+	font-size: 12px;
+}
+
+#simple-right .SimpleModelHint {
+	margin: 4px 0;
+	color: var(--simple-text-muted);
+}
+
+@media all and ( max-width: 860px ) {
+
+	#simple-mode .SimpleModelBody {
+		grid-template-columns: 1fr;
+	}
+
+	#simple-mode .SimpleModelPreviewHost {
+		height: 260px;
+	}
+
+	#simple-mode .SimpleModelDims {
+		grid-template-columns: 1fr 1fr;
+	}
+
+}
+
+#simple-left .SimpleModelBackupLabel {
+	font-size: 12px;
+	color: var(--simple-text-muted);
+}
+
+#simple-left .SimpleModelCardRow .SimpleModelCard {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+	#simple-left .SimpleModelCardRow .SimpleModelCard .SimpleCardText {
+		min-width: 0;
+	}
+
+	#simple-left .SimpleModelCardRow .SimpleModelCard .SimpleCardName,
+	#simple-left .SimpleModelCardRow .SimpleModelCard .SimpleCardDetail {
+		display: block;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+#simple-left .SimpleModelCardRow .SimpleCardActions {
+	display: flex;
+	flex-direction: column;
+	flex: none;
+	gap: 2px;
 }

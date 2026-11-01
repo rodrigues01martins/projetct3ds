@@ -18,7 +18,7 @@
 
 import * as THREE from 'three';
 
-import { getMeta, getComponentData, isUserComponent } from './SimpleMode.ComponentFactory.js';
+import { getMeta, getComponentData, isUserComponent, isImportedModelRoot } from './SimpleMode.ComponentFactory.js';
 import { getDefinition } from './SimpleMode.Components.js';
 import { isLightingGroup } from './SimpleMode.Lighting.js';
 import { getSavedViews, sanitizeView } from './SimpleMode.SavedViews.js';
@@ -49,6 +49,7 @@ function labelOf( object ) {
 	}
 
 	if ( isUserComponent( object ) ) return 'Componente personalizado';
+	if ( isImportedModelRoot( object ) ) return 'Modelo importado';
 	if ( object.isMesh ) return 'Objeto';
 	return 'Grupo';
 
@@ -94,7 +95,7 @@ function collectUnits( scene ) {
 			let unit = null;
 			const data = getComponentData( child );
 			if ( isHosted( child ) && data !== null ) unit = { kind: 'opening', hosted: true };
-			else if ( insideUnit === false && ( data !== null || isUserComponent( child ) ) ) unit = { kind: 'component' };
+			else if ( insideUnit === false && ( data !== null || isUserComponent( child ) || isImportedModelRoot( child ) ) ) unit = { kind: 'component' };
 			else if ( insideUnit === false && object === scene && ( child.isMesh || child.isGroup || child.type === 'Object3D' ) ) unit = { kind: 'object' };
 
 			if ( unit !== null ) units.push( Object.assign( unit, { object: child, component: data !== null ? data.id : null, label: labelOf( child ) } ) );
@@ -155,6 +156,42 @@ function plainGeometryJSON( geometry ) {
 	const json = plain.toJSON();
 	delete json.metadata;
 	return json;
+
+}
+
+// EV-013: o que o visualizador não reproduz nos modelos importados (informado antes de compartilhar)
+const UNSUPPORTED_MATERIAL = [
+	[ 'sheen', ( m ) => m.sheen > 0, 'brilho de tecido (sheen)' ],
+	[ 'iridescence', ( m ) => m.iridescence > 0, 'iridescência' ],
+	[ 'anisotropy', ( m ) => m.anisotropy > 0, 'anisotropia' ],
+	[ 'specularMaps', ( m ) => m.specularIntensityMap || m.specularColorMap, 'mapas especulares' ],
+	[ 'clearcoatMaps', ( m ) => m.clearcoatMap || m.clearcoatRoughnessMap || m.clearcoatNormalMap, 'mapas de verniz' ],
+	[ 'transmissionMaps', ( m ) => m.transmissionMap || m.thicknessMap, 'mapas de transmissão' ],
+	[ 'attenuation', ( m ) => m.isMeshPhysicalMaterial && Number.isFinite( m.attenuationDistance ) && m.attenuationDistance !== Infinity, 'atenuação de volume' ],
+	[ 'lightMap', ( m ) => m.lightMap, 'mapa de iluminação' ],
+	[ 'displacement', ( m ) => m.displacementMap, 'mapa de deslocamento' ]
+];
+
+function importedModelNotes( scene ) {
+
+	const models = [];
+	scene.traverse( ( object ) => {
+
+		if ( isImportedModelRoot( object ) === false ) return;
+		const lost = new Set();
+		let extraUV = false;
+		object.traverse( ( child ) => {
+
+			if ( child.isMesh !== true ) return;
+			for ( const material of [].concat( child.material ) ) for ( const [ , test, label ] of UNSUPPORTED_MATERIAL ) if ( test( material ) ) lost.add( label );
+			for ( const name of Object.keys( child.geometry.attributes ) ) if ( [ 'position', 'normal', 'uv', 'uv1', 'color' ].includes( name ) === false && name !== 'tangent' ) extraUV = true;
+
+		} );
+		if ( extraUV ) lost.add( 'canais extras de coordenadas de textura' );
+		models.push( { uuid: object.uuid, name: object.name || 'Modelo importado', lost: [ ...lost ] } );
+
+	} );
+	return models;
 
 }
 
@@ -272,6 +309,7 @@ function prepareShare( editor, { project, title, description = '', versionLabel 
 		removed: describeReport( report ),
 		stats: manifest.stats,
 		fingerprints: unitFingerprints( scene ),
+		importedModels: importedModelNotes( scene ),
 		bytes: sceneText.length + viewsText.length
 	};
 

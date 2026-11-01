@@ -8,11 +8,12 @@
 //     um registro por componente, nunca por peça (tampo e pernas não viram móveis);
 //   - portas/janelas hospedadas: pelo vínculo da EV-007 (registro da abertura + componente filho da parede),
 //     contadas uma única vez; registro sem componente = aviso de abertura órfã;
-//   - "Meus componentes" e objetos sem parâmetros: contagem por unidade, dimensões da caixa envolvente (estimadas).
+//   - "Meus componentes" e objetos sem parâmetros: contagem por unidade, dimensões da caixa envolvente (estimadas);
+//   - modelos importados (EV-013): UMA unidade por grupo, com nome, categoria e caixa envolvente (sem volume de material).
 
 import * as THREE from 'three';
 
-import { getComponentData, isUserComponent } from './SimpleMode.ComponentFactory.js';
+import { getComponentData, isUserComponent, isImportedModelRoot } from './SimpleMode.ComponentFactory.js';
 import { getDefinition, validateParameters } from './SimpleMode.Components.js';
 import { getOpenings, getHosted, findFixture } from './SimpleMode.Openings.js';
 import { isLightingGroup } from './SimpleMode.Lighting.js';
@@ -132,7 +133,7 @@ function buildQuantities( scene ) {
 	const records = [];
 	const issues = [];
 
-	function record( object, type, { dims = null, extra = {}, host = null, notes = [], status = 'ok', definitionName = null } = {} ) {
+	function record( object, type, { dims = null, extra = {}, host = null, notes = [], status = 'ok', definitionName = null, category = null, groupSuffix = '' } = {} ) {
 
 		const info = TYPES[ type ];
 		const entry = {
@@ -140,14 +141,14 @@ function buildQuantities( scene ) {
 			name: object.name || info.label,
 			type,
 			typeLabel: definitionName || info.label,
-			category: info.category,
+			category: category || info.category,
 			dims: dims || {},
 			measurements: dims !== null ? measure( type, dims, extra ) : { count: 1 },
 			primary: info.primary,
 			host,
 			status,
 			notes,
-			groupKey: dims !== null ? dimsKey( type, dims ) : type + '|'
+			groupKey: ( dims !== null ? dimsKey( type, dims ) : type + '|' ) + groupSuffix
 		};
 
 		records.push( entry );
@@ -287,7 +288,7 @@ function buildQuantities( scene ) {
 		let found = false;
 		object.traverse( ( child ) => {
 
-			if ( child !== object && ( getComponentData( child ) !== null || isUserComponent( child ) ) ) found = true;
+			if ( child !== object && ( getComponentData( child ) !== null || isUserComponent( child ) || isImportedModelRoot( child ) ) ) found = true;
 
 		} );
 		return found;
@@ -300,6 +301,15 @@ function buildQuantities( scene ) {
 
 		const data = getComponentData( object );
 		if ( data !== null ) return visitComponent( object, data );
+
+		if ( isImportedModelRoot( object ) ) {
+
+			const asset = object.userData.project3ds.importedAsset;
+			const category = { furniture: 'furniture', equipment: 'furniture', decor: 'furniture', structures: 'structures', architecture: 'structures' }[ asset.category ] || 'others';
+			record( object, 'imported', { dims: boxOf( object ), status: 'estimated', category, groupSuffix: '|' + asset.assetId, definitionName: `Modelo importado: ${asset.name || asset.originalName || 'modelo'}`, notes: [ 'Modelo importado: contado por unidade; dimensões da caixa envolvente (informativas — não representam volume de material).' ] } );
+			return;
+
+		}
 
 		if ( isUserComponent( object ) ) {
 

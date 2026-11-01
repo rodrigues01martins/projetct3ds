@@ -9,12 +9,13 @@
 //     interrompida pelas aberturas da EV-007 que o plano de corte atravessa;
 //   - portas/janelas: registros wall.userData.project3ds.openings (tipo, posição, peitoril, largura, altura);
 //   - ambientes: pisos do mesmo nível (área pelo contorno real);
-//   - mobiliário e demais objetos entre o piso e o corte: projeção simplificada (envoltória convexa de cada peça).
+//   - mobiliário e demais objetos entre o piso e o corte: projeção simplificada (envoltória convexa de cada peça);
+//   - modelos importados (EV-013): UM contorno simplificado (envoltória convexa do conjunto), marcado como tal.
 // Interpretação paramétrica dos componentes conhecidos; nenhuma interseção genérica com todas as malhas.
 
 import * as THREE from 'three';
 
-import { getComponentData, findComponentRoot } from './SimpleMode.ComponentFactory.js';
+import { getComponentData, findComponentRoot, isImportedModelRoot } from './SimpleMode.ComponentFactory.js';
 import { getOpenings } from './SimpleMode.Openings.js';
 import { isLightingGroup } from './SimpleMode.Lighting.js';
 
@@ -320,6 +321,14 @@ function describeOthers( others, referenceY, cutY, scene ) {
 		}
 
 		if ( parts.length === 0 ) continue;
+
+		// EV-013: modelo importado — envoltória convexa única do conjunto (contorno simplificado, não desenho técnico)
+		if ( isImportedModelRoot( root ) ) {
+
+			items.push( { uuid: root.uuid, name: root.name, component: null, imported: true, simplified: true, parts: [ convexHull( parts.flat() ) ] } );
+			continue;
+
+		}
 
 		const data = getComponentData( root );
 		items.push( { uuid: root.uuid, name: root.name, component: data !== null ? data.id : null, parts } );

@@ -70,6 +70,8 @@ const SimpleModeStrings = {
 	'library/tab/catalog/title': 'Componentes prontos: paredes, portas, móveis e mais',
 	'library/tab/mine': 'Meus',
 	'library/tab/mine/title': 'Meus componentes salvos neste navegador',
+	'library/tab/models': 'Modelos',
+	'library/tab/models/title': 'Modelos importados (GLB/GLTF) salvos neste navegador',
 	'library/search': 'Buscar componente',
 	'library/search/title': 'Buscar componentes por nome ou categoria',
 	'library/insert/title': 'Inserir %s (%s) — %s',

@@ -52,7 +52,9 @@ const TYPES = {
 	chair: { label: 'Cadeira', category: 'furniture', prefix: 'CAD', primary: 'count', measurements: [ 'count', 'width', 'depth', 'height' ] },
 	shelf: { label: 'Estante', category: 'furniture', prefix: 'EST', primary: 'count', measurements: [ 'count', 'width', 'depth', 'height' ] },
 	custom: { label: 'Componente personalizado', category: 'others', prefix: 'PER', primary: 'count', measurements: [ 'count', 'width', 'depth', 'height', 'boxVolume' ] },
-	generic: { label: 'Objeto sem parâmetros', category: 'others', prefix: 'OUT', primary: 'count', measurements: [ 'count', 'width', 'depth', 'height', 'boxVolume' ] }
+	generic: { label: 'Objeto sem parâmetros', category: 'others', prefix: 'OUT', primary: 'count', measurements: [ 'count', 'width', 'depth', 'height', 'boxVolume' ] },
+	// EV-013: modelo 3D importado — uma unidade por grupo (malhas internas não contam); caixa envolvente só informativa
+	imported: { label: 'Modelo importado', category: 'others', prefix: 'MOD', primary: 'count', measurements: [ 'count', 'width', 'depth', 'height' ] }
 };
 
 const CATEGORIES = {

@@ -35,6 +35,9 @@ import { SimpleModeProjectStatus } from './SimpleMode.ProjectStatus.js';
 import { ReviewManager } from './SimpleMode.ReviewManager.js';
 import { SimpleModeShareDialog } from './SimpleMode.ShareDialog.js';
 import { SimpleModeReviewPanel } from './SimpleMode.ReviewPanel.js';
+import { ExternalModelLibrary } from './SimpleMode.ExternalModelLibrary.js';
+import { SimpleModeExternalModelPanel } from './SimpleMode.ExternalModelPanel.js';
+import { previewStats } from './SimpleMode.ExternalModelPreview.js';
 
 import { getSimpleString as t } from './SimpleMode.Strings.js';
 
@@ -121,6 +124,9 @@ function SimpleMode( editor ) {
 
 	const context = { notify, setMode, units, precision, measure, alignment, userLibrary, interaction };
 
+	// EV-013: biblioteca de modelos importados (banco próprio "project3ds-assets"; só metadados até um modelo ser usado)
+	context.modelLibrary = new ExternalModelLibrary( editor );
+
 	// EV-011: diálogo de confirmação e gestão de projetos (identidade, autosave, versões, recuperação).
 	// Criada antes dos painéis: instala os envoltórios de Editor.toJSON/clear antes de qualquer carregamento.
 	context.dialog = new ProjectDialog( container.dom );
@@ -184,6 +190,14 @@ function SimpleMode( editor ) {
 	context.openShare = () => shareDialog.show();
 	context.openReviews = () => reviewPanel.show();
 	context.importReview = () => reviewPanel.importFile();
+
+	// EV-013: janela de importação/pré-visualização de modelos 3D externos (GLB/GLTF)
+	const modelPanel = new SimpleModeExternalModelPanel( editor, context, context.modelLibrary, container.dom );
+	context.openExternalModelFiles = ( files ) => modelPanel.openFiles( files );
+	context.openExternalModelRecord = ( record ) => modelPanel.openRecord( record );
+	context.externalModels = { panel: modelPanel, library: context.modelLibrary, previewStats };
+	// diagnóstico somente leitura (estado da janela e memória da pré-visualização), usado nos testes automatizados
+	window.project3dsExternal = Object.freeze( { panel: Object.freeze( { getState: () => modelPanel.getState() } ), previewStats } );
 
 	// EV-005: galeria de projetos prontos (aberta por "Novo" ou pelo convite da cena vazia)
 	const gallery = new SimpleModeTemplateGallery( editor, context );
@@ -296,6 +310,7 @@ function SimpleMode( editor ) {
 		context,
 		projects: context.projects,
 		reviews: context.reviews,
+		externalModels: context.externalModels,
 		initialMode: config.getKey( MODE_KEY ) === 'advanced' ? 'advanced' : 'simple'
 	};
 
