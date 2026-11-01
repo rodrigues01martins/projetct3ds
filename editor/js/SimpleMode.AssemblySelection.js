@@ -136,7 +136,7 @@ function AssemblySelection( editor, context, isSimple ) {
 		editor.selected = null;
 		editor.select( hit.object );
 
-	} );
+	}, true ); // captura: o raio usa a câmera ANTES do duplo clique do viewport enquadrar (e mover) a câmera
 
 	document.addEventListener( 'keydown', ( event ) => {
 

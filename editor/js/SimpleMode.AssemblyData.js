@@ -273,12 +273,18 @@ function applyLocal( object, local ) {
 
 // novos UUIDs para todos os objetos da subárvore, novos IDs de conjunto e de abertura, vínculos parede → porta/janela
 // apontando para os objetos DA CÓPIA. Devolve o mapa uuid antigo -> objeto novo.
-function reassignIdentities( root, { definitionId } = {} ) {
+// source: objeto de origem quando root é um clone (Object3D.clone() já troca os UUIDs, então o vínculo
+// abertura → porta é refeito pela travessia paralela, como em relinkClone da EV-007)
+function reassignIdentities( root, { definitionId, source = null } = {} ) {
 
 	const map = new Map();
+	const originals = [];
+	if ( source !== null ) source.traverse( ( object ) => originals.push( object.uuid ) );
+	let index = 0;
 	root.traverse( ( object ) => {
 
-		const old = object.uuid;
+		const old = source !== null && originals[ index ] !== undefined ? originals[ index ] : object.uuid;
+		index ++;
 		object.uuid = THREE.MathUtils.generateUUID();
 		map.set( old, object );
 

@@ -25,6 +25,7 @@ class UngroupAssemblyCommand extends Command {
 	execute() {
 
 		const parent = this.parent;
+		this.editor.deselect(); // o grupo sai da cena: os controles de transformação não podem ficar presos a ele
 		this.parent.updateWorldMatrix( true, false );
 		this.group.updateMatrixWorld( true );
 		const locals = this.records.map( ( { object } ) => preservedLocal( object, parent.matrixWorld ) );

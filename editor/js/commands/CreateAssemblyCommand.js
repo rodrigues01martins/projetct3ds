@@ -98,6 +98,7 @@ class CreateAssemblyCommand extends Command {
 	undo() {
 
 		const parent = this.parent;
+		this.editor.deselect(); // o grupo sai da cena: os controles de transformação não podem ficar presos a ele
 
 		for ( const { object } of this.records ) object.removeFromParent();
 		this.group.removeFromParent();

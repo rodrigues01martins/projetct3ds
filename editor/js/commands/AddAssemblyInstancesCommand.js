@@ -77,6 +77,7 @@ class AddAssemblyInstancesCommand extends Command {
 
 	undo() {
 
+		this.editor.deselect();
 		for ( const object of this.objects ) this.editor.removeObject( object );
 
 		if ( this.original !== null ) {

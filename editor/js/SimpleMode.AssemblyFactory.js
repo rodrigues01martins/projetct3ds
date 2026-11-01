@@ -105,7 +105,7 @@ function duplicate( object ) {
 
 	} );
 
-	reassignIdentities( copy );
+	reassignIdentities( copy, { source: object } );
 	return copy;
 
 }
