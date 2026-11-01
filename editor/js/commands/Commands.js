@@ -31,3 +31,8 @@ export { SetSavedViewsCommand } from './SetSavedViewsCommand.js';
 export { SetPlanCommand } from './SetPlanCommand.js';
 export { SetBudgetCommand } from './SetBudgetCommand.js';
 export { SetProjectReviewsCommand } from './SetProjectReviewsCommand.js';
+export { CreateAssemblyCommand } from './CreateAssemblyCommand.js';
+export { UngroupAssemblyCommand } from './UngroupAssemblyCommand.js';
+export { SetAssemblyMembershipCommand } from './SetAssemblyMembershipCommand.js';
+export { AddAssemblyInstancesCommand } from './AddAssemblyInstancesCommand.js';
+export { SetAssemblyDataCommand } from './SetAssemblyDataCommand.js';

@@ -19,6 +19,7 @@
 import * as THREE from 'three';
 
 import { getMeta, getComponentData, isUserComponent, isImportedModelRoot } from './SimpleMode.ComponentFactory.js';
+import { isAssembly } from './SimpleMode.AssemblyData.js';
 import { getDefinition } from './SimpleMode.Components.js';
 import { isLightingGroup } from './SimpleMode.Lighting.js';
 import { getSavedViews, sanitizeView } from './SimpleMode.SavedViews.js';
@@ -92,11 +93,19 @@ function collectUnits( scene ) {
 
 			if ( isLightingGroup( child ) || child.isLight || child.isCamera ) continue;
 
+			// EV-014: o conjunto não é uma unidade; seus componentes internos são (selecionáveis e comentáveis no visualizador)
+			if ( isAssembly( child ) ) {
+
+				walk( child, insideUnit );
+				continue;
+
+			}
+
 			let unit = null;
 			const data = getComponentData( child );
 			if ( isHosted( child ) && data !== null ) unit = { kind: 'opening', hosted: true };
 			else if ( insideUnit === false && ( data !== null || isUserComponent( child ) || isImportedModelRoot( child ) ) ) unit = { kind: 'component' };
-			else if ( insideUnit === false && object === scene && ( child.isMesh || child.isGroup || child.type === 'Object3D' ) ) unit = { kind: 'object' };
+			else if ( insideUnit === false && ( object === scene || isAssembly( object ) ) && ( child.isMesh || child.isGroup || child.type === 'Object3D' ) ) unit = { kind: 'object' };
 
 			if ( unit !== null ) units.push( Object.assign( unit, { object: child, component: data !== null ? data.id : null, label: labelOf( child ) } ) );
 			walk( child, insideUnit || ( unit !== null && unit.kind !== 'opening' ) );

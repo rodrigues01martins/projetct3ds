@@ -38,6 +38,11 @@ import { SimpleModeReviewPanel } from './SimpleMode.ReviewPanel.js';
 import { ExternalModelLibrary } from './SimpleMode.ExternalModelLibrary.js';
 import { SimpleModeExternalModelPanel } from './SimpleMode.ExternalModelPanel.js';
 import { previewStats } from './SimpleMode.ExternalModelPreview.js';
+import { AssemblyLibrary } from './SimpleMode.AssemblyLibrary.js';
+import { AssemblySelection } from './SimpleMode.AssemblySelection.js';
+import { AssemblyPreview } from './SimpleMode.AssemblyPreview.js';
+import { AssemblySnapping } from './SimpleMode.AssemblySnapping.js';
+import { SimpleModeAssemblyPanel } from './SimpleMode.AssemblyPanel.js';
 
 import { getSimpleString as t } from './SimpleMode.Strings.js';
 
@@ -127,6 +132,13 @@ function SimpleMode( editor ) {
 	// EV-013: biblioteca de modelos importados (banco próprio "project3ds-assets"; só metadados até um modelo ser usado)
 	context.modelLibrary = new ExternalModelLibrary( editor );
 
+	// EV-014: montagem modular — biblioteca própria ("project3ds-assemblies"), seleção hierárquica (encadeada à
+	// resolução acima, só no Modo Simples), prévia temporária e ferramenta de encaixe
+	context.assemblyLibrary = new AssemblyLibrary( editor, context.modelLibrary );
+	context.assemblySelection = new AssemblySelection( editor, context, () => currentMode === 'simple' );
+	context.assemblyPreview = new AssemblyPreview( editor, interaction );
+	context.assemblySnapping = new AssemblySnapping( editor, context, interaction, context.assemblyPreview, context.assemblySelection );
+
 	// EV-011: diálogo de confirmação e gestão de projetos (identidade, autosave, versões, recuperação).
 	// Criada antes dos painéis: instala os envoltórios de Editor.toJSON/clear antes de qualquer carregamento.
 	context.dialog = new ProjectDialog( container.dom );
@@ -196,6 +208,21 @@ function SimpleMode( editor ) {
 	context.openExternalModelFiles = ( files ) => modelPanel.openFiles( files );
 	context.openExternalModelRecord = ( record ) => modelPanel.openRecord( record );
 	context.externalModels = { panel: modelPanel, library: context.modelLibrary, previewStats };
+	// EV-014: menu "Montagem", painel lateral contextual e diálogos de conjunto
+	context.assemblyPanel = new SimpleModeAssemblyPanel( editor, context, container.dom, { selection: context.assemblySelection, snapping: context.assemblySnapping, preview: context.assemblyPreview, library: context.assemblyLibrary } );
+	context.openAssemblyMenu = ( anchor ) => context.assemblyPanel.openMenu( anchor );
+	// diagnóstico somente leitura da montagem (resultado do encaixe em prévia, conjunto em edição, painel lateral)
+	window.project3dsAssembly = Object.freeze( {
+		snapResult: () => {
+
+			const r = context.assemblySnapping.getResult();
+			return r === null ? null : { moving: r.moving.id, target: r.target.id, targetUuid: r.targetObject ? r.targetObject.uuid : null, from: r.from.position.toArray(), to: r.to.position.toArray(), normalFrom: r.from.normal.toArray(), normalTo: r.to.normal.toArray(), distance: r.distance, angle: r.angle };
+
+		},
+		editing: () => ( context.assemblySelection.getEditing() !== null ? context.assemblySelection.getEditing().uuid : null ),
+		side: () => context.assemblyPanel.getSideState()
+	} );
+
 	// diagnóstico somente leitura (estado da janela e memória da pré-visualização), usado nos testes automatizados
 	window.project3dsExternal = Object.freeze( { panel: Object.freeze( { getState: () => modelPanel.getState() } ), previewStats } );
 

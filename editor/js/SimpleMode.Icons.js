@@ -60,6 +60,9 @@ const ICON_PATHS = {
 	// EV-011 — gestão de projetos
 	folder: '<path d="M3 6.5A1.5 1.5 0 0 1 4.5 5H9l2 2h8.5A1.5 1.5 0 0 1 21 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5z"/>',
 
+	// EV-014 — montagem modular
+	assembly: '<rect x="3" y="12" width="8" height="8" rx="1"/><rect x="13" y="12" width="8" height="8" rx="1"/><rect x="8" y="3" width="8" height="8" rx="1"/>',
+
 	// EV-013 — modelos importados
 	add: '<path d="M12 5v14M5 12h14"/>',
 	model: '<path d="M12 3 4 7.5v9L12 21l8-4.5v-9z"/><path d="M4 7.5 12 12l8-4.5M12 12v9"/><circle cx="12" cy="12" r="1.2"/>',

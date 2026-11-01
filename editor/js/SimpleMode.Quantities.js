@@ -9,11 +9,13 @@
 //   - portas/janelas hospedadas: pelo vínculo da EV-007 (registro da abertura + componente filho da parede),
 //     contadas uma única vez; registro sem componente = aviso de abertura órfã;
 //   - "Meus componentes" e objetos sem parâmetros: contagem por unidade, dimensões da caixa envolvente (estimadas);
-//   - modelos importados (EV-013): UMA unidade por grupo, com nome, categoria e caixa envolvente (sem volume de material).
+//   - modelos importados (EV-013): UMA unidade por grupo, com nome, categoria e caixa envolvente (sem volume de material);
+//   - conjuntos modulares (EV-014): a raiz não conta; cada componente interno conta uma vez (cópias contam por si).
 
 import * as THREE from 'three';
 
 import { getComponentData, isUserComponent, isImportedModelRoot } from './SimpleMode.ComponentFactory.js';
+import { isAssembly } from './SimpleMode.AssemblyData.js';
 import { getDefinition, validateParameters } from './SimpleMode.Components.js';
 import { getOpenings, getHosted, findFixture } from './SimpleMode.Openings.js';
 import { isLightingGroup } from './SimpleMode.Lighting.js';
@@ -301,6 +303,14 @@ function buildQuantities( scene ) {
 
 		const data = getComponentData( object );
 		if ( data !== null ) return visitComponent( object, data );
+
+		// EV-014: conjunto modular nunca é uma unidade extra — conta só o que está dentro (componentes, modelos, objetos)
+		if ( isAssembly( object ) ) {
+
+			for ( const child of object.children ) visit( child );
+			return;
+
+		}
 
 		if ( isImportedModelRoot( object ) ) {
 

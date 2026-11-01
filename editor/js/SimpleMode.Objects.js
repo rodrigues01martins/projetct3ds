@@ -11,6 +11,7 @@ import { getSimpleString as t } from './SimpleMode.Strings.js';
 import { createIcon, createSimpleButton, createText } from './SimpleMode.Icons.js';
 import { SimpleModeLibrary, getUniqueName } from './SimpleMode.Library.js';
 import { getComponentData, isUserComponent, isImportedModelRoot } from './SimpleMode.ComponentFactory.js';
+import { isAssembly, assemblyAncestors } from './SimpleMode.AssemblyData.js';
 import { getDefinition } from './SimpleMode.Components.js';
 import { isLightingGroup } from './SimpleMode.Lighting.js';
 import { isHostedFixture } from './SimpleMode.Openings.js';
@@ -171,6 +172,7 @@ function SimpleModeObjects( editor, context ) {
 
 		if ( isUserComponent( object ) ) return 'bookmark';
 		if ( isImportedModelRoot( object ) ) return 'model'; // EV-013
+		if ( isAssembly( object ) ) return 'assembly'; // EV-014
 
 		if ( object.isMesh && object.geometry ) {
 
@@ -204,9 +206,17 @@ function SimpleModeObjects( editor, context ) {
 
 		}
 
-		for ( const object of objects ) {
+		// EV-014: conjuntos aparecem como hierarquia recolhível (conjunto → componentes → aberturas)
+		const visit = ( object, depth ) => {
 
-			addRow( object, false );
+			addRow( object, depth > 0, depth );
+
+			if ( isAssembly( object ) ) {
+
+				if ( expanded.has( object.uuid ) ) for ( const child of object.children ) visit( child, depth + 1 );
+				return;
+
+			}
 
 			// EV-007: portas e janelas hospedadas aparecem logo abaixo da parede (hierarquia parede → aberturas)
 			const hosted = [];
@@ -216,21 +226,27 @@ function SimpleModeObjects( editor, context ) {
 
 			} );
 
-			for ( const child of hosted ) addRow( child, true );
+			for ( const child of hosted ) addRow( child, true, depth + 1 );
 
-		}
+		};
+
+		for ( const object of objects ) visit( object, 0 );
 
 		updateSelection();
 
 	}
 
-	function addRow( object, nested ) {
+	const expanded = new Set();
+
+	function addRow( object, nested, depth = nested ? 1 : 0 ) {
 
 		const name = object.name || t( 'objects/unnamed' );
 
 		const row = document.createElement( 'div' );
 		row.className = 'SimpleObjectRow' + ( nested ? ' nested' : '' );
 		row.setAttribute( 'role', 'listitem' );
+		if ( depth > 1 ) row.style.setProperty( '--depth', String( depth ) );
+		if ( depth > 1 ) row.classList.add( 'deep' );
 
 		const mark = document.createElement( 'input' );
 		mark.type = 'checkbox';
@@ -259,7 +275,10 @@ function SimpleModeObjects( editor, context ) {
 
 		item.addEventListener( 'click', function () {
 
-			editor.select( object );
+			// EV-014: um componente interno é selecionado entrando no conjunto que o contém
+			const chain = assemblyAncestors( object, editor.scene );
+			if ( chain.length > 0 && context.assemblySelection !== undefined ) context.assemblySelection.enterEditing( chain[ chain.length - 1 ], object );
+			else editor.select( object );
 
 		} );
 
@@ -273,6 +292,29 @@ function SimpleModeObjects( editor, context ) {
 		badge.className = 'SimpleReferenceBadge';
 		badge.textContent = t( 'objects/list/reference' );
 		badge.title = t( 'objects/list/reference/title' );
+
+		// EV-014: expandir/recolher conjunto
+		if ( isAssembly( object ) ) {
+
+			const toggle = document.createElement( 'button' );
+			toggle.type = 'button';
+			toggle.className = 'SimpleObjectToggle';
+			const open = expanded.has( object.uuid );
+			toggle.textContent = open ? '▾' : '▸';
+			toggle.title = open ? `Recolher "${name}"` : `Expandir "${name}"`;
+			toggle.setAttribute( 'aria-label', toggle.title );
+			toggle.setAttribute( 'aria-expanded', open ? 'true' : 'false' );
+			toggle.addEventListener( 'click', () => {
+
+				if ( expanded.has( object.uuid ) ) expanded.delete( object.uuid );
+				else expanded.add( object.uuid );
+				refreshList();
+
+			} );
+			row.appendChild( toggle );
+			row.classList.add( 'assembly' );
+
+		}
 
 		row.appendChild( item );
 		row.appendChild( badge );
@@ -305,7 +347,25 @@ function SimpleModeObjects( editor, context ) {
 	}
 
 	signals.sceneGraphChanged.add( refreshList );
-	signals.objectSelected.add( updateSelection );
+	signals.objectSelected.add( function ( object ) {
+
+		// EV-014: componente interno selecionado → conjuntos que o contêm ficam expandidos na lista
+		let changed = false;
+		for ( const group of object ? assemblyAncestors( object, editor.scene ) : [] ) {
+
+			if ( expanded.has( group.uuid ) === false ) {
+
+				expanded.add( group.uuid );
+				changed = true;
+
+			}
+
+		}
+
+		if ( changed ) refreshList();
+		else updateSelection();
+
+	} );
 	alignment.changed.add( updateSelection );
 
 	signals.objectChanged.add( function ( object ) {

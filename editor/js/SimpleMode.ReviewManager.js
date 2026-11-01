@@ -140,7 +140,27 @@ function ReviewManager( editor, context ) {
 	function locate( comment, { useCamera = false } = {} ) {
 
 		const object = comment.anchor.kind !== 'project' ? findObject( comment.anchor.objectUuid ) : undefined;
-		if ( object !== undefined ) editor.select( object );
+		if ( object !== undefined ) {
+
+			// EV-014: componente dentro de um conjunto — entra no conjunto para selecionar o próprio componente
+			let assembly = null, current = object.parent;
+			while ( current !== null && current !== editor.scene ) {
+
+				if ( current.userData.project3ds && current.userData.project3ds.assembly ) {
+
+					assembly = current;
+					break;
+
+				}
+
+				current = current.parent;
+
+			}
+
+			if ( assembly !== null && context.assemblySelection !== undefined ) context.assemblySelection.enterEditing( assembly, object );
+			else editor.select( object );
+
+		}
 
 		if ( useCamera && comment.camera !== null && context.cameras !== undefined ) {
 

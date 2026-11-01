@@ -196,6 +196,17 @@ function SimpleModeTopbar( editor, context ) {
 	exportJSONButton.dom.dataset.action = 'export-json';
 	fileGroup.add( exportJSONButton );
 
+	// EV-014: montagem modular — um único botão com menu (criar/editar/desagrupar conjunto, encaixar, repetir, matriz…)
+	const assemblyButton = createSimpleButton( {
+		icon: 'assembly', label: 'Montagem', title: 'Montagem modular: conjuntos, encaixes, repetição e matriz',
+		className: 'SimpleAssemblyButton',
+		onClick: () => context.openAssemblyMenu( assemblyButton.dom )
+	} );
+	assemblyButton.dom.dataset.action = 'assembly';
+	assemblyButton.dom.setAttribute( 'aria-haspopup', 'menu' );
+	assemblyButton.dom.setAttribute( 'aria-expanded', 'false' );
+	fileGroup.add( assemblyButton );
+
 	// EV-012: compartilhar o projeto (pacote de visualização) e acompanhar as revisões devolvidas
 	const shareButton = createSimpleButton( {
 		icon: 'share', label: t( 'topbar/share' ), title: t( 'topbar/share/title' ),

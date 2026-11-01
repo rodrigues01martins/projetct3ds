@@ -14,6 +14,7 @@ import { isLightingGroup } from './SimpleMode.Lighting.js';
 
 import { SimpleModeExternalModelLibraryView } from './SimpleMode.ExternalModelLibraryView.js';
 import { createInstance } from './SimpleMode.ExternalModelInstances.js';
+import { SimpleModeAssemblyLibraryView } from './SimpleMode.AssemblyLibraryView.js';
 
 import { getSimpleString as t } from './SimpleMode.Strings.js';
 import { createIcon, createSimpleButton, createText } from './SimpleMode.Icons.js';
@@ -22,7 +23,7 @@ const TAB_KEY = 'interface/simple/libraryTab';
 
 // EV-006: componentes com base física bem definida (a janela começa no peitoril, então não é apoiada automaticamente)
 const PLACEABLE = new Set( [ 'wall', 'floor', 'panel', 'door', 'table', 'chair', 'shelf', 'platform' ] );
-const TABS = [ 'basics', 'catalog', 'mine', 'models' ];
+const TABS = [ 'basics', 'catalog', 'mine', 'models', 'assemblies' ];
 
 // utilitários compartilhados -------------------------------------------------------
 
@@ -155,6 +156,7 @@ function SimpleModeLibrary( editor, context, basicsContent ) {
 		renderCatalog();
 		renderMine();
 		modelsView.render();
+		assembliesView.render();
 
 	} );
 	searchRow.dom.appendChild( search );
@@ -192,6 +194,7 @@ function SimpleModeLibrary( editor, context, basicsContent ) {
 
 		if ( tab === 'mine' && userLibrary.isLoaded() === false ) userLibrary.load();
 		if ( tab === 'models' && modelLibrary.isLoaded() === false ) modelLibrary.load(); // só metadados e miniaturas
+		if ( tab === 'assemblies' && context.assemblyLibrary.isLoaded() === false ) context.assemblyLibrary.load();
 
 	}
 
@@ -598,6 +601,13 @@ function SimpleModeLibrary( editor, context, basicsContent ) {
 		openRecord: ( record ) => context.openExternalModelRecord( record )
 	} );
 
+	// EV-014: conjuntos modulares (prontos e salvos)
+	const assembliesView = new SimpleModeAssemblyLibraryView( editor, context, context.assemblyLibrary, modelLibrary, panels.assemblies.dom, {
+		matches,
+		insert: ( object, label ) => insert( object, label )
+	} );
+	context.showAssemblies = () => selectTab( 'assemblies' );
+
 	context.insertImportedModel = ( object ) => insert( object, object.name );
 	context.showImportedModels = () => selectTab( 'models' );
 	context.importExternalModel = () => {
@@ -626,6 +636,7 @@ function SimpleModeLibrary( editor, context, basicsContent ) {
 	renderCatalog();
 	renderMine();
 	modelsView.render();
+	assembliesView.render();
 
 	const initialTab = config.getKey( TAB_KEY );
 	selectTab( TABS.includes( initialTab ) ? initialTab : 'basics' );

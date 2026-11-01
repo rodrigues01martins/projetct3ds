@@ -16,7 +16,6 @@ import { SetPositionCommand } from './commands/SetPositionCommand.js';
 import { SetRotationCommand } from './commands/SetRotationCommand.js';
 import { SetScaleCommand } from './commands/SetScaleCommand.js';
 
-import { clone } from '../../examples/jsm/utils/SkeletonUtils.js';
 
 import { getSimpleString as t } from './SimpleMode.Strings.js';
 import { createIcon, createSimpleButton, createText } from './SimpleMode.Icons.js';
@@ -25,11 +24,15 @@ import { getDimensionInfo, computeScaleForSize } from './SimpleMode.Dimensions.j
 import { SimpleModeComponentProperties } from './SimpleMode.ComponentProperties.js';
 import { getComponentState, isUserComponent, isImportedModelRoot } from './SimpleMode.ComponentFactory.js';
 import { SimpleModeExternalModelProperties } from './SimpleMode.ExternalModelProperties.js';
+import { SimpleModeAssemblyProperties } from './SimpleMode.AssemblyPanel.js';
+import { isAssembly, getAssembly } from './SimpleMode.AssemblyData.js';
+import { duplicate as duplicateSmart } from './SimpleMode.AssemblyFactory.js';
+import { AddAssemblyInstancesCommand } from './commands/AddAssemblyInstancesCommand.js';
 import { categoryName as modelCategoryName } from './SimpleMode.ExternalModelStorage.js';
 import { getCategory } from './SimpleMode.Components.js';
 import { SimpleModeAppearancePanel } from './SimpleMode.AppearancePanel.js';
 import { SimpleModeOpeningProperties } from './SimpleMode.OpeningProperties.js';
-import { isHostedFixture, getOpeningOf, relinkClone } from './SimpleMode.Openings.js';
+import { isHostedFixture, getOpeningOf } from './SimpleMode.Openings.js';
 
 const SECTIONS_KEY = 'interface/simple/sections';
 const AXES = [ 'x', 'y', 'z' ];
@@ -257,6 +260,10 @@ function SimpleModeProperties( editor, context ) {
 	// EV-004: acabamentos (materiais, texturas procedurais e partes lógicas dos componentes)
 	const colorSection = createSection( 'appearance', t( 'properties/section/appearance' ) );
 	const appearancePanel = new SimpleModeAppearancePanel( editor, context, colorSection );
+
+	// EV-014: conjunto modular — componentes, dimensões, conectores, editar/desagrupar/salvar na biblioteca
+	const assemblySection = createSection( 'assembly', 'Conjunto modular' );
+	const assemblyProperties = new SimpleModeAssemblyProperties( editor, context, assemblySection );
 
 	// EV-013: modelo importado — origem, correções de importação e materiais da instância (no lugar dos acabamentos)
 	const importedSection = createSection( 'imported', 'Modelo importado' );
@@ -694,33 +701,20 @@ function SimpleModeProperties( editor, context ) {
 
 		}
 
-		const copy = clone( object );
-
-		// EV-007: aberturas da cópia ganham identificadores próprios e apontam para as próprias portas/janelas
-		relinkClone( object, copy );
-
-		// materiais próprios: mudar a cor da cópia não deve alterar o original
-		copy.traverse( function ( child ) {
-
-			if ( child.material === undefined ) return;
-
-			child.material = Array.isArray( child.material ) ?
-				child.material.map( ( material ) => material.clone() ) :
-				child.material.clone();
-
-			// geometria própria: regenerar um componente copiado não afeta o original (EV-003)
-			if ( child.geometry !== undefined ) child.geometry = child.geometry.clone();
-
-			// EV-004: texturas com repetição própria (a imagem continua compartilhada na GPU)
-			for ( const material of Array.isArray( child.material ) ? child.material : [ child.material ] ) {
-
-				if ( material.map ) material.map = material.map.clone();
-
-			}
-
-		} );
-
+		// EV-014: duplicação inteligente (componentes, modelos importados, conjuntos e subconjuntos): UUIDs, IDs de
+		// conjunto e vínculos de aberturas próprios; materiais independentes; geometria de modelos importados compartilhada
+		const copy = duplicateSmart( object );
 		copy.name = object.name !== '' ? object.name + ' ' + t( 'properties/copySuffix' ) : '';
+
+		if ( object.parent !== editor.scene && isAssembly( object.parent ) ) {
+
+			// dentro de um conjunto em edição: a cópia fica no mesmo conjunto, ao lado do original
+			copy.position.x += 1.2;
+			editor.execute( new AddAssemblyInstancesCommand( editor, [ copy ], { parent: object.parent, name: 'Duplicar: ' + ( object.name || 'objeto' ) } ) );
+			context.notify( t( 'message/duplicated' ), 'success' );
+			return;
+
+		}
 
 		if ( object.parent !== editor.scene ) {
 
@@ -744,6 +738,14 @@ function SimpleModeProperties( editor, context ) {
 		if ( object === null ) {
 
 			context.notify( t( 'message/nothingSelected' ) );
+			return;
+
+		}
+
+		// EV-014: excluir conjunto pede a ação explícita (excluir conteúdo OU desagrupar preservando componentes)
+		if ( isAssembly( object ) && context.assemblyPanel !== undefined ) {
+
+			context.assemblyPanel.deleteAssembly( object );
 			return;
 
 		}
@@ -781,6 +783,7 @@ function SimpleModeProperties( editor, context ) {
 
 		if ( isUserComponent( object ) ) return t( 'type/userComponent' );
 		if ( isImportedModelRoot( object ) ) return 'Modelo importado';
+		if ( isAssembly( object ) ) return 'Conjunto modular';
 		if ( info.primitive !== null ) return t( TYPE_NAMES[ info.primitive ] );
 		if ( object.isLight ) return t( 'type/light' );
 		if ( object.isCamera ) return t( 'type/camera' );
@@ -839,6 +842,10 @@ function SimpleModeProperties( editor, context ) {
 		importedSection.details.hidden = imported === false;
 		if ( imported ) colorSection.details.hidden = true;
 
+		const assembly = assemblyProperties.update( object );
+		assemblySection.details.hidden = assembly === false;
+		if ( assembly ) colorSection.details.hidden = true; // acabamentos se editam por componente (Editar conjunto)
+
 		updateCategory( object );
 
 	}
@@ -860,6 +867,10 @@ function SimpleModeProperties( editor, context ) {
 		} else if ( isImportedModelRoot( object ) ) {
 
 			text = t( 'properties/category', modelCategoryName( object.userData.project3ds.importedAsset.category ) );
+
+		} else if ( isAssembly( object ) ) {
+
+			text = t( 'properties/category', ( { rooms: 'Ambientes', stands: 'Estandes', modular: 'Estruturas modulares', furniture: 'Mobiliário', exhibition: 'Exposição', events: 'Eventos' } )[ getAssembly( object ).category ] || 'Outros' );
 
 		}
 
