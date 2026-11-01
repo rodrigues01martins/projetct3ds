@@ -5598,3 +5598,6 @@ body.mode-simple.budget-open #simple-center {
 	}
 
 }
+
+/* EV-014: cada opção do painel de montagem em sua própria linha */
+#simple-assembly-panel .SimpleCheckboxRow { display: flex; align-items: center; gap: 6px; margin: 4px 0; }
