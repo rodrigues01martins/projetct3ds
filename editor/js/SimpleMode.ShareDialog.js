@@ -29,7 +29,7 @@ function viewerAddress() {
 function SimpleModeShareDialog( editor, context, root ) {
 
 	const projects = context.projects;
-	const state = { open: false, step: 'form', prepared: null, busy: false, options: { materials: true, lighting: true, views: true, names: true, dimensions: true } };
+	const state = { open: false, step: 'form', prepared: null, busy: false, options: { materials: true, lighting: true, views: true, names: true, dimensions: true, technical: false } };
 
 	const overlay = el( 'div', 'SimpleShareOverlay' );
 	overlay.id = 'simple-share';
@@ -150,6 +150,7 @@ function SimpleModeShareDialog( editor, context, root ) {
 		row( 'Vistas salvas', manifest.contents.views ? `incluídas — ${s.views} vista(s)` : 'excluídas', manifest.contents.views );
 		row( 'Nomes dos componentes', manifest.contents.names ? 'incluídos' : 'excluídos (apenas o tipo é exibido)', manifest.contents.names );
 		row( 'Dimensões básicas', manifest.contents.dimensions ? 'incluídas' : 'excluídas', manifest.contents.dimensions );
+		row( 'Ficha técnica resumida', manifest.contents.technical ? `incluída — ${s.technical || 0} componente(s) com ficha (somente código, nome, dimensões nominais, material, peso informado e revisão)` : 'excluída', manifest.contents.technical === true );
 		for ( const item of EXCLUDED ) row( item, 'excluído', false );
 		row( 'Tamanho estimado', formatBytes( prepared.bytes ) + ' antes da compactação' );
 		body.appendChild( table );

@@ -445,6 +445,30 @@ function resolveRecord( scene, catalogId, revision, snapshot = null ) {
 
 }
 
+// acrescenta ao snapshot as revisões usadas que ainda não estão nele (sessão/catálogo local); nunca substitui nem
+// remove (desfazer uma exclusão continua encontrando os dados do projeto). Retorna true se acrescentou algo.
+function completeSnapshot( scene ) {
+
+	const missing = [];
+	let snapshot = null;
+	scene.traverse( ( object ) => {
+
+		const link = getTechnicalLink( object );
+		if ( link === null ) return;
+		if ( snapshot === null ) snapshot = getSnapshot( scene );
+		const key = revisionKey( link.catalogId, link.catalogRevision );
+		if ( snapshot.parts[ key ] !== undefined || missing.some( ( r ) => revisionKey( r.catalogId, r.revision ) === key ) ) return;
+		const { record } = resolveRecord( scene, link.catalogId, link.catalogRevision, snapshot );
+		if ( record !== null ) missing.push( record );
+
+	} );
+	if ( missing.length === 0 ) return false;
+	for ( const record of missing ) snapshot.parts[ revisionKey( record.catalogId, record.revision ) ] = record;
+	setSnapshot( scene, snapshot );
+	return true;
+
+}
+
 // fichas e regras usadas numa subárvore (para definições de conjunto e pacotes): somente o necessário
 function technicalForSubtree( root, scene, rules = null ) {
 
@@ -494,7 +518,7 @@ function formatNominal( meters, unit = 'mm' ) {
 
 	if ( meters === null || meters === undefined ) return 'Não informado';
 	const factor = DISPLAY_UNITS[ unit ] || 1000;
-	return ( meters * factor ).toLocaleString( 'pt-BR', { maximumFractionDigits: unit === 'm' ? 4 : unit === 'cm' ? 2 : 1 } ) + ' ' + unit;
+	return ( meters * factor ).toLocaleString( 'pt-BR', { maximumFractionDigits: unit === 'm' ? 4 : unit === 'cm' ? 2 : 1, useGrouping: false } ) + ' ' + unit;
 
 }
 
@@ -517,6 +541,6 @@ export {
 	TechnicalError, cleanText, cleanCode, codeKey, cleanFamily, cleanUrl, newId, isId,
 	emptyPart, sanitizePart, sanitizeRule, isComplete, hasDocument, coerceValidation, validationProblem, pendingFields,
 	changedFields, isTechnicalChange, revisionKey, categoryName, validationName, searchText, normalizeQuery,
-	getTechnicalLink, makeLink, getSnapshot, hasSnapshot, setSnapshot, rememberRecords, setLocalResolver, resolveRecord, technicalForSubtree,
+	getTechnicalLink, makeLink, getSnapshot, hasSnapshot, setSnapshot, rememberRecords, setLocalResolver, resolveRecord, technicalForSubtree, completeSnapshot,
 	formatWeight, formatNominal, nominalSummary
 };

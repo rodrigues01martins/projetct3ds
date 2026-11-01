@@ -66,7 +66,8 @@ const CONTENT_OPTIONS = [
 	{ key: 'lighting', label: 'Iluminação' },
 	{ key: 'views', label: 'Câmeras e vistas salvas' },
 	{ key: 'names', label: 'Nomes dos componentes' },
-	{ key: 'dimensions', label: 'Dimensões básicas dos objetos' }
+	{ key: 'dimensions', label: 'Dimensões básicas dos objetos' },
+	{ key: 'technical', label: 'Ficha técnica resumida (código, nome, dimensões nominais, material, peso informado, revisão)', defaultOff: true }
 ];
 
 const EXCLUDED = [
@@ -401,6 +402,23 @@ function sanitizeGeometry( geometry, report, totals ) {
 
 }
 
+// EV-015: ficha técnica RESUMIDA autorizada pelo proprietário — lista explícita de campos (nada de documentos internos,
+// histórico de revisões, preços, dados administrativos ou anotações)
+function sanitizeTechnicalShare( technical ) {
+
+	if ( technical === null || typeof technical !== 'object' ) return null;
+	const code = text( technical.code, 40 );
+	if ( code === '' ) return null;
+	const clean = { code, name: text( technical.name, 120 ), revision: Number.isInteger( technical.revision ) && technical.revision >= 1 && technical.revision <= 1e6 ? technical.revision : null };
+	const nominal = Array.isArray( technical.nominal ) && technical.nominal.length === 3 ? technical.nominal.map( ( v ) => ( isNumber( v ) && v > 0 && v <= 1000 ? v : null ) ) : null;
+	if ( nominal !== null && nominal.some( ( v ) => v !== null ) ) clean.nominal = nominal;
+	const material = text( technical.material, 60 );
+	if ( material !== '' ) clean.material = material;
+	if ( isNumber( technical.weight ) && technical.weight > 0 && technical.weight <= 1e6 ) clean.weight = technical.weight;
+	return clean;
+
+}
+
 // metadados de visualização de um objeto (o ÚNICO userData que entra no pacote)
 function sanitizeShareInfo( share ) {
 
@@ -414,6 +432,8 @@ function sanitizeShareInfo( share ) {
 	const dims = numbers( share.dims, 3, 1e5 );
 	if ( dims !== null && dims.every( ( d ) => d >= 0 ) ) clean.dims = dims;
 	if ( share.hosted === true ) clean.hosted = true;
+	const technical = sanitizeTechnicalShare( share.technical );
+	if ( technical !== null ) clean.technical = technical;
 	return Object.keys( clean ).length > 0 ? clean : null;
 
 }
@@ -485,6 +505,7 @@ function sanitizeObject( object, ctx, depth ) {
 		if ( share !== null ) {
 
 			if ( ctx.dimensions === false ) delete share.dims;
+			if ( ctx.technical === false ) delete share.technical;
 			clean.userData = { share };
 
 		}
@@ -648,7 +669,7 @@ function sanitizeScene( json, options = {} ) {
 	let fallback = null;
 	const ctx = {
 		report, count: 0, ids: new Set(), targets: [], geometries, materials,
-		lighting: opts.lighting, names: opts.names, dimensions: opts.dimensions,
+		lighting: opts.lighting, names: opts.names, dimensions: opts.dimensions, technical: opts.technical,
 		fallbackMaterial: () => {
 
 			if ( fallback === null ) {
@@ -915,7 +936,7 @@ async function readPackage( bytes, { sanitizeView } ) {
 		description: text( manifest.description, LIMITS.description ),
 		createdAt: typeof manifest.createdAt === 'string' && Number.isFinite( Date.parse( manifest.createdAt ) ) ? new Date( Date.parse( manifest.createdAt ) ).toISOString() : null,
 		permissions: Object.assign( {}, PERMISSIONS ), // capacidades FIXAS do visualizador: o arquivo não as amplia
-		contents: Object.fromEntries( CONTENT_OPTIONS.map( ( o ) => [ o.key, manifest.contents ? manifest.contents[ o.key ] !== false : true ] ) ),
+		contents: Object.fromEntries( CONTENT_OPTIONS.map( ( o ) => [ o.key, o.defaultOff ? manifest.contents !== null && typeof manifest.contents === 'object' && manifest.contents[ o.key ] === true : ( manifest.contents ? manifest.contents[ o.key ] !== false : true ) ] ) ),
 		display: sanitizeDisplay( manifest.display ),
 		contentHash
 	};

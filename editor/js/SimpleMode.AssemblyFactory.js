@@ -20,6 +20,7 @@ import * as THREE from 'three';
 import { getMeta, setMeta, isImportedModelRoot, isComponent } from './SimpleMode.ComponentFactory.js';
 import { createInstance } from './SimpleMode.ExternalModelInstances.js';
 import { sanitizeSettings } from './SimpleMode.ExternalModelTransforms.js';
+import { technicalForSubtree, rememberRecords } from './SimpleMode.TechnicalCatalogData.js';
 import {
 	DEFINITION_FORMAT, DEFINITION_VERSION, ASSEMBLY_LIMITS, isAssembly, getAssembly, getConnectors, assemblyUnits,
 	checkPreservable, reassignIdentities, totalVertices, cleanText
@@ -230,6 +231,11 @@ function serializeAssembly( group, { id, name, category, keywords = [], modelLib
 	const size = box.isEmpty() ? new THREE.Vector3() : box.getSize( new THREE.Vector3() );
 	const units = assemblyUnits( group );
 
+	// EV-015: fichas técnicas (somente as revisões usadas) e regras de compatibilidade aplicáveis acompanham a definição
+	let scene = group;
+	while ( scene.parent !== null ) scene = scene.parent;
+	const technical = technicalForSubtree( group, scene );
+
 	return {
 		definition: {
 			format: DEFINITION_FORMAT,
@@ -242,6 +248,7 @@ function serializeAssembly( group, { id, name, category, keywords = [], modelLib
 			components: units.map( ( unit ) => ( { uuid: unit.uuid, name: unit.name, type: isImportedModelRoot( unit ) ? 'imported' : ( isComponent( unit ) ? getMeta( unit ).component.id : ( isAssembly( unit ) ? 'assembly' : 'object' ) ) } ) ),
 			connectors: getConnectors( group ),
 			dependencies,
+			technical: technical.parts.length > 0 ? technical : undefined,
 			root: json
 		},
 		size: [ size.x, size.y, size.z ],
@@ -273,6 +280,7 @@ function missingDependencies( definition, modelLibrary ) {
 async function instantiateDefinition( definition, { modelLibrary } ) {
 
 	validateDefinition( definition );
+	if ( definition.technical && Array.isArray( definition.technical.parts ) ) rememberRecords( definition.technical.parts ); // EV-015: dados técnicos da definição disponíveis ao projeto
 	if ( modelLibrary !== null && modelLibrary.isLoaded() === false ) await modelLibrary.load();
 	const missing = missingDependencies( definition, modelLibrary );
 	if ( missing.length > 0 ) throw new AssemblyError( `Modelos externos ausentes na biblioteca de modelos: ${missing.map( ( d ) => `"${d.name}" (${d.originalName || d.assetId})` ).join( ', ' )}. Importe-os (ou importe o pacote .p3ds-assembly.zip deste conjunto) antes de inserir.`, missing.map( ( d ) => d.name ) );

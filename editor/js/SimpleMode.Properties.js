@@ -25,6 +25,7 @@ import { SimpleModeComponentProperties } from './SimpleMode.ComponentProperties.
 import { getComponentState, isUserComponent, isImportedModelRoot } from './SimpleMode.ComponentFactory.js';
 import { SimpleModeExternalModelProperties } from './SimpleMode.ExternalModelProperties.js';
 import { SimpleModeAssemblyProperties } from './SimpleMode.AssemblyPanel.js';
+import { SimpleModeTechnicalPartProperties } from './SimpleMode.TechnicalPartProperties.js';
 import { isAssembly, getAssembly } from './SimpleMode.AssemblyData.js';
 import { duplicate as duplicateSmart } from './SimpleMode.AssemblyFactory.js';
 import { AddAssemblyInstancesCommand } from './commands/AddAssemblyInstancesCommand.js';
@@ -264,6 +265,10 @@ function SimpleModeProperties( editor, context ) {
 	// EV-014: conjunto modular — componentes, dimensões, conectores, editar/desagrupar/salvar na biblioteca
 	const assemblySection = createSection( 'assembly', 'Conjunto modular' );
 	const assemblyProperties = new SimpleModeAssemblyProperties( editor, context, assemblySection );
+
+	// EV-015: ficha técnica do componente (resumo; a ficha completa abre no Catálogo Técnico)
+	const technicalSection = createSection( 'technical', 'Ficha técnica' );
+	const technicalProperties = context.technical !== undefined ? new SimpleModeTechnicalPartProperties( editor, context, technicalSection, { catalog: context.technical.catalog } ) : null;
 
 	// EV-013: modelo importado — origem, correções de importação e materiais da instância (no lugar dos acabamentos)
 	const importedSection = createSection( 'imported', 'Modelo importado' );
@@ -845,6 +850,8 @@ function SimpleModeProperties( editor, context ) {
 		const assembly = assemblyProperties.update( object );
 		assemblySection.details.hidden = assembly === false;
 		if ( assembly ) colorSection.details.hidden = true; // acabamentos se editam por componente (Editar conjunto)
+
+		technicalSection.details.hidden = technicalProperties === null || technicalProperties.update( object ) === false;
 
 		updateCategory( object );
 

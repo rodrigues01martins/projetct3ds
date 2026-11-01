@@ -280,7 +280,8 @@ function describeUnit( object ) {
 		name: object.name || '',
 		label: share.label || ( share.kind === 'opening' ? 'Abertura' : 'Componente' ),
 		dims: share.dims || null,
-		hosted: share.hosted === true
+		hosted: share.hosted === true,
+		technical: share.technical || null
 	};
 
 }
@@ -318,7 +319,21 @@ function renderInfo() {
 
 		}
 
+		// EV-015: ficha técnica resumida (somente quando o proprietário autorizou no compartilhamento)
+		if ( info.technical !== null ) {
+
+			const t = info.technical;
+			add( 'Código técnico', t.code );
+			if ( t.name ) add( 'Ficha técnica', t.name );
+			if ( t.revision !== null ) add( 'Revisão da ficha', String( t.revision ) );
+			if ( t.nominal ) add( 'Dimensões nominais', t.nominal.map( ( v ) => ( v === null ? '—' : formatLength( v ) ) ).join( ' × ' ) );
+			add( 'Material declarado', t.material || 'Não informado' );
+			add( 'Peso informado', typeof t.weight === 'number' ? t.weight.toLocaleString( 'pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 } ) + ' kg' : 'Não informado' );
+
+		}
+
 		selectionBox.appendChild( list );
+		if ( info.technical !== null ) selectionBox.appendChild( el( 'p', 'ViewerHint', 'Dados declarados na ficha técnica do proprietário; não constituem certificação nem verificação estrutural.' ) );
 		const row = el( 'div', 'ViewerRow' );
 		row.append(
 			btn( 'Adicionar comentário', () => {

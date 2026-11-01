@@ -22,6 +22,7 @@ import { getMeta, getComponentData, isUserComponent, isImportedModelRoot } from 
 import { isAssembly } from './SimpleMode.AssemblyData.js';
 import { getDefinition } from './SimpleMode.Components.js';
 import { isLightingGroup } from './SimpleMode.Lighting.js';
+import { getTechnicalLink, resolveRecord, getSnapshot } from './SimpleMode.TechnicalCatalogData.js';
 import { getSavedViews, sanitizeView } from './SimpleMode.SavedViews.js';
 import { renderToCanvas } from './SimpleMode.ImageExport.js';
 import { sanitizeScene, sanitizeViews, buildPackage, describeReport, EXCLUDED } from './SimpleMode.ShareData.js';
@@ -264,6 +265,8 @@ function prepareShare( editor, { project, title, description = '', versionLabel 
 	} );
 
 	const units = new Map( collectUnits( scene ).map( ( unit ) => [ unit.object.uuid, unit ] ) );
+	const technicalSnapshot = getSnapshot( scene );
+	let technicalCount = 0;
 
 	( function annotate( node ) {
 
@@ -278,6 +281,19 @@ function prepareShare( editor, { project, title, description = '', versionLabel 
 			if ( unit.hosted ) share.hosted = true;
 			const dims = localSize( unit.object );
 			if ( dims !== null ) share.dims = dims;
+			// EV-015: ficha técnica resumida somente quando autorizada explicitamente (campos permitidos, nada além)
+			if ( options.technical === true ) {
+
+				const link = getTechnicalLink( unit.object );
+				const record = link !== null ? resolveRecord( scene, link.catalogId, link.catalogRevision, technicalSnapshot ).record : null;
+				if ( record !== null ) {
+
+					share.technical = { code: record.code, name: record.name, revision: record.revision, nominal: [ record.dimensions.width, record.dimensions.height, record.dimensions.depth ], material: record.material.primary, weight: record.physical.weight };
+					technicalCount ++;
+
+				}
+
+			}
 
 		} else if ( live !== undefined && isLightingGroup( live ) ) {
 
@@ -306,7 +322,7 @@ function prepareShare( editor, { project, title, description = '', versionLabel 
 		contents: Object.assign( { geometry: true }, options ),
 		excluded: EXCLUDED.slice(),
 		display: displaySettings( editor ),
-		stats: Object.assign( {}, stats, { views: views.length } )
+		stats: Object.assign( {}, stats, { views: views.length, technical: technicalCount } )
 	};
 
 	return {

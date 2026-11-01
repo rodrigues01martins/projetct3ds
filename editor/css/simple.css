@@ -5601,3 +5601,122 @@ body.mode-simple.budget-open #simple-center {
 
 /* EV-014: cada opção do painel de montagem em sua própria linha */
 #simple-assembly-panel .SimpleCheckboxRow { display: flex; align-items: center; gap: 6px; margin: 4px 0; }
+
+/* ============================================================================================================
+   EV-015 — Catálogo Técnico de Peças
+   Tons: completo = azul (informativo, nunca "aprovado"), faltante = âmbar, incompatível = vermelho,
+   divergência de revisão/dimensional = roxo.
+   ============================================================================================================ */
+
+#simple-mode {
+	--simple-tech-complete: #0a84ff;
+	--simple-tech-missing: #b7791f;
+	--simple-tech-missing-soft: #fff4d6;
+	--simple-tech-incompatible: #e5484d;
+	--simple-tech-incompatible-soft: #e5484d1a;
+	--simple-tech-revision: #8a4fff;
+	--simple-tech-revision-soft: #8a4fff1a;
+}
+
+@media ( prefers-color-scheme: dark ) {
+
+	#simple-mode {
+		--simple-tech-missing: #f0b44c;
+		--simple-tech-missing-soft: #f0b44c22;
+	}
+
+}
+
+#simple-mode .SimpleCatalog { width: 1180px; }
+#simple-mode .SimpleCatalogTabs { flex: 1 1 auto; flex-wrap: wrap; }
+#simple-mode .SimpleCatalogTab[hidden] { display: none; }
+#simple-mode .SimpleCatalogBody { flex: 1 1 auto; overflow: auto; padding: 14px 16px 20px; display: flex; flex-direction: column; gap: 12px; }
+#simple-mode .SimpleCatalogToolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+#simple-mode .SimpleCatalogToolbar .SimpleCatalogSearch { flex: 1 1 260px; min-width: 180px; }
+#simple-mode .SimpleCatalogInput, #simple-mode .SimpleCatalogSelect, #simple-mode .SimpleCatalogTextarea { min-height: 32px; padding: 4px 8px; border: 1px solid var(--simple-border); border-radius: 6px; background: var(--simple-surface); color: var(--simple-text); font: inherit; }
+#simple-mode .SimpleCatalogTextarea { min-height: 64px; resize: vertical; width: 100%; box-sizing: border-box; }
+#simple-mode .SimpleCatalogList { display: flex; flex-direction: column; gap: 6px; }
+#simple-mode .SimpleCatalogRow { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-content: space-between; padding: 10px 12px; border: 1px solid var(--simple-border); border-radius: 8px; background: var(--simple-surface); }
+#simple-mode .SimpleCatalogRowMain { display: flex; flex-direction: column; gap: 2px; min-width: 220px; flex: 1 1 320px; }
+#simple-mode .SimpleCatalogCode { font-variant-numeric: tabular-nums; }
+#simple-mode .SimpleCatalogMeta, #simple-mode .SimpleCatalogHint, #simple-mode .SimpleCatalogFieldHint { color: var(--simple-text-muted); font-size: 12px; }
+#simple-mode .SimpleCatalogActions { display: flex; flex-wrap: wrap; gap: 4px; }
+#simple-mode .SimpleCatalogAction { padding: 4px 8px; font-size: 12px; }
+#simple-mode .SimpleCatalogAction.danger, #simple-mode .SimpleCatalogConnectorRemove.danger, #simple-mode .SimpleRuleDelete.danger { color: var(--simple-danger); }
+#simple-mode .SimpleCatalogAction.primary { background: var(--simple-accent); color: #fff; border-color: var(--simple-accent); }
+#simple-mode .SimpleCatalogEmpty { color: var(--simple-text-muted); padding: 16px 4px; }
+#simple-mode .SimpleCatalogPick { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; padding: 10px 12px; border-radius: 8px; background: var(--simple-accent-soft); }
+#simple-mode .SimpleCatalogWarning { padding: 8px 12px; border-radius: 8px; background: var(--simple-tech-missing-soft); color: var(--simple-text); }
+#simple-mode .SimpleCatalogNotice, #simple-mode .SimpleCatalogDisclaimer { margin: 0; padding: 8px 12px; border-left: 3px solid var(--simple-text-muted); background: var(--simple-surface); color: var(--simple-text-muted); font-size: 12px; }
+
+/* ficha */
+#simple-mode .SimpleCatalogSheetHead { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: baseline; }
+#simple-mode .SimpleCatalogSheetHead h3, #simple-mode .SimpleCatalogForm h3 { margin: 0; }
+#simple-mode .SimpleCatalogBadge { padding: 2px 8px; border-radius: 999px; background: var(--simple-accent-soft); font-size: 12px; }
+#simple-mode .SimpleCatalogSection { margin: 0; padding: 10px 12px; border: 1px solid var(--simple-border); border-radius: 8px; background: var(--simple-surface); }
+#simple-mode .SimpleCatalogSection h4, #simple-mode .SimpleCatalogSection legend { margin: 0 0 6px; font-weight: 600; font-size: 13px; }
+#simple-mode .SimpleCatalogFacts dd.missing, #simple-mode .SimpleTechnicalFacts dd.missing { color: var(--simple-text-muted); font-style: italic; }
+#simple-mode .SimpleCatalogForm { display: flex; flex-direction: column; gap: 12px; }
+#simple-mode .SimpleCatalogGrid { display: grid; grid-template-columns: repeat( auto-fill, minmax( 200px, 1fr ) ); gap: 8px 12px; }
+#simple-mode .SimpleCatalogField { display: flex; flex-direction: column; gap: 3px; font-size: 12px; }
+#simple-mode .SimpleCatalogFieldLabel { color: var(--simple-text-muted); }
+#simple-mode .SimpleCatalogConnectorList { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
+#simple-mode .SimpleCatalogConnectorRow { display: grid; grid-template-columns: repeat( auto-fill, minmax( 150px, 1fr ) ); gap: 6px 10px; align-items: end; padding: 8px; border: 1px dashed var(--simple-border); border-radius: 6px; }
+#simple-mode .SimpleCatalogErrors:empty { display: none; }
+#simple-mode .SimpleCatalogErrors { padding: 8px 12px; border-radius: 8px; background: var(--simple-danger-soft); color: var(--simple-danger); }
+#simple-mode .SimpleCatalogErrors p { margin: 2px 0; }
+#simple-mode .SimpleCatalogSheetActions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+#simple-mode .SimpleCatalogSave.primary { background: var(--simple-accent); color: #fff; border-color: var(--simple-accent); }
+#simple-mode .SimpleCatalogRevisions { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; font-size: 12px; }
+#simple-mode .SimpleCatalogRevisions li .SimpleButton { margin-left: 8px; padding: 2px 6px; font-size: 11px; }
+
+/* peças do projeto, regras */
+#simple-mode .SimpleBomSummary { margin: 0; padding: 8px 12px; border-radius: 8px; background: var(--simple-surface); border: 1px solid var(--simple-border); }
+#simple-mode .SimpleBomSummary.partial { border-color: var(--simple-tech-missing); background: var(--simple-tech-missing-soft); }
+#simple-mode .SimpleBomWrap { overflow: auto; border: 1px solid var(--simple-border); border-radius: 8px; }
+#simple-mode .SimpleBomTable { width: 100%; border-collapse: collapse; font-size: 12px; background: var(--simple-surface); }
+#simple-mode .SimpleBomTable th, #simple-mode .SimpleBomTable td { padding: 6px 8px; border-bottom: 1px solid var(--simple-border); text-align: left; vertical-align: top; }
+#simple-mode .SimpleBomTable th { position: sticky; top: 0; background: var(--simple-bg); font-weight: 600; }
+#simple-mode .SimpleBomTable td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+#simple-mode .SimpleBomRow { cursor: pointer; }
+#simple-mode .SimpleBomRow:hover, #simple-mode .SimpleBomRow:focus-visible { background: var(--simple-accent-soft); outline: none; }
+#simple-mode .SimpleBomRow.missing td:last-child, #simple-mode .SimpleBomRow.pending td:last-child { color: var(--simple-tech-missing); }
+#simple-mode .SimpleBomRow.divergent td:last-child { color: var(--simple-tech-revision); }
+#simple-mode .SimpleRuleRow.incompatible td:nth-child(3) { color: var(--simple-tech-incompatible); }
+
+/* indicadores, conferência */
+#simple-mode .SimpleTechIndicators { display: grid; grid-template-columns: repeat( auto-fill, minmax( 160px, 1fr ) ); gap: 8px; }
+#simple-mode .SimpleTechIndicator { display: flex; flex-direction: column; gap: 2px; align-items: flex-start; padding: 10px 12px; border: 1px solid var(--simple-border); border-left-width: 4px; border-radius: 8px; background: var(--simple-surface); color: var(--simple-text); font: inherit; text-align: left; }
+#simple-mode button.SimpleTechIndicator { cursor: pointer; }
+#simple-mode button.SimpleTechIndicator:focus-visible { box-shadow: var(--simple-focus); outline: none; }
+#simple-mode .SimpleTechIndicator strong { font-size: 18px; font-variant-numeric: tabular-nums; }
+#simple-mode .SimpleTechIndicator span { color: var(--simple-text-muted); font-size: 12px; }
+#simple-mode .SimpleTechIndicator.complete { border-left-color: var(--simple-tech-complete); }
+#simple-mode .SimpleTechIndicator.missing { border-left-color: var(--simple-tech-missing); background: var(--simple-tech-missing-soft); }
+#simple-mode .SimpleTechIndicator.incompatible { border-left-color: var(--simple-tech-incompatible); background: var(--simple-tech-incompatible-soft); }
+#simple-mode .SimpleTechIndicator.divergent, #simple-mode .SimpleTechIndicator.revision { border-left-color: var(--simple-tech-revision); background: var(--simple-tech-revision-soft); }
+#simple-mode .SimpleCheckFindings { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 4px; }
+#simple-mode .SimpleCheckFinding { padding: 6px 10px; border-left: 3px solid var(--simple-border); border-radius: 4px; background: var(--simple-surface); font-size: 12px; cursor: pointer; }
+#simple-mode .SimpleCheckFinding.pending, #simple-mode .SimpleCheckFinding.insufficient { border-left-color: var(--simple-tech-missing); }
+#simple-mode .SimpleCheckFinding.incompatible { border-left-color: var(--simple-tech-incompatible); }
+#simple-mode .SimpleCheckFinding.divergent, #simple-mode .SimpleCheckFinding.revision { border-left-color: var(--simple-tech-revision); }
+#simple-mode .SimpleCompatResult { margin: 0; padding: 8px 12px; border-radius: 8px; }
+#simple-mode .SimpleCompatResult:empty { display: none; }
+#simple-mode .SimpleCompatResult.compatible { background: var(--simple-accent-soft); }
+#simple-mode .SimpleCompatResult.incompatible { background: var(--simple-tech-incompatible-soft); }
+#simple-mode .SimpleCompatResult.insufficient { background: var(--simple-tech-missing-soft); }
+
+/* propriedades */
+#simple-mode .SimpleTechnicalDims { margin: 6px 0; font-size: 12px; }
+#simple-mode .SimpleTechnicalDims.divergent { color: var(--simple-tech-revision); font-weight: 600; }
+#simple-mode .SimpleTechnicalOutdated { display: flex; flex-direction: column; gap: 6px; margin: 6px 0; padding: 8px; border-radius: 6px; background: var(--simple-tech-revision-soft); font-size: 12px; }
+#simple-mode .SimpleTechnicalWarning { color: var(--simple-tech-missing); font-size: 12px; }
+#simple-mode .SimpleBudgetTechnicalRef { color: var(--simple-text-muted); }
+
+@media all and ( max-width: 760px ) {
+
+	#simple-mode .SimpleCatalog { height: 100vh; border-radius: 0; }
+	#simple-mode .SimpleCatalogBody { padding: 10px; }
+	#simple-mode .SimpleCatalogActions { width: 100%; }
+
+}

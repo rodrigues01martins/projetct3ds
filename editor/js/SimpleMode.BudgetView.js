@@ -24,6 +24,7 @@ import { parseNumber } from './SimpleMode.Units.js';
 
 import { getSimpleString as t } from './SimpleMode.Strings.js';
 import { createSimpleButton } from './SimpleMode.Icons.js';
+import { getTechnicalLink, resolveRecord } from './SimpleMode.TechnicalCatalogData.js';
 
 const TABS = [ 'quantities', 'budget', 'summary' ];
 
@@ -806,6 +807,16 @@ function SimpleModeBudgetView( editor, context, container ) {
 		} else {
 
 			bDetail.appendChild( el( 'p', 'SimpleBudgetDetailMeta', t( 'budget/field/source' ) + ': ' + result.sourceLabel ) );
+
+			// EV-015: código técnico da peça como REFERÊNCIA (não substitui o código orçamentário nem altera o preço)
+			if ( item.source.kind === 'object' ) {
+
+				const target = editor.scene.getObjectByProperty( 'uuid', item.source.objectUuid );
+				const link = target !== undefined ? getTechnicalLink( target ) : null;
+				const technical = link !== null ? resolveRecord( editor.scene, link.catalogId, link.catalogRevision ).record : null;
+				if ( technical !== null ) bDetail.appendChild( el( 'p', 'SimpleBudgetDetailMeta SimpleBudgetTechnicalRef', `Ficha técnica (referência): ${technical.code} — ${technical.name}, revisão ${technical.revision}. O preço continua definido neste orçamento.` ) );
+
+			}
 
 			const type = item.source.kind === 'object' ? ( result.records[ 0 ] || {} ).type : item.source.componentId;
 			const measure = field( t( 'budget/field/measurement' ), el( 'select', 'SimpleSelect' ) );

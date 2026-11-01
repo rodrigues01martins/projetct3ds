@@ -43,6 +43,10 @@ import { AssemblySelection } from './SimpleMode.AssemblySelection.js';
 import { AssemblyPreview } from './SimpleMode.AssemblyPreview.js';
 import { AssemblySnapping } from './SimpleMode.AssemblySnapping.js';
 import { SimpleModeAssemblyPanel } from './SimpleMode.AssemblyPanel.js';
+import { TechnicalCatalogLibrary } from './SimpleMode.TechnicalCatalogLibrary.js';
+import { SimpleModeTechnicalCatalog } from './SimpleMode.TechnicalCatalogPanel.js';
+import { completeSnapshot, getSnapshot, getTechnicalLink } from './SimpleMode.TechnicalCatalogData.js';
+import { describe as describeTechnical } from './SimpleMode.TechnicalPartLinks.js';
 
 import { getSimpleString as t } from './SimpleMode.Strings.js';
 
@@ -139,6 +143,10 @@ function SimpleMode( editor ) {
 	context.assemblyPreview = new AssemblyPreview( editor, interaction );
 	context.assemblySnapping = new AssemblySnapping( editor, context, interaction, context.assemblyPreview, context.assemblySelection );
 
+	// EV-015: catálogo técnico de peças (banco próprio "project3ds-parts"), carregado em segundo plano
+	context.technical = { catalog: new TechnicalCatalogLibrary(), panel: null };
+	context.technical.catalog.load();
+
 	// EV-011: diálogo de confirmação e gestão de projetos (identidade, autosave, versões, recuperação).
 	// Criada antes dos painéis: instala os envoltórios de Editor.toJSON/clear antes de qualquer carregamento.
 	context.dialog = new ProjectDialog( container.dom );
@@ -211,6 +219,53 @@ function SimpleMode( editor ) {
 	// EV-014: menu "Montagem", painel lateral contextual e diálogos de conjunto
 	context.assemblyPanel = new SimpleModeAssemblyPanel( editor, context, container.dom, { selection: context.assemblySelection, snapping: context.assemblySnapping, preview: context.assemblyPreview, library: context.assemblyLibrary } );
 	context.openAssemblyMenu = ( anchor ) => context.assemblyPanel.openMenu( anchor );
+	// EV-015: interface do catálogo técnico (Catálogo, Ficha, Peças do projeto, Conferência, Compatibilidade, Resumo)
+	context.technical.panel = new SimpleModeTechnicalCatalog( editor, context, container.dom, { catalog: context.technical.catalog } );
+	context.openTechnicalCatalog = ( tab = 'catalog' ) => context.technical.panel.open( tab );
+
+	// snapshot técnico do projeto: completa (somente acrescenta) as revisões usadas por componentes inseridos de
+	// conjuntos da biblioteca/pacotes; a revisão já gravada no projeto nunca é trocada
+	editor.signals.sceneGraphChanged.add( () => completeSnapshot( editor.scene ) );
+
+	// ao abrir um projeto: aviso (uma vez) quando há fichas com revisão mais recente no catálogo local
+	let technicalCheckPending = false, technicalTimer = null;
+	editor.signals.editorCleared.add( () => ( technicalCheckPending = true ) );
+	editor.signals.sceneGraphChanged.add( () => {
+
+		if ( technicalCheckPending === false ) return;
+		clearTimeout( technicalTimer );
+		technicalTimer = setTimeout( async () => {
+
+			technicalCheckPending = false;
+			const catalog = context.technical.catalog;
+			await catalog.load();
+			let outdated = 0;
+			editor.scene.traverse( ( object ) => {
+
+				const link = getTechnicalLink( object );
+				if ( link !== null && ( catalog.latestRevision( link.catalogId ) ?? 0 ) > link.catalogRevision ) outdated ++;
+
+			} );
+			if ( outdated > 0 ) notify( `${outdated} componente(s) usam revisões anteriores de fichas técnicas. Revisão mais recente disponível no catálogo local (atualização somente com confirmação).`, 'info' );
+
+		}, 800 );
+
+	} );
+
+	// diagnóstico somente leitura do catálogo técnico (testes automatizados)
+	window.project3dsTechnical = Object.freeze( {
+		catalogState: () => ( { loaded: context.technical.catalog.state.loaded, available: context.technical.catalog.state.available, parts: context.technical.catalog.state.parts.size, revisions: context.technical.catalog.state.revisions.size, rules: context.technical.catalog.state.rules.size } ),
+		snapshot: () => JSON.parse( JSON.stringify( getSnapshot( editor.scene ) ) ),
+		describe: ( uuid ) => {
+
+			const object = editor.scene.getObjectByProperty( 'uuid', uuid );
+			if ( object === undefined ) return null;
+			const info = describeTechnical( editor, object, context.technical.catalog );
+			return info.link === null ? { link: null } : { link: info.link, origin: info.origin, record: info.record, latest: info.latest, outdated: info.outdated, dimensions: info.dimensions ? { status: info.dimensions.status, items: info.dimensions.items } : null };
+
+		},
+		panel: () => ( { open: context.technical.panel.isOpen(), tab: context.technical.panel.state.tab } )
+	} );
 	// diagnóstico somente leitura da montagem (resultado do encaixe em prévia, conjunto em edição, painel lateral)
 	window.project3dsAssembly = Object.freeze( {
 		snapResult: () => {

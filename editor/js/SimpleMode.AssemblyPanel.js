@@ -75,7 +75,10 @@ function SimpleModeAssemblyPanel( editor, context, root, { selection, snapping, 
 		[ 'matrix', 'Criar matriz', 'Linhas × colunas (até 200 instâncias)', 'grid' ],
 		[ 'connectors', 'Configurar encaixes', 'Pontos de encaixe do objeto selecionado', 'place' ],
 		[ 'assistant', 'Montar com assistente', 'Inserção peça a peça por encaixe', 'next' ],
-		[ 'save', 'Salvar na biblioteca modular', 'Torna o conjunto reutilizável', 'bookmark' ]
+		[ 'save', 'Salvar na biblioteca modular', 'Torna o conjunto reutilizável', 'bookmark' ],
+		[ 'catalog', 'Catálogo técnico', 'Fichas, códigos, revisões e compatibilidade (EV-015)', 'budget' ],
+		[ 'check', 'Conferir montagem', 'Consistência cadastral e dimensional do conjunto', 'measure' ],
+		[ 'bom', 'Gerar lista de peças', 'Quantidades e pesos conhecidos por código', 'templates' ]
 	];
 
 	const menu = el( 'div', 'SimpleMenu SimpleAssemblyMenu' );
@@ -314,6 +317,15 @@ function SimpleModeAssemblyPanel( editor, context, root, { selection, snapping, 
 			case 'connectors': return openSide( 'connectors' );
 			case 'assistant': return openSide( 'assistant' );
 			case 'save': return openSide( 'save' );
+			case 'catalog': return context.technical !== undefined ? context.technical.panel.open( 'catalog' ) : null;
+			case 'check':
+			case 'bom': {
+
+				if ( context.technical === undefined ) return null;
+				const group = isAssembly( selected ) ? selected : ( selected !== null ? assemblyAncestors( selected, editor.scene )[ 0 ] : undefined );
+				return key === 'check' ? context.technical.panel.check( group || null ) : context.technical.panel.showBOM( group || null );
+
+			}
 
 		}
 

@@ -324,6 +324,9 @@ function SimpleModeAssemblyLibraryView( editor, context, library, modelLibrary, 
 				}
 
 				await library.importDefinition( item.definition, item.meta, { asCopy: mode === 'copy' } );
+				// EV-015: fichas técnicas e regras do pacote entram no catálogo local (somente o que falta; nada é sobrescrito)
+				const technical = item.definition.technical;
+				if ( technical && context.technical !== undefined ) await context.technical.catalog.importRecords( technical.parts || [], technical.rules || [] );
 				imported ++;
 
 			}
