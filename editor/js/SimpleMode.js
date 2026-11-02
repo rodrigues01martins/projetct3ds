@@ -227,16 +227,18 @@ function SimpleMode( editor ) {
 	// conjuntos da biblioteca/pacotes; a revisão já gravada no projeto nunca é trocada
 	editor.signals.sceneGraphChanged.add( () => completeSnapshot( editor.scene ) );
 
-	// ao abrir um projeto: aviso (uma vez) quando há fichas com revisão mais recente no catálogo local
-	let technicalCheckPending = true, technicalTimer = null; // inclui o projeto restaurado na abertura da página
-	editor.signals.editorCleared.add( () => ( technicalCheckPending = true ) );
-	editor.signals.sceneGraphChanged.add( () => {
+	// ao abrir um projeto (inclusive o restaurado na abertura da página): aviso, uma vez por projeto aberto, quando há
+	// fichas com revisão mais recente no catálogo local (a atualização continua exigindo confirmação)
+	let technicalChecked, technicalTimer = null;
+	context.projects.changed.add( () => {
 
-		if ( technicalCheckPending === false ) return;
+		const active = context.projects.getActive();
+		const id = active !== null ? active.id : null;
+		if ( context.projects.isTransitioning() || context.projects.state.status === 'loading' || id === technicalChecked ) return;
+		technicalChecked = id;
 		clearTimeout( technicalTimer );
 		technicalTimer = setTimeout( async () => {
 
-			technicalCheckPending = false;
 			const catalog = context.technical.catalog;
 			await catalog.load();
 			let outdated = 0;
@@ -248,7 +250,7 @@ function SimpleMode( editor ) {
 			} );
 			if ( outdated > 0 ) notify( `${outdated} componente(s) usam revisões anteriores de fichas técnicas. Revisão mais recente disponível no catálogo local (atualização somente com confirmação).`, 'info' );
 
-		}, 800 );
+		}, 600 );
 
 	} );
 
