@@ -5778,7 +5778,7 @@ body.mode-simple.budget-open #simple-center {
 #simple-mode .SimpleLogFieldInfo { display: flex; flex-direction: column; gap: 2px; }
 #simple-mode .SimpleLogFieldInfo span { color: var(--simple-text-muted); font-size: 13px; }
 #simple-mode .SimpleLogFieldControls { display: flex; flex-wrap: wrap; gap: 6px; }
-#simple-mode .SimpleLog.field .SimpleButton { min-height: 44px; min-width: 44px; font-size: 15px; justify-content: center; }
+#simple-mode .SimpleLog.field .SimpleLogBody .SimpleButton { min-height: 44px; min-width: 44px; font-size: 15px; justify-content: center; }
 #simple-mode .SimpleLogFieldView.active { background: var(--simple-accent); color: #fff; }
 
 @media all and ( max-width: 760px ) {

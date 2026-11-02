@@ -435,8 +435,8 @@ function SimpleModeLogisticsPanel( editor, context, root ) {
 			[ 'Cargas planejadas', s.loadsPlanned, 'neutral' ], [ 'Cargas carregadas (declarado)', s.loadsLoaded, 'neutral' ],
 			[ 'Etapas concluídas', s.stagesDone, 'neutral' ], [ 'Etapas pendentes', s.stagesPending, s.stagesPending > 0 ? 'missing' : 'neutral' ],
 			[ 'Itens com divergência', s.divergences, s.divergences > 0 ? 'incompatible' : 'neutral' ], [ 'Peças devolvidas', s.returned, 'neutral' ], [ 'Faltantes no retorno', s.returnMissing, s.returnMissing > 0 ? 'missing' : 'neutral' ],
-			[ s.weight.partial ? 'Peso líquido conhecido (parcial)' : 'Peso líquido conhecido', kg( s.weight.known ), s.weight.partial ? 'missing' : 'neutral' ],
-			[ s.weight.packagedUnknown > 0 ? 'Peso embalado conhecido (parcial)' : 'Peso embalado conhecido', kg( s.weight.packaged ), s.weight.packagedUnknown > 0 ? 'missing' : 'neutral' ],
+			[ s.weight.partial ? 'Peso líquido conhecido (parcial)' : 'Peso líquido conhecido', s.weight.known === 0 && s.weight.unknown > 0 ? 'Desconhecido' : kg( s.weight.known ), s.weight.partial ? 'missing' : 'neutral' ],
+			[ s.weight.packagedUnknown > 0 ? 'Peso embalado conhecido (parcial)' : 'Peso embalado conhecido', s.weight.packaged === 0 && s.weight.packagedUnknown > 0 ? 'Desconhecido' : kg( s.weight.packaged ), s.weight.packagedUnknown > 0 ? 'missing' : 'neutral' ],
 			[ 'Peças sem peso', s.weight.unknown, s.weight.unknown > 0 ? 'missing' : 'neutral' ]
 		] ) {
 
