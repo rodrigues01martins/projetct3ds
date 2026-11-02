@@ -5800,8 +5800,9 @@ body.mode-simple.budget-open #simple-center {
 
 }
 
-/* EV-016: até 1180 px a Logística sai da barra (continua no menu Montagem → "Planejamento e logística") */
-@media all and ( max-width: 1180px ) {
+/* EV-016: abaixo de 1440 px a Logística sai da barra (continua no menu Montagem → "Planejamento e logística"); em 1366 px a
+   barra fica igual à da EV-015 */
+@media all and ( max-width: 1439px ) {
 
 	#simple-topbar [data-action="logistics"] {
 		display: none;
