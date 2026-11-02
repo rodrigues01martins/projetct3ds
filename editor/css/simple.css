@@ -5787,3 +5787,15 @@ body.mode-simple.budget-open #simple-center {
 	#simple-mode .SimpleLogBody { padding: 10px; }
 
 }
+
+/* EV-016: até 1600 px os botões só-ícone Montagem e Logística também ficam quadrados (a barra cabe em 1366 px) */
+@media all and ( max-width: 1600px ) {
+
+	#simple-topbar [data-action="assembly"],
+	#simple-topbar [data-action="logistics"] {
+		width: 36px;
+		padding: 0;
+		justify-content: center;
+	}
+
+}
