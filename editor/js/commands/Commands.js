@@ -38,3 +38,4 @@ export { AddAssemblyInstancesCommand } from './AddAssemblyInstancesCommand.js';
 export { SetAssemblyDataCommand } from './SetAssemblyDataCommand.js';
 export { SetTechnicalPartCommand } from './SetTechnicalPartCommand.js';
 export { SetTechnicalCatalogSnapshotCommand } from './SetTechnicalCatalogSnapshotCommand.js';
+export { SetLogisticsPlanCommand } from './SetLogisticsPlanCommand.js';
