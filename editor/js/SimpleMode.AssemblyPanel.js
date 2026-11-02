@@ -78,7 +78,8 @@ function SimpleModeAssemblyPanel( editor, context, root, { selection, snapping, 
 		[ 'save', 'Salvar na biblioteca modular', 'Torna o conjunto reutilizável', 'bookmark' ],
 		[ 'catalog', 'Catálogo técnico', 'Fichas, códigos, revisões e compatibilidade (EV-015)', 'budget' ],
 		[ 'check', 'Conferir montagem', 'Consistência cadastral e dimensional do conjunto', 'measure' ],
-		[ 'bom', 'Gerar lista de peças', 'Quantidades e pesos conhecidos por código', 'templates' ]
+		[ 'bom', 'Gerar lista de peças', 'Quantidades e pesos conhecidos por código', 'templates' ],
+		[ 'logistics', 'Planejamento e logística', 'Etapas, separação, kits, cargas e retorno (EV-016)', 'logistics' ]
 	];
 
 	const menu = el( 'div', 'SimpleMenu SimpleAssemblyMenu' );
@@ -317,6 +318,7 @@ function SimpleModeAssemblyPanel( editor, context, root, { selection, snapping, 
 			case 'connectors': return openSide( 'connectors' );
 			case 'assistant': return openSide( 'assistant' );
 			case 'save': return openSide( 'save' );
+			case 'logistics': return context.openLogistics !== undefined ? context.openLogistics() : null;
 			case 'catalog': return context.technical !== undefined ? context.technical.panel.open( 'catalog' ) : null;
 			case 'check':
 			case 'bom': {

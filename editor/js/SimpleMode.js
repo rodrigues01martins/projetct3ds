@@ -45,6 +45,9 @@ import { AssemblySnapping } from './SimpleMode.AssemblySnapping.js';
 import { SimpleModeAssemblyPanel } from './SimpleMode.AssemblyPanel.js';
 import { TechnicalCatalogLibrary } from './SimpleMode.TechnicalCatalogLibrary.js';
 import { SimpleModeTechnicalCatalog } from './SimpleMode.TechnicalCatalogPanel.js';
+import { SimpleModeLogisticsPanel } from './SimpleMode.LogisticsPanel.js';
+import { getPlan as getLogisticsPlan } from './SimpleMode.LogisticsData.js';
+import { planSummary as logisticsSummary } from './SimpleMode.LogisticsSummary.js';
 import { completeSnapshot, getSnapshot, getTechnicalLink } from './SimpleMode.TechnicalCatalogData.js';
 import { describe as describeTechnical } from './SimpleMode.TechnicalPartLinks.js';
 
@@ -222,6 +225,20 @@ function SimpleMode( editor ) {
 	// EV-015: interface do catálogo técnico (Catálogo, Ficha, Peças do projeto, Conferência, Compatibilidade, Resumo)
 	context.technical.panel = new SimpleModeTechnicalCatalog( editor, context, container.dom, { catalog: context.technical.catalog } );
 	context.openTechnicalCatalog = ( tab = 'catalog' ) => context.technical.panel.open( tab );
+
+	// EV-016: planejamento de montagem e logística (dados em scene.userData.project3ds.logistics)
+	context.logistics = new SimpleModeLogisticsPanel( editor, context, container.dom );
+	context.openLogistics = ( tab = 'overview' ) => context.logistics.open( tab );
+	window.project3dsLogistics = Object.freeze( {
+		plan: () => JSON.parse( JSON.stringify( getLogisticsPlan( editor.scene ) ) ),
+		summary: () => {
+
+			const plan = getLogisticsPlan( editor.scene );
+			return plan.planId === null ? null : JSON.parse( JSON.stringify( logisticsSummary( plan ) ) );
+
+		},
+		panel: () => ( { open: context.logistics.isOpen(), tab: context.logistics.state.tab, field: context.logistics.state.field } )
+	} );
 
 	// snapshot técnico do projeto: completa (somente acrescenta) as revisões usadas por componentes inseridos de
 	// conjuntos da biblioteca/pacotes; a revisão já gravada no projeto nunca é trocada

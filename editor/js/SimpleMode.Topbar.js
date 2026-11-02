@@ -207,6 +207,15 @@ function SimpleModeTopbar( editor, context ) {
 	assemblyButton.dom.setAttribute( 'aria-expanded', 'false' );
 	fileGroup.add( assemblyButton );
 
+	// EV-016: planejamento de montagem e logística (área própria sobre o projeto ativo)
+	const logisticsButton = createSimpleButton( {
+		icon: 'logistics', label: 'Logística', title: 'Planejamento e Logística: etapas, separação, kits, transporte, conferência e retorno',
+		className: 'SimpleLogisticsButton',
+		onClick: () => context.openLogistics && context.openLogistics()
+	} );
+	logisticsButton.dom.dataset.action = 'logistics';
+	fileGroup.add( logisticsButton );
+
 	// EV-012: compartilhar o projeto (pacote de visualização) e acompanhar as revisões devolvidas
 	const shareButton = createSimpleButton( {
 		icon: 'share', label: t( 'topbar/share' ), title: t( 'topbar/share/title' ),

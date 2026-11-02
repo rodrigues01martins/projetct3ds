@@ -5720,3 +5720,70 @@ body.mode-simple.budget-open #simple-center {
 	#simple-mode .SimpleCatalogActions { width: 100%; }
 
 }
+
+/* ============================================================================================================
+   EV-016 — Planejamento e Logística
+   ============================================================================================================ */
+
+#simple-topbar .SimpleLogisticsButton .SimpleButtonLabel { display: none; }
+#simple-mode .SimpleLog { width: 1240px; }
+#simple-mode .SimpleLogTabs { flex: 1 1 auto; flex-wrap: wrap; }
+#simple-mode .SimpleLogBody { flex: 1 1 auto; overflow: auto; padding: 14px 16px 20px; display: flex; flex-direction: column; gap: 10px; }
+#simple-mode .SimpleLogToolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+#simple-mode .SimpleLogSearch { flex: 1 1 240px; }
+#simple-mode .SimpleLogInput, #simple-mode .SimpleLogSelect, #simple-mode .SimpleLogTextarea { min-height: 30px; padding: 3px 7px; border: 1px solid var(--simple-border); border-radius: 6px; background: var(--simple-surface); color: var(--simple-text); font: inherit; box-sizing: border-box; }
+#simple-mode .SimpleLogInput[type="number"] { width: 72px; text-align: right; }
+#simple-mode .SimpleLogTextarea { width: 100%; min-height: 54px; resize: vertical; }
+#simple-mode .SimpleLogField { display: flex; flex-direction: column; gap: 3px; font-size: 12px; }
+#simple-mode .SimpleLogFieldLabel { color: var(--simple-text-muted); }
+#simple-mode .SimpleLogGrid { display: grid; grid-template-columns: repeat( auto-fill, minmax( 190px, 1fr ) ); gap: 8px 12px; }
+#simple-mode .SimpleLogFieldset { margin: 0; padding: 8px 10px; border: 1px solid var(--simple-border); border-radius: 8px; display: flex; flex-wrap: wrap; gap: 4px 16px; }
+#simple-mode .SimpleLogFieldset legend { font-weight: 600; font-size: 12px; }
+#simple-mode .SimpleLogUnitList { display: grid; grid-template-columns: repeat( auto-fill, minmax( 220px, 1fr ) ); gap: 8px; width: 100%; max-height: 260px; overflow: auto; }
+#simple-mode .SimpleLogUnitGroup { display: flex; flex-direction: column; gap: 2px; font-size: 12px; }
+#simple-mode .SimpleLogH3 { margin: 8px 0 0; font-size: 14px; }
+#simple-mode .SimpleLogH4 { margin: 6px 0 0; font-size: 13px; }
+#simple-mode .SimpleLogNotice { margin: 0; padding: 7px 11px; border-left: 3px solid var(--simple-text-muted); background: var(--simple-surface); color: var(--simple-text-muted); font-size: 12px; }
+#simple-mode .SimpleLogHint { color: var(--simple-text-muted); font-size: 12px; margin: 0; }
+#simple-mode .SimpleLogHint.over, #simple-mode .SimpleLogCapacityText.over { color: var(--simple-tech-incompatible); font-weight: 600; }
+#simple-mode .SimpleLogHint.incomplete, #simple-mode .SimpleLogCapacityText.incomplete { color: var(--simple-tech-missing); }
+#simple-mode .SimpleLogCapacityText, #simple-mode .SimpleLogLoadWeight, #simple-mode .SimpleLogKitSummary { margin: 0; font-size: 12px; }
+#simple-mode .SimpleLogLoadWeight.partial, #simple-mode .SimpleLogKitSummary.partial { color: var(--simple-tech-missing); }
+#simple-mode .SimpleLogEmpty { color: var(--simple-text-muted); padding: 12px 2px; }
+#simple-mode .SimpleLogBanner { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 12px; border-radius: 8px; background: var(--simple-accent-soft); }
+#simple-mode .SimpleLogBanner.alert { background: var(--simple-tech-missing-soft); border: 1px solid var(--simple-tech-missing); }
+#simple-mode .SimpleLogCard { display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border: 1px solid var(--simple-border); border-radius: 8px; background: var(--simple-surface); }
+#simple-mode .SimpleLogCardHead { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: flex-end; }
+#simple-mode .SimpleLogTableWrap { overflow: auto; border: 1px solid var(--simple-border); border-radius: 8px; max-height: 60vh; }
+#simple-mode .SimpleLogTable { width: 100%; border-collapse: collapse; font-size: 12px; background: var(--simple-surface); }
+#simple-mode .SimpleLogTable th, #simple-mode .SimpleLogTable td { padding: 5px 7px; border-bottom: 1px solid var(--simple-border); text-align: left; vertical-align: middle; }
+#simple-mode .SimpleLogTable th { position: sticky; top: 0; background: var(--simple-bg); font-weight: 600; z-index: 1; }
+#simple-mode .SimpleLogTable td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+#simple-mode .SimpleLogTable tr.late td, #simple-mode .SimpleLogPickRow.divergent td, #simple-mode .SimpleLogReceivingRow.divergent td { background: var(--simple-tech-missing-soft); }
+#simple-mode .SimpleLogTable tr.manual td { font-style: italic; }
+#simple-mode .SimpleLogActions { display: flex; flex-wrap: wrap; gap: 4px; }
+#simple-mode .SimpleLogActions .SimpleButton, #simple-mode .SimpleLogTable .SimpleButton { padding: 3px 7px; font-size: 11px; }
+#simple-mode .SimpleLog .danger { color: var(--simple-danger); }
+#simple-mode .SimpleLog .primary { background: var(--simple-accent); color: #fff; border-color: var(--simple-accent); }
+#simple-mode .SimpleLogReports { display: flex; flex-wrap: wrap; gap: 8px; }
+#simple-mode .SimpleLogFieldToggle.active { background: var(--simple-accent); color: #fff; }
+
+/* modo conferência: alvos de toque ≥ 44 px */
+#simple-mode .SimpleLog.field .SimpleLogBody { gap: 12px; }
+#simple-mode .SimpleLogFieldSection { display: flex; flex-direction: column; gap: 8px; padding: 10px; border: 1px solid var(--simple-border); border-radius: 10px; background: var(--simple-surface); }
+#simple-mode .SimpleLogFieldItem { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; border-left: 4px solid var(--simple-border); background: var(--simple-bg); }
+#simple-mode .SimpleLogFieldItem.complete { border-left-color: var(--simple-tech-complete); }
+#simple-mode .SimpleLogFieldItem.partial, #simple-mode .SimpleLogFieldItem.pending { border-left-color: var(--simple-tech-missing); }
+#simple-mode .SimpleLogFieldItem.divergent { border-left-color: var(--simple-tech-incompatible); }
+#simple-mode .SimpleLogFieldInfo { display: flex; flex-direction: column; gap: 2px; }
+#simple-mode .SimpleLogFieldInfo span { color: var(--simple-text-muted); font-size: 13px; }
+#simple-mode .SimpleLogFieldControls { display: flex; flex-wrap: wrap; gap: 6px; }
+#simple-mode .SimpleLog.field .SimpleButton { min-height: 44px; min-width: 44px; font-size: 15px; justify-content: center; }
+#simple-mode .SimpleLogFieldView.active { background: var(--simple-accent); color: #fff; }
+
+@media all and ( max-width: 760px ) {
+
+	#simple-mode .SimpleLog { height: 100vh; border-radius: 0; }
+	#simple-mode .SimpleLogBody { padding: 10px; }
+
+}
