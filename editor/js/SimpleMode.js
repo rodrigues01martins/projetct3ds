@@ -228,7 +228,7 @@ function SimpleMode( editor ) {
 	editor.signals.sceneGraphChanged.add( () => completeSnapshot( editor.scene ) );
 
 	// ao abrir um projeto: aviso (uma vez) quando há fichas com revisão mais recente no catálogo local
-	let technicalCheckPending = false, technicalTimer = null;
+	let technicalCheckPending = true, technicalTimer = null; // inclui o projeto restaurado na abertura da página
 	editor.signals.editorCleared.add( () => ( technicalCheckPending = true ) );
 	editor.signals.sceneGraphChanged.add( () => {
 
@@ -255,6 +255,7 @@ function SimpleMode( editor ) {
 	// diagnóstico somente leitura do catálogo técnico (testes automatizados)
 	window.project3dsTechnical = Object.freeze( {
 		catalogState: () => ( { loaded: context.technical.catalog.state.loaded, available: context.technical.catalog.state.available, parts: context.technical.catalog.state.parts.size, revisions: context.technical.catalog.state.revisions.size, rules: context.technical.catalog.state.rules.size } ),
+		parts: () => context.technical.catalog.list().map( ( p ) => ( { catalogId: p.catalogId, code: p.code, revision: p.revision } ) ),
 		snapshot: () => JSON.parse( JSON.stringify( getSnapshot( editor.scene ) ) ),
 		describe: ( uuid ) => {
 
