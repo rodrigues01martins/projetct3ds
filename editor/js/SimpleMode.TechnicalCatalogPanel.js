@@ -305,7 +305,7 @@ function SimpleModeTechnicalCatalog( editor, context, root, { catalog } ) {
 		main.append(
 			el( 'strong', 'SimpleCatalogCode', part.code ),
 			el( 'span', 'SimpleCatalogName', part.name ),
-			el( 'small', 'SimpleCatalogMeta', [ categoryName( part.category ), `rev. ${part.revision}`, validationName( part.control.validation ), part.manufacturer.name || 'Fabricante não informado', formatWeight( part.physical.weight ), uses > 0 ? `${uses} uso(s) no projeto` : '' ].filter( Boolean ).join( ' · ' ) )
+			el( 'small', 'SimpleCatalogMeta', [ categoryName( part.category ), `rev. ${part.revision}`, validationName( part.control.validation ), part.manufacturer.name || 'Fabricante não informado', part.physical.weight === null ? 'Peso não informado' : formatWeight( part.physical.weight ), uses > 0 ? `${uses} uso(s) no projeto` : '' ].filter( Boolean ).join( ' · ' ) )
 		);
 		row.appendChild( main );
 		const actions = el( 'div', 'SimpleCatalogActions' );
